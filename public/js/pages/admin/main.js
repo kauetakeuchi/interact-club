@@ -18,15 +18,31 @@ const secIcons = {
 
 const secDesc = {
     painel: "Visão geral do clube",
-    membros: "Gerencie os membros do clube",
-    eventos: "Crie e gerencie eventos",
-    projetos: "Acompanhe os projetos do clube",
-    noticias: "Publique notícias e atualizações",
-    avisos: "Envie avisos aos membros",
-    contatos: "Mensagens recebidas pelo site",
+    membros: "Cuide das pessoas que fazem o clube acontecer.",
+    eventos: "Organize os próximos encontros e ações.",
+    projetos: "Acompanhe as iniciativas que estão saindo do papel.",
+    noticias: "Conte o que o clube vem fazendo.",
+    avisos: "Compartilhe recados com todo mundo.",
+    contatos: "Veja quem entrou em contato pelo site.",
 };
 
 const titles = { painel: "Painel", membros: "Membros", eventos: "Eventos", projetos: "Projetos", noticias: "Notícias", avisos: "Avisos", contatos: "Contatos" };
+
+const firstName = user?.name?.trim().split(/\s+/)[0] || "Admin";
+
+function greeting() {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Bom dia";
+    if (hour < 18) return "Boa tarde";
+    return "Boa noite";
+}
+
+function todayLabel() {
+    const formatted = new Intl.DateTimeFormat("pt-BR", {
+        weekday: "long", day: "2-digit", month: "long",
+    }).format(new Date());
+    return formatted.charAt(0).toUpperCase() + formatted.slice(1);
+}
 
 function layout(title) {
     const links = [
@@ -35,38 +51,49 @@ function layout(title) {
         { h: "noticias", l: "Notícias" }, { h: "avisos", l: "Avisos" },
         { h: "contatos", l: "Contatos" },
     ];
+    const isDashboard = section === "painel";
     return `<div class="layout-sidebar">
-    <aside class="sidebar sidebar-admin">
+    <button class="admin-nav-overlay" aria-label="Fechar menu" onclick="toggleAdminNav(false)"></button>
+    <aside class="sidebar sidebar-admin" id="admin-navigation">
       <div class="sidebar-brand">
-        <div class="sidebar-logo">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
-          Admin
-        </div>
+        <a class="sidebar-logo" href="/admin?painel" aria-label="Ir para o painel">
+          <span class="sidebar-logo-mark"><span>IC</span></span>
+          <span class="sidebar-logo-copy">Interact <small>Sede do clube</small></span>
+        </a>
+        <button class="sidebar-close" onclick="toggleAdminNav(false)" aria-label="Fechar menu">✕</button>
       </div>
-      <nav class="sidebar-nav">
-        ${links.map(l => `<a href="/admin?${l.h}" class="${section === l.h ? "active" : ""}">${secIcons[l.h]}<span>${l.l}</span></a>`).join("")}
+      <div class="sidebar-context">
+        <span></span>
+        <p>Organizar</p>
+      </div>
+      <nav class="sidebar-nav" aria-label="Administração do clube">
+        ${links.map(l => `<a href="/admin?${l.h}" class="${section === l.h ? "active" : ""}" ${section === l.h ? 'aria-current="page"' : ""}>${secIcons[l.h]}<span>${l.l}</span></a>`).join("")}
         <div class="sidebar-divider"></div>
-        <a href="/" class="sidebar-home-link">${icons.home}<span>Ver Site</span></a>
+        <a href="/" class="sidebar-home-link">${icons.home}<span>Voltar ao site</span></a>
         <div class="sidebar-nav-spacer"></div>
         <div class="sidebar-user-inline">
           <div class="sidebar-user-avatar">${esc(user.name.charAt(0).toUpperCase())}</div>
           <div class="sidebar-user-info">
             <div class="sidebar-user-name">${esc(user.name)}</div>
-            <div class="sidebar-user-role">Administrador</div>
+            <div class="sidebar-user-role">Administração</div>
           </div>
-          <button class="sidebar-user-logout" onclick="localStorage.removeItem('token');localStorage.removeItem('user');window.location.href='/'" title="Sair">${icons.logout}</button>
+          <button class="sidebar-user-logout" onclick="localStorage.removeItem('token');localStorage.removeItem('user');window.location.href='/'" title="Sair da conta" aria-label="Sair da conta">${icons.logout}</button>
         </div>
       </nav>
     </aside>
     <main class="main-content">
+      <div class="admin-mobile-bar">
+        <button class="admin-menu-button" onclick="toggleAdminNav(true)" aria-label="Abrir menu" aria-controls="admin-navigation" aria-expanded="false"><span></span><span></span></button>
+        <span class="admin-mobile-brand">Interact</span>
+        <div class="sidebar-user-avatar">${esc(user.name.charAt(0).toUpperCase())}</div>
+      </div>
       <div class="content-header">
-        <div>
-          <div class="content-header-icon">${secIcons[section] || icons.painel}</div>
-          <div>
-            <h1>${title}</h1>
-            <p>${secDesc[section] || ""}</p>
-          </div>
+        <div class="content-header-copy">
+          <span class="content-eyebrow">${isDashboard ? todayLabel() : "Administração do clube"}</span>
+          <h1>${isDashboard ? `${greeting()}, <em>${esc(firstName)}</em>.` : title}</h1>
+          <p>${isDashboard ? "Aqui está o que está acontecendo no clube hoje." : secDesc[section] || ""}</p>
         </div>
+        <div class="content-header-mark" aria-hidden="true">${secIcons[section] || icons.painel}</div>
       </div>
       <div id="section-content"></div>
     </main>
@@ -80,4 +107,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     app.innerHTML = layout(titles[section] || "Admin");
     const c = document.getElementById("section-content");
     c.innerHTML = await (sections[section]?.() || sections.painel());
+});
+
+window.toggleAdminNav = (open) => {
+    document.body.classList.toggle("admin-nav-open", open);
+    document.querySelector(".admin-menu-button")?.setAttribute("aria-expanded", String(open));
+};
+
+document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") window.toggleAdminNav(false);
 });
