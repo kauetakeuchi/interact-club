@@ -1,0 +1,11 @@
+{
+  "name": "interact-club",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "npm --prefix server run dev",
+    "build": "npm --prefix server run build",
+    "start": "npm --prefix server start",
+    "seed": "npm --prefix server run seed"
+  }
+}
