@@ -36,7 +36,14 @@ Copie `server/.env.example` para `server/.env` e preencha com seus valores:
 DATABASE_URL="mysql://root:@localhost:3306/interact_club"
 JWT_SECRET="troque-por-um-segredo-forte"
 PORT=3001
+
+# Opcional: habilita armazenamento de imagens no Cloudinary
+CLOUDINARY_CLOUD_NAME=""
+CLOUDINARY_API_KEY=""
+CLOUDINARY_API_SECRET=""
 ```
+
+Sem as variáveis do Cloudinary, o upload continua funcionando com armazenamento local em `public/uploads/`.
 
 ### 3. Instale as dependências
 

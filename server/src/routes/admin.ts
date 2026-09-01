@@ -4,7 +4,7 @@ import { query, getOne, exec } from "../lib/db";
 import { requireAdmin, AuthRequest } from "../middleware/auth";
 import { validate } from "../lib/validation";
 import { eventoSchema, projetoSchema, noticiaSchema, avisoSchema } from "../lib/schemas";
-import { deleteLocalFile } from "../lib/storage";
+import { deleteImage } from "../lib/storage";
 import { logError } from "../lib/logger";
 
 const router = Router();
@@ -69,7 +69,7 @@ router.put("/eventos/:id", validate(eventoSchema), async (req: AuthRequest, res:
   try {
     const { title, description, date, location, imageUrl, isPublic, maxParticipants } = req.body;
     const antigo = await getOne<{ imageUrl: string | null }>("SELECT imageUrl FROM `event` WHERE id = ?", [req.params.id]);
-    if (antigo?.imageUrl && antigo.imageUrl !== imageUrl) deleteLocalFile(antigo.imageUrl);
+    if (antigo?.imageUrl && antigo.imageUrl !== imageUrl) await deleteImage(antigo.imageUrl);
     await exec(
       "UPDATE `event` SET title=?, description=?, `date`=?, location=?, imageUrl=?, isPublic=?, maxParticipants=? WHERE id=?",
       [title, description, date, location ?? null, imageUrl ?? null, isPublic ?? true, maxParticipants ?? null, req.params.id]
@@ -86,7 +86,7 @@ router.delete("/eventos/:id", async (req: AuthRequest, res: Response) => {
   try {
     await exec("DELETE FROM eventsignup WHERE eventId = ?", [req.params.id]);
     const evento = await getOne<{ imageUrl: string | null }>("SELECT imageUrl FROM `event` WHERE id = ?", [req.params.id]);
-    if (evento?.imageUrl) deleteLocalFile(evento.imageUrl);
+    if (evento?.imageUrl) await deleteImage(evento.imageUrl);
     await exec("DELETE FROM `event` WHERE id = ?", [req.params.id]);
     return res.json({ success: true });
   } catch (err) {
@@ -126,7 +126,7 @@ router.put("/projetos/:id", validate(projetoSchema), async (req: AuthRequest, re
   try {
     const { title, description, status, startDate, endDate, imageUrl, isPublic } = req.body;
     const antigo = await getOne<{ imageUrl: string | null }>("SELECT imageUrl FROM `project` WHERE id = ?", [req.params.id]);
-    if (antigo?.imageUrl && antigo.imageUrl !== imageUrl) deleteLocalFile(antigo.imageUrl);
+    if (antigo?.imageUrl && antigo.imageUrl !== imageUrl) await deleteImage(antigo.imageUrl);
     await exec(
       "UPDATE `project` SET title=?, description=?, `status`=?, startDate=?, endDate=?, imageUrl=?, isPublic=? WHERE id=?",
       [title, description, status, startDate ?? null, endDate ?? null, imageUrl ?? null, isPublic ?? true, req.params.id]
@@ -141,7 +141,7 @@ router.put("/projetos/:id", validate(projetoSchema), async (req: AuthRequest, re
 router.delete("/projetos/:id", async (req: AuthRequest, res: Response) => {
   try {
     const projeto = await getOne<{ imageUrl: string | null }>("SELECT imageUrl FROM `project` WHERE id = ?", [req.params.id]);
-    if (projeto?.imageUrl) deleteLocalFile(projeto.imageUrl);
+    if (projeto?.imageUrl) await deleteImage(projeto.imageUrl);
     await exec("DELETE FROM `project` WHERE id = ?", [req.params.id]);
     return res.json({ success: true });
   } catch (err) {
@@ -194,7 +194,7 @@ router.put("/noticias/:id", validate(noticiaSchema), async (req: AuthRequest, re
     ]);
     if (existing) return res.status(409).json({ message: "Slug já existe" });
     const antigo = await getOne<{ imageUrl: string | null }>("SELECT imageUrl FROM newsarticle WHERE id = ?", [req.params.id]);
-    if (antigo?.imageUrl && antigo.imageUrl !== imageUrl) deleteLocalFile(antigo.imageUrl);
+    if (antigo?.imageUrl && antigo.imageUrl !== imageUrl) await deleteImage(antigo.imageUrl);
     await exec(
       "UPDATE newsarticle SET title=?, slug=?, content=?, excerpt=?, imageUrl=?, category=?, published=? WHERE id=?",
       [title, slug, content, excerpt ?? null, imageUrl ?? null, category ?? null, published ?? false, req.params.id]
@@ -209,7 +209,7 @@ router.put("/noticias/:id", validate(noticiaSchema), async (req: AuthRequest, re
 router.delete("/noticias/:id", async (req: AuthRequest, res: Response) => {
   try {
     const noticia = await getOne<{ imageUrl: string | null }>("SELECT imageUrl FROM newsarticle WHERE id = ?", [req.params.id]);
-    if (noticia?.imageUrl) deleteLocalFile(noticia.imageUrl);
+    if (noticia?.imageUrl) await deleteImage(noticia.imageUrl);
     await exec("DELETE FROM newsarticle WHERE id = ?", [req.params.id]);
     return res.json({ success: true });
   } catch (err) {

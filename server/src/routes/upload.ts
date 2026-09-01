@@ -1,8 +1,9 @@
 import { Router, Response } from "express";
 import multer from "multer";
 import path from "path";
+import fs from "fs";
 import { requireAdmin } from "../middleware/auth";
-import { UPLOAD_DIR } from "../lib/storage";
+import { UPLOAD_DIR, isCloudinaryEnabled, uploadToCloudinary } from "../lib/storage";
 import { logError } from "../lib/logger";
 
 const router = Router();
@@ -24,9 +25,21 @@ const upload = multer({
   },
 });
 
-router.post("/", requireAdmin, upload.single("file"), (req: any, res: Response) => {
+router.post("/", requireAdmin, upload.single("file"), async (req: any, res: Response) => {
   try {
     if (!req.file) return res.status(400).json({ message: "Arquivo obrigatório" });
+
+    if (isCloudinaryEnabled()) {
+      const buffer = fs.readFileSync(req.file.path);
+      const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      try {
+        const { url } = await uploadToCloudinary(buffer, fileName);
+        return res.json({ url });
+      } finally {
+        fs.unlinkSync(req.file.path);
+      }
+    }
+
     return res.json({ url: `/uploads/${req.file.filename}` });
   } catch (err) {
     logError("upload", err);
