@@ -28,6 +28,25 @@
   --font-body: 'Outfit', sans-serif;
 }
 
+html.dark {
+  --bg: #0B0F1A;
+  --surface: #151B2B;
+  --text: #E2E6F0;
+  --text-muted: #9AA0B0;
+  --text-light: #6B7280;
+  --border: #232B3D;
+  --muted: #111727;
+  --primary-dark: #E6EBF7;
+  --primary-light: #1C2A44;
+  --shadow: 0 1px 3px rgba(0,0,0,.45);
+  --shadow-md: 0 4px 16px rgba(0,0,0,.45);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,.55);
+}
+
+html {
+  transition: background-color .3s ease, color .3s ease;
+}
+
 /* ============================================
    CONTATO — UM RECADO DE VERDADE
    Editorial, direto e com espaço para conversa.
@@ -7160,5 +7179,641 @@ footer {
 
   .about-page .sobre-map-frame {
     border-top-right-radius: 2rem;
+  }
+}
+
+/* ============================================
+   DARK MODE — TOGGLE (LIGHT / DARK) + OVERRIDES
+   Toggle idêntico à imagem: pílula com sol/lua
+   ============================================ */
+.theme-toggle {
+  position: relative;
+  width: 168px;
+  height: 46px;
+  border-radius: 999px;
+  background: #E9E9EE;
+  border: 1px solid #E3E3E8;
+  box-shadow:
+    inset 0 2px 6px rgba(0,0,0,.08),
+    inset 0 1px 1px rgba(255,255,255,.9),
+    0 1px 2px rgba(0,0,0,.06);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 10px 0 16px;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: background .38s cubic-bezier(.22,1,.36,1), border-color .38s, box-shadow .38s;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.theme-toggle:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.theme-toggle[data-theme="dark"] {
+  background: #1C1C20;
+  border-color: #2A2A2E;
+  box-shadow:
+    inset 0 2px 8px rgba(0,0,0,.45),
+    inset 0 1px 0 rgba(255,255,255,.04),
+    0 1px 2px rgba(0,0,0,.2);
+}
+
+.theme-toggle__text {
+  font-family: var(--font-heading);
+  font-size: .58rem;
+  font-weight: 800;
+  letter-spacing: .07em;
+  line-height: 1.05;
+  text-transform: uppercase;
+  transition: color .3s ease, opacity .3s ease, transform .3s ease;
+  pointer-events: none;
+  text-align: center;
+  display: inline-block;
+}
+
+.theme-toggle__text--light {
+  color: #FFFFFF;
+  text-shadow: 0 1px 1px rgba(0,0,0,.07);
+  margin-left: 2px;
+}
+
+.theme-toggle__text--dark {
+  color: #9AA0A6;
+  margin-right: 2px;
+}
+
+.theme-toggle[data-theme="dark"] .theme-toggle__text--light {
+  color: #5A5E66;
+  text-shadow: none;
+}
+
+.theme-toggle[data-theme="dark"] .theme-toggle__text--dark {
+  color: #CFCFD3;
+  font-weight: 700;
+}
+
+/* Esconde texto do lado oposto atrás do thumb para replicar a imagem (só um label visível) */
+.theme-toggle[data-theme="light"] .theme-toggle__text--dark {
+  opacity: 0;
+  transform: translateX(6px);
+  pointer-events: none;
+}
+.theme-toggle[data-theme="dark"] .theme-toggle__text--light {
+  opacity: 0;
+  transform: translateX(-6px);
+  pointer-events: none;
+}
+.theme-toggle[data-theme="light"] .theme-toggle__text--light,
+.theme-toggle[data-theme="dark"] .theme-toggle__text--dark {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.theme-toggle__thumb {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  box-shadow:
+    0 4px 14px rgba(0,0,0,.14),
+    0 1px 3px rgba(0,0,0,.12),
+    inset 0 1px 1px rgba(255,255,255,1);
+  display: grid;
+  place-items: center;
+  transition: transform .42s cubic-bezier(.34,1.56,.64,1), background .3s ease, box-shadow .3s ease;
+  will-change: transform;
+}
+
+.theme-toggle[data-theme="light"] .theme-toggle__thumb {
+  transform: translateX(122px);
+}
+
+.theme-toggle[data-theme="dark"] .theme-toggle__thumb {
+  transform: translateX(0);
+  background: #F2F2F3;
+  box-shadow:
+    0 4px 14px rgba(0,0,0,.35),
+    0 1px 3px rgba(0,0,0,.3),
+    inset 0 1px 1px rgba(255,255,255,.9);
+}
+
+.theme-toggle__icon {
+  width: 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  transition: opacity .22s ease, transform .32s cubic-bezier(.34,1.56,.64,1), rotate .32s ease;
+  position: absolute;
+}
+
+.theme-toggle__icon--sun {
+  color: #9AA0A6;
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
+}
+
+.theme-toggle__icon--moon {
+  color: #1C1C20;
+  opacity: 0;
+  transform: scale(.7) rotate(-30deg);
+}
+
+.theme-toggle[data-theme="dark"] .theme-toggle__icon--sun {
+  opacity: 0;
+  transform: scale(.7) rotate(30deg);
+}
+
+.theme-toggle[data-theme="dark"] .theme-toggle__icon--moon {
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
+}
+
+.theme-toggle__icon--moon::after {
+  content: '';
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: currentColor;
+  border-radius: 50%;
+  opacity: .9;
+  top: 4px;
+  right: 2px;
+  box-shadow:
+    -6px 7px 0 -1px currentColor,
+    4px 6px 0 -1.2px currentColor;
+}
+
+/* Navbar integration */
+.navbar .theme-toggle {
+  margin-right: .25rem;
+}
+
+.theme-toggle--floating {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 9999;
+  box-shadow:
+    inset 0 2px 6px rgba(0,0,0,.08),
+    inset 0 1px 1px rgba(255,255,255,.9),
+    0 8px 24px rgba(0,0,0,.12);
+}
+
+html.dark .theme-toggle--floating {
+  box-shadow:
+    inset 0 2px 8px rgba(0,0,0,.45),
+    0 8px 24px rgba(0,0,0,.35);
+}
+
+/* Garante que o toggle continue visível no mobile mesmo com menu fechado */
+@media (max-width: 768px) {
+  .navbar .container {
+    gap: .75rem;
+  }
+  .navbar .nav-right {
+    display: flex !important;
+    align-items: center;
+    gap: .75rem;
+    margin-left: auto;
+  }
+  .navbar .nav-right #login-link,
+  .navbar .nav-right #user-menu {
+    display: none;
+  }
+  .mobile-open .nav-right #login-link,
+  .mobile-open .nav-right #user-menu {
+    display: flex;
+  }
+  .navbar .theme-toggle {
+    width: 146px;
+    height: 38px;
+    padding: 0 8px 0 12px;
+    order: 2;
+  }
+  .theme-toggle[data-theme="light"] .theme-toggle__thumb {
+    transform: translateX(100px);
+  }
+  .theme-toggle__thumb {
+    width: 30px;
+    height: 30px;
+    top: 3px;
+  }
+  .theme-toggle__text {
+    font-size: .52rem;
+  }
+  .theme-toggle__icon {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+/* ============================================
+   DARK MODE — GLOBAL OVERRIDES
+   ============================================ */
+html.dark body {
+  background: var(--bg);
+  color: var(--text);
+}
+
+html.dark .navbar {
+  background: rgba(11,15,26,.88);
+  border-bottom-color: var(--border);
+  backdrop-filter: blur(14px);
+}
+
+html.dark .navbar .logo {
+  color: var(--text);
+}
+
+html.dark .navbar .nav-links a {
+  color: var(--text-muted);
+}
+
+html.dark .navbar .nav-links a:hover,
+html.dark .navbar .nav-links a.active {
+  color: var(--text);
+}
+
+html.dark .mobile-toggle {
+  color: var(--text);
+}
+
+html.dark .mobile-open .nav-links,
+html.dark .mobile-open .nav-right {
+  background: #0F1423;
+  border-bottom-color: var(--border);
+}
+
+/* Sections */
+html.dark .projetos-section,
+html.dark .faq-section,
+html.dark .news-section,
+html.dark .section,
+html.dark .about-page,
+html.dark .contact-page {
+  background: var(--bg) !important;
+  border-top-color: var(--border) !important;
+  color: var(--text);
+}
+
+html.dark .eventos-home,
+html.dark .eventos-home--cal,
+html.dark .section-muted,
+html.dark .news-empty,
+html.dark .contact-main {
+  background: var(--muted) !important;
+  border-top-color: var(--border) !important;
+}
+
+html.dark .section-title,
+html.dark .news-title,
+html.dark .projetos-head .section-title,
+html.dark .faq-section .section-title,
+html.dark .encontre-head h1,
+html.dark .contact-directory > h2,
+html.dark .contact-letter h2 {
+  color: var(--text) !important;
+}
+
+html.dark .projetos-subtitle,
+html.dark .faq-subtitle,
+html.dark .eventos-subtitle,
+html.dark .news-title span,
+html.dark .contact-letter-head > p {
+  color: var(--text-muted) !important;
+}
+
+/* Cards */
+html.dark .ficha,
+html.dark .evento-card,
+html.dark .cal-card,
+html.dark .cal-event,
+html.dark .card,
+html.dark .value-card,
+html.dark .news-lead,
+html.dark .news-stack__item,
+html.dark .encontre-card,
+html.dark .encontre-filter,
+html.dark .encontre-card__media,
+html.dark .gallery-item__cta,
+html.dark .contact-letter,
+html.dark .sobre-map-info,
+html.dark .stat-card,
+html.dark .table-wrap,
+html.dark .info-card,
+html.dark .faq-item,
+html.dark .timeline-card,
+html.dark .project-entry-card,
+html.dark .contact-card {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,.3) !important;
+}
+
+html.dark .ficha:hover,
+html.dark .evento-card:hover,
+html.dark .encontre-card:hover,
+html.dark .news-lead:hover,
+html.dark .news-stack__item:hover {
+  border-color: #2A3350 !important;
+  box-shadow: 0 12px 32px rgba(0,0,0,.35) !important;
+}
+
+html.dark .ficha__title,
+html.dark .evento-card__title,
+html.dark .cal-event__body h4,
+html.dark .news-lead__body h3,
+html.dark .news-stack__body h4,
+html.dark .encontre-card__title,
+html.dark .card-body h3,
+html.dark .value-card h3,
+html.dark .timeline-card__title,
+html.dark .gallery-item__title,
+html.dark .project-entry-body h3 {
+  color: var(--text) !important;
+}
+
+html.dark .ficha__desc,
+html.dark .evento-card__desc,
+html.dark .cal-event__desc,
+html.dark .news-lead__body p,
+html.dark .news-stack__body p,
+html.dark .encontre-card__meta,
+html.dark .encontre-card__date,
+html.dark .card-body p,
+html.dark .value-card p,
+html.dark .timeline-card__desc,
+html.dark .gallery-item__desc,
+html.dark .faq-item p {
+  color: var(--text-muted) !important;
+}
+
+html.dark .ficha__meta,
+html.dark .evento-card__foot,
+html.dark .cal-event__foot,
+html.dark .project-entry-meta,
+html.dark .timeline-card__meta,
+html.dark .gallery-item__meta,
+html.dark .card-footer,
+html.dark .encontre-grid,
+html.dark .contact-lines,
+html.dark .sobre-map-item {
+  border-color: var(--border) !important;
+}
+
+html.dark .ficha__meta dt,
+html.dark .evento-card__foot span,
+html.dark .cal-event__vagas,
+html.dark .card-footer,
+html.dark .sobre-map-item span {
+  color: var(--text-muted) !important;
+}
+
+html.dark .ficha__meta dd,
+html.dark .evento-card__meta,
+html.dark .value-card .value-icon {
+  color: var(--text) !important;
+}
+
+html.dark .ficha__media,
+html.dark .evento-card__media,
+html.dark .news-lead__media,
+html.dark .news-stack__media,
+html.dark .encontre-card__media,
+html.dark .timeline-card__media,
+html.dark .gallery-item__media,
+html.dark .card-img {
+  background: #0F1423 !important;
+}
+
+html.dark .hero-focus__dock {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,.4) !important;
+}
+
+html.dark .hero-focus__dock-item strong {
+  color: var(--text) !important;
+}
+
+html.dark .hero-focus__dock-item span {
+  color: var(--text-muted) !important;
+}
+
+html.dark .hero-focus__dock-sep {
+  background: var(--border) !important;
+}
+
+html.dark .cal-head {
+  background: linear-gradient(135deg, #0F1423 0%, #17458F 55%, #1E4A9A 100%) !important;
+}
+
+html.dark .cal-weekdays {
+  color: var(--text-muted) !important;
+}
+
+html.dark .cal-day {
+  color: var(--text) !important;
+}
+
+html.dark .cal-day--muted {
+  opacity: .28 !important;
+}
+
+html.dark .cal-day--today {
+  background: var(--amber) !important;
+  color: #0B0F1A !important;
+}
+
+html.dark .cal-day--event {
+  background: #1A2540 !important;
+  border-color: #24365E !important;
+  color: var(--text) !important;
+}
+
+html.dark .cal-event__date {
+  background: #1A2540 !important;
+  border-color: #24365E !important;
+}
+
+html.dark .cal-event__date b {
+  color: var(--text) !important;
+}
+
+html.dark .faq-item summary {
+  color: var(--text) !important;
+}
+
+html.dark .faq-item summary::after {
+  background: var(--muted) !important;
+  color: var(--text) !important;
+}
+
+html.dark .faq-item[open] {
+  border-color: #24365E !important;
+}
+
+html.dark .timeline-dot {
+  background: var(--surface) !important;
+  border-color: #24365E !important;
+  color: var(--text) !important;
+}
+
+html.dark .timeline-impact::before,
+html.dark .project-timeline::before {
+  background: linear-gradient(180deg, #24365E 0%, transparent 100%) !important;
+}
+
+html.dark .value-card {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+}
+
+html.dark .value-card .value-icon {
+  background: #1A2540 !important;
+}
+
+html.dark .news-all,
+html.dark .projetos-head__link,
+html.dark .eventos-head__link,
+html.dark .gallery-item__cta,
+html.dark .encontre-filter {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+  color: var(--text) !important;
+}
+
+html.dark .news-all:hover,
+html.dark .projetos-head__link:hover,
+html.dark .eventos-head__link:hover {
+  background: #1A2540 !important;
+  border-color: #2A3E66 !important;
+}
+
+html.dark .projetos-head__link,
+html.dark .eventos-head__link {
+  color: var(--primary-light);
+}
+
+html.dark .form-control,
+html.dark .search-input {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+  color: var(--text) !important;
+}
+
+html.dark .form-control::placeholder,
+html.dark .search-input::placeholder {
+  color: var(--text-light) !important;
+}
+
+html.dark .modal {
+  background: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+}
+
+html.dark .modal h2,
+html.dark .content-header h1 {
+  color: var(--text) !important;
+}
+
+html.dark .table-wrap,
+html.dark .admin-table {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+}
+
+html.dark thead th {
+  background: #111727 !important;
+  color: var(--text-muted) !important;
+  border-bottom-color: var(--border) !important;
+}
+
+html.dark tbody td {
+  color: var(--text) !important;
+  border-bottom-color: var(--border) !important;
+}
+
+html.dark tbody tr:nth-child(even) {
+  background: rgba(255,255,255,.02) !important;
+}
+
+html.dark tbody tr:hover {
+  background: rgba(255,255,255,.04) !important;
+}
+
+html.dark footer {
+  background: #070A14 !important;
+  color: rgba(255,255,255,.7) !important;
+  border-top: 1px solid var(--border);
+}
+
+html.dark .contact-page {
+  --contact-canvas: #0B0F1A;
+  --contact-paper: #151B2B;
+  --contact-ink: #E2E6F0;
+  --contact-line: #232B3D;
+  --contact-muted: #9AA0B0;
+}
+
+html.dark .contact-page .contact-main {
+  background: var(--bg) !important;
+}
+
+html.dark .contact-page .contact-letter,
+html.dark .contact-page .contact-line,
+html.dark .contact-page .contact-lines,
+html.dark .contact-page .contact-meeting {
+  border-color: var(--border) !important;
+}
+
+html.dark .about-page {
+  --about-paper: #0B0F1A;
+  --about-ink: #E2E6F0;
+  --about-line: #232B3D;
+  --about-muted: #9AA0B0;
+  --about-cream: #111727;
+  background: var(--bg) !important;
+}
+
+html.dark .about-page .sobre-map-info,
+html.dark .about-page .sobre-map-frame {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+}
+
+/* Scrollbar dark */
+html.dark ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+html.dark ::-webkit-scrollbar-track {
+  background: var(--muted);
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  background: #2A3350;
+  border-radius: 4px;
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: #34415F;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-toggle,
+  .theme-toggle__thumb,
+  .theme-toggle__icon,
+  .theme-toggle__text {
+    transition: none !important;
   }
 }
