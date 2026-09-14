@@ -7188,20 +7188,20 @@ footer {
    ============================================ */
 .theme-toggle {
   position: relative;
-  width: 168px;
-  height: 46px;
+  width: 132px;
+  height: 36px;
   border-radius: 999px;
   background: #E9E9EE;
   border: 1px solid #E3E3E8;
   box-shadow:
-    inset 0 2px 6px rgba(0,0,0,.08),
+    inset 0 2px 5px rgba(0,0,0,.08),
     inset 0 1px 1px rgba(255,255,255,.9),
     0 1px 2px rgba(0,0,0,.06);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 10px 0 16px;
+  padding: 0 8px 0 12px;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
   transition: background .38s cubic-bezier(.22,1,.36,1), border-color .38s, box-shadow .38s;
@@ -7225,9 +7225,9 @@ footer {
 
 .theme-toggle__text {
   font-family: var(--font-heading);
-  font-size: .58rem;
+  font-size: .48rem;
   font-weight: 800;
-  letter-spacing: .07em;
+  letter-spacing: .06em;
   line-height: 1.05;
   text-transform: uppercase;
   transition: color .3s ease, opacity .3s ease, transform .3s ease;
@@ -7276,15 +7276,15 @@ footer {
 
 .theme-toggle__thumb {
   position: absolute;
-  top: 4px;
-  left: 4px;
-  width: 36px;
-  height: 36px;
+  top: 3px;
+  left: 3px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   background: #FFFFFF;
   box-shadow:
-    0 4px 14px rgba(0,0,0,.14),
-    0 1px 3px rgba(0,0,0,.12),
+    0 3px 10px rgba(0,0,0,.14),
+    0 1px 2px rgba(0,0,0,.12),
     inset 0 1px 1px rgba(255,255,255,1);
   display: grid;
   place-items: center;
@@ -7293,21 +7293,21 @@ footer {
 }
 
 .theme-toggle[data-theme="light"] .theme-toggle__thumb {
-  transform: translateX(122px);
+  transform: translateX(96px);
 }
 
 .theme-toggle[data-theme="dark"] .theme-toggle__thumb {
   transform: translateX(0);
   background: #F2F2F3;
   box-shadow:
-    0 4px 14px rgba(0,0,0,.35),
-    0 1px 3px rgba(0,0,0,.3),
+    0 3px 10px rgba(0,0,0,.35),
+    0 1px 2px rgba(0,0,0,.3),
     inset 0 1px 1px rgba(255,255,255,.9);
 }
 
 .theme-toggle__icon {
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   display: grid;
   place-items: center;
   transition: opacity .22s ease, transform .32s cubic-bezier(.34,1.56,.64,1), rotate .32s ease;
@@ -7393,25 +7393,26 @@ html.dark .theme-toggle--floating {
     display: flex;
   }
   .navbar .theme-toggle {
-    width: 146px;
-    height: 38px;
-    padding: 0 8px 0 12px;
+    width: 118px;
+    height: 32px;
+    padding: 0 6px 0 10px;
     order: 2;
   }
   .theme-toggle[data-theme="light"] .theme-toggle__thumb {
-    transform: translateX(100px);
+    transform: translateX(84px);
   }
   .theme-toggle__thumb {
-    width: 30px;
-    height: 30px;
+    width: 24px;
+    height: 24px;
     top: 3px;
+    left: 3px;
   }
   .theme-toggle__text {
-    font-size: .52rem;
+    font-size: .44rem;
   }
   .theme-toggle__icon {
-    width: 18px;
-    height: 18px;
+    width: 14px;
+    height: 14px;
   }
 }
 
