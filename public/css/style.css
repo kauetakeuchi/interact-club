@@ -1,7 +1,7 @@
 /* ============================================
    IMPORTS & VARIABLES
    ============================================ */
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Sora:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap');
 
 :root {
   --primary: #17458F;
@@ -871,6 +871,12 @@ input, textarea, select {
   align-items: center;
   gap: .5rem;
   color: var(--text);
+}
+
+.navbar .logo img {
+  height: 2.5rem;
+  width: auto;
+  display: block;
 }
 
 .navbar .logo span {
@@ -6628,7 +6634,7 @@ footer {
   flex: 0 0 auto;
   border: 1px solid currentColor;
   border-radius: 50%;
-  font-family: 'Fraunces', Georgia, serif;
+  font-family: var(--font-heading);
   font-size: .7rem;
 }
 
@@ -6642,7 +6648,7 @@ footer {
 
 .about-lead {
   max-width: 55rem;
-  font-family: 'Fraunces', Georgia, serif;
+  font-family: var(--font-heading);
   color: var(--about-ink);
   font-size: clamp(2.15rem, 4.4vw, 4.25rem);
   font-weight: 500;
@@ -6685,7 +6691,7 @@ footer {
 }
 
 .about-world-numbers strong {
-  font-family: 'Fraunces', Georgia, serif;
+  font-family: var(--font-heading);
   color: var(--about-blue);
   font-size: clamp(1.8rem, 3vw, 2.8rem);
   font-weight: 500;
@@ -6866,7 +6872,7 @@ footer {
 
 .about-method-steps strong {
   color: var(--about-ink);
-  font-family: 'Fraunces', Georgia, serif;
+  font-family: var(--font-heading);
   font-size: 1.45rem;
   font-weight: 600;
 }
