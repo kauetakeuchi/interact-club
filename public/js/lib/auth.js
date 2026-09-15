@@ -32,8 +32,11 @@ export class Auth {
             body: JSON.stringify({ email, password }),
         });
         const data = await res.json();
-        if (!res.ok)
-            throw new Error(data.message || "Erro no login");
+        if (!res.ok) {
+            const error = new Error(data.message || "Erro no login");
+            error.code = data.code;
+            throw error;
+        }
         this.setSession(data.token, data.user);
         return data;
     }
@@ -44,9 +47,36 @@ export class Auth {
             body: JSON.stringify({ name, email, password, phone, birthDate }),
         });
         const data = await res.json();
+        if (!res.ok) {
+            const error = new Error(data.message || "Erro no cadastro");
+            error.code = data.code;
+            throw error;
+        }
+        return data;
+    }
+    async verifyEmail(token) {
+        const res = await fetch("/api/auth/verify-email", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ token }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+            const error = new Error(data.message || "Erro ao confirmar email");
+            error.code = data.code;
+            throw error;
+        }
+        return data;
+    }
+    async resendVerification(email) {
+        const res = await fetch("/api/auth/resend-verification", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email }),
+        });
+        const data = await res.json();
         if (!res.ok)
-            throw new Error(data.message || "Erro no cadastro");
-        this.setSession(data.token, data.user);
+            throw new Error(data.message || "Erro ao reenviar verificação");
         return data;
     }
     logout() {

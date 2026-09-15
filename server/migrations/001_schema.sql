@@ -16,8 +16,12 @@ CREATE TABLE IF NOT EXISTS `user` (
   bio TEXT NULL,
   phone VARCHAR(50) NULL,
   birthDate DATE NULL,
+  emailVerifiedAt TIMESTAMP NULL,
+  emailVerificationTokenHash CHAR(64) NULL,
+  emailVerificationExpiresAt DATETIME NULL,
   createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_user_email_verification_token (emailVerificationTokenHash)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `event` (

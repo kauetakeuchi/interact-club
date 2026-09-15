@@ -5,7 +5,8 @@ import { icons } from "../icons.js";
 
 export async function render() {
     const m = await api.get("/membros");
-    const active = m.filter(u => u.status === "ACTIVE").length;
+    const active = m.filter(u => u.status === "ACTIVE" && u.emailVerifiedAt).length;
+    const unverified = m.filter(u => !u.emailVerifiedAt).length;
     const admins = m.filter(u => u.role === "ADMIN").length;
     return `<div class="section-bar">
       <div class="section-bar-stats">
@@ -13,16 +14,19 @@ export async function render() {
         <span class="section-bar-divider"></span>
         <span class="section-bar-stat">${active} ativos</span>
         <span class="section-bar-divider"></span>
+        <span class="section-bar-stat">${unverified} sem confirmar email</span>
+        <span class="section-bar-divider"></span>
         <span class="section-bar-stat">${admins} admins</span>
       </div>
       <div class="section-bar-actions">
         <div class="search-wrap"><input class="search-input" placeholder="Buscar membros..." onkeyup="filtrarTabela(this)">${icons.search}</div>
       </div>
     </div>
-    <div class="table-wrap"><table class="admin-table" id="tabela-membros"><thead><tr><th>Nome</th><th>Email</th><th>Cargo</th><th>Função</th><th>Status</th><th class="th-actions">Ações</th></tr></thead><tbody>
+    <div class="table-wrap"><table class="admin-table" id="tabela-membros"><thead><tr><th>Nome</th><th>Email</th><th>Verificação</th><th>Cargo</th><th>Função</th><th>Status</th><th class="th-actions">Ações</th></tr></thead><tbody>
       ${m.map(u => `<tr>
         <td><div class="cell-name"><div class="cell-avatar">${esc(u.name.charAt(0).toUpperCase())}</div>${esc(u.name)}</div></td>
         <td><span class="cell-email">${esc(u.email)}</span></td>
+        <td><span class="status-dot status-${u.emailVerifiedAt ? "green" : "amber"}"></span><span class="status-label">${u.emailVerifiedAt ? "Confirmado" : "Pendente"}</span></td>
         <td>${u.position ? esc(u.position) : '<span class="cell-empty">—</span>'}</td>
         <td><span class="badge badge-${u.role === "ADMIN" ? "red" : u.role === "DIRECTOR" ? "warning" : "gray"}">${USER_ROLE_LABELS[u.role] || u.role}</span></td>
         <td><span class="status-dot status-${u.status === "ACTIVE" ? "green" : u.status === "PENDING" ? "amber" : "gray"}"></span><span class="status-label">${USER_STATUS_LABELS[u.status] || u.status}</span></td>

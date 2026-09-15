@@ -8,7 +8,7 @@ function renderSuccess() {
       </div>
       <span class="contact-section-label">Tudo certo</span>
       <h2 class="success-title">Pronto, chegou!</h2>
-      <p class="success-text">Valeu por chamar. A gente responde assim que der.</p>
+      <p class="success-text">Obrigado pela mensagem. Nossa equipe responderá em breve.</p>
       <button class="contact-submit contact-submit-secondary" id="ct-reset">Escrever outro recado <span aria-hidden="true">↗</span></button>
     </div>`;
 }
@@ -20,13 +20,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     <header class="contact-intro">
       <div class="container contact-intro-grid">
         <div class="contact-intro-copy contact-reveal">
-          <span class="contact-kicker"><i></i> Chama a gente</span>
-          <h1>Quer falar com<br>a gente? <em>Chega mais.</em></h1>
-          <p>Dúvida, ideia, vontade de participar ou convite pra algum projeto? Manda pra gente. Quem responde é o próprio pessoal do clube.</p>
+          <span class="contact-kicker"><i></i> Fale conosco</span>
+          <h1>Quer falar com<br>o clube? <em>Chega mais.</em></h1>
+          <p>Dúvida, ideia, vontade de participar ou convite para algum projeto? Envie sua mensagem. A equipe do próprio clube responde.</p>
         </div>
         <div class="contact-intro-note contact-reveal" aria-label="Um recado nosso">
           <span class="contact-note-number">01</span>
-          <p>Sem robô no meio.<br><strong>É a gente mesmo.</strong></p>
+          <p>Atendimento de verdade.<br><strong>Você fala diretamente com o clube.</strong></p>
           <svg viewBox="0 0 110 40" aria-hidden="true"><path d="M2 28c23-17 53-20 102-10M91 8l14 10-13 10"/></svg>
         </div>
       </div>
@@ -50,20 +50,20 @@ document.addEventListener("DOMContentLoaded", async () => {
             </a>
             <a href="https://www.google.com/maps/search/?api=1&query=Rua+Francisco+Mesquita+640+Taquaritinga+SP" target="_blank" rel="noopener" class="contact-line">
               <span class="contact-line-index">03</span>
-              <span class="contact-line-copy"><small>Onde a gente se encontra</small><strong>Rua Francisco Mesquita, 640<br>Taquaritinga — SP</strong></span>
+              <span class="contact-line-copy"><small>Onde nos encontramos</small><strong>Rua Francisco Mesquita, 640<br>Taquaritinga — SP</strong></span>
               <span class="contact-line-arrow" aria-hidden="true">↗</span>
             </a>
           </div>
           <aside class="contact-meeting">
             <span class="contact-meeting-day">Sáb</span>
-            <div><small>A gente se reúne</small><strong>Todo sábado, às 11h</strong><p>É na sede do Rotary. Pode aparecer.</p></div>
+            <div><small>Nossos encontros</small><strong>Todo sábado, às 11h</strong><p>É na sede do Rotary. Pode aparecer.</p></div>
           </aside>
         </section>
 
         <section class="contact-letter contact-reveal" aria-labelledby="contact-form-title">
           <div class="contact-letter-head">
             <span class="contact-section-label">Manda um recado</span>
-            <h2 id="contact-form-title">Conta pra gente.</h2>
+            <h2 id="contact-form-title">Conte sua ideia.</h2>
             <p>Não precisa escrever bonito. Só diz como podemos ajudar.</p>
           </div>
           <form id="contato-form" class="contact-form">
@@ -77,7 +77,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         </div>
         <div class="form-group"><label for="ct-message">Seu recado <span>*</span></label><textarea id="ct-message" class="form-control" required rows="6" placeholder="Manda os detalhes por aqui..."></textarea></div>
         <div class="contact-form-foot">
-          <p>Normalmente a gente responde em até 2 dias.</p>
+          <p>Normalmente respondemos em até 2 dias.</p>
           <button type="submit" class="contact-submit" id="ct-btn">Mandar mensagem <span aria-hidden="true">↗</span></button>
         </div>
       </form>
@@ -107,7 +107,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         btn.innerHTML = '<span class="spinner"></span> Mandando...';
         try {
             await api.post("/contato", data);
-            toast.show("Mensagem recebida! A gente fala com você em breve.");
+            toast.show("Mensagem recebida! Entraremos em contato em breve.");
             form.style.display = "none";
             successEl.innerHTML = renderSuccess();
             successEl.style.display = "block";

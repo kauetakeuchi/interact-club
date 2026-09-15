@@ -1,0 +1,26 @@
+<!DOCTYPE html><html lang="pt-BR">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg"><title>Verificar email - Interact Club</title><link rel="stylesheet" href="/css/style.css"></head>
+<body>
+<div id="page-content" style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem;">
+  <div style="width:100%;max-width:30rem;">
+    <div style="text-align:center;margin-bottom:2rem;">
+      <a href="/" style="display:inline-flex;align-items:center;gap:.5rem;font-size:.875rem;color:var(--text);margin-bottom:2rem;">← Voltar ao site</a>
+      <h1 style="font-family:var(--font-heading);font-size:2.3rem;color:var(--primary-dark);">Verifique seu <span style="color:var(--secondary);">email</span></h1>
+    </div>
+    <div style="border:1px solid var(--border);padding:2rem;">
+      <div id="verification-status" role="status" aria-live="polite" style="text-align:center;line-height:1.6;color:var(--text);">
+        Verificando seu link…
+      </div>
+      <a id="login-link" class="btn btn-primary btn-full" href="/login" hidden style="margin-top:1.5rem;">Ir para o login</a>
+      <form id="resend-form" hidden style="margin-top:1.5rem;">
+        <div class="form-group"><label for="verification-email">Email</label><input type="email" id="verification-email" class="form-control" required placeholder="seu@email.com"></div>
+        <button type="submit" class="btn btn-primary btn-full" id="resend-btn">Enviar novo link</button>
+      </form>
+    </div>
+  </div>
+</div>
+<div id="toast-container" class="toast-container"></div>
+<script type="module" src="/js/pages/verificar-email.js"></script>
+</body>
+</html>

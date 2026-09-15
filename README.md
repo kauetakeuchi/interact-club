@@ -36,6 +36,13 @@ Copie `server/.env.example` para `server/.env` e preencha com seus valores:
 DATABASE_URL="mysql://root:@localhost:3306/interact_club"
 JWT_SECRET="troque-por-um-segredo-forte"
 PORT=3001
+APP_URL="http://localhost:3001"
+
+# Envio do link de confirmação de novos cadastros
+EMAIL_PROVIDER="resend"
+SMTP_USER="usuario-smtp"
+SMTP_PASS="senha-smtp"
+SMTP_FROM="Interact Club <contato@exemplo.org>"
 
 # Opcional: habilita armazenamento de imagens no Cloudinary
 CLOUDINARY_CLOUD_NAME=""
@@ -44,6 +51,26 @@ CLOUDINARY_API_SECRET=""
 ```
 
 Sem as variáveis do Cloudinary, o upload continua funcionando com armazenamento local em `public/uploads/`.
+
+As variáveis de email são necessárias para novos cadastros: a conta só pode entrar depois que o usuário clicar no link recebido. Em produção, defina `APP_URL` com o endereço público do site (por exemplo, `https://interact.exemplo.org`).
+
+Provedores disponíveis:
+
+| `EMAIL_PROVIDER` | `SMTP_USER` | `SMTP_PASS` |
+|---|---|---|
+| `gmail` | Endereço Gmail completo | Senha de aplicativo do Google |
+| `brevo` | Usuário SMTP da Brevo | Chave SMTP da Brevo |
+| `resend` | Pode ser omitido (`resend` é usado automaticamente) | Chave de API da Resend |
+| `hostinger` | Endereço de email completo | Senha da caixa de email |
+| `smtp` | Usuário do serviço, se exigido | Senha do serviço, se exigida |
+
+Nos quatro primeiros casos, servidor, porta e criptografia são preenchidos automaticamente. Para `smtp`, configure também `SMTP_HOST`, `SMTP_PORT` e `SMTP_SECURE`; esses campos também podem substituir o preset de qualquer provedor.
+
+Se o banco já existia antes da verificação de email, execute uma vez:
+
+```
+server/migrations/002_email_verification.sql
+```
 
 ### 3. Instale as dependências
 

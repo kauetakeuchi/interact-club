@@ -47,7 +47,7 @@ async function main() {
       async () => {
         const hash = await bcrypt.hash(senha, 12);
         await pool.execute(
-          "INSERT INTO `user` (id, name, email, passwordHash, role, `status`, `position`) VALUES (?, ?, ?, ?, ?, 'ACTIVE', ?)",
+          "INSERT INTO `user` (id, name, email, passwordHash, role, `status`, `position`, emailVerifiedAt) VALUES (?, ?, ?, ?, ?, 'ACTIVE', ?, CURRENT_TIMESTAMP)",
           [randomUUID(), nome, email, hash, role, cargo]
         );
       }

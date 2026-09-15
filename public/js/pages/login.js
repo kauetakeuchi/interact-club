@@ -26,6 +26,11 @@ document.getElementById("login-form")?.addEventListener("submit", async (e) => {
     }
     catch (err) {
         toast.show(err.message || "Email ou senha inválidos", "error");
+        const verificationHelp = document.getElementById("verification-help");
+        if (err.code === "EMAIL_NOT_VERIFIED" && verificationHelp) {
+            verificationHelp.hidden = false;
+            verificationHelp.href = `/verificar-email?email=${encodeURIComponent(document.getElementById("login-email").value)}`;
+        }
         btn.disabled = false;
         btn.textContent = "Entrar";
     }

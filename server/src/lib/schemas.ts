@@ -19,16 +19,24 @@ const optionalText = (max: number) =>
 // ---------- Auth ----------
 
 export const loginSchema = z.object({
-  email: z.string().trim().min(1, "Email obrigatório").email("Email inválido").max(255),
+  email: z.string().trim().toLowerCase().min(1, "Email obrigatório").email("Email inválido").max(255),
   password: z.string().min(1, "Senha obrigatória"),
 });
 
 export const registerSchema = z.object({
   name: z.string().trim().min(2, "Informe seu nome").max(255),
-  email: z.string().trim().min(1, "Email obrigatório").email("Email inválido").max(255),
+  email: z.string().trim().toLowerCase().min(1, "Email obrigatório").email("Email inválido").max(255),
   password: z.string().min(6, "Senha deve ter no mínimo 6 caracteres").max(100),
   phone: optionalText(50),
   birthDate: z.preprocess(emptyToNull, z.coerce.date({ message: "Data de nascimento inválida" }).nullish()),
+});
+
+export const verifyEmailSchema = z.object({
+  token: z.string().trim().regex(/^[a-f0-9]{64}$/i, "Link de verificação inválido"),
+});
+
+export const resendVerificationSchema = z.object({
+  email: z.string().trim().toLowerCase().min(1, "Email obrigatório").email("Email inválido").max(255),
 });
 
 export const perfilSchema = z.object({
@@ -113,7 +121,7 @@ export const contatoSchema = z.object({
 export const membroUpdateSchema = z
   .object({
     name: z.string().trim().min(1, "Nome obrigatório").max(255).optional(),
-    email: z.string().trim().email("Email inválido").max(255).optional(),
+    email: z.string().trim().toLowerCase().email("Email inválido").max(255).optional(),
     role: z.enum(["MEMBER", "DIRECTOR", "ADMIN"], { message: "Função inválida" }).optional(),
     status: z.enum(["PENDING", "ACTIVE", "INACTIVE"], { message: "Status inválido" }).optional(),
     position: optionalText(255),

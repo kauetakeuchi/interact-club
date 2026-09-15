@@ -18,12 +18,19 @@ document.getElementById("register-form")?.addEventListener("submit", async (e) =
         const birthDate = document.getElementById("reg-birth").value;
         const password = document.getElementById("reg-password").value;
         await auth.register(name, email, password, phone, birthDate);
-        toast.show("Conta criada! Bem-vindo!");
-        setTimeout(() => { window.location.href = "/"; }, 500);
+        toast.show("Enviamos um link de confirmação para seu email.");
+        setTimeout(() => {
+            window.location.href = `/verificar-email?sent=1&email=${encodeURIComponent(email)}`;
+        }, 700);
     }
     catch (err) {
         toast.show(err.message || "Erro ao criar conta", "error");
         btn.disabled = false;
         btn.textContent = "Criar Conta";
+        if (err.code === "EMAIL_NOT_VERIFIED") {
+            setTimeout(() => {
+                window.location.href = `/verificar-email?email=${encodeURIComponent(document.getElementById("reg-email").value)}`;
+            }, 900);
+        }
     }
 });

@@ -11,7 +11,7 @@ const router = Router();
 
 router.get("/", requireAdmin, ah(async (_req: AuthRequest, res: Response) => {
   const membros = await query(
-    "SELECT id, name, email, role, `status`, `position`, avatarUrl, createdAt FROM `user` ORDER BY createdAt DESC"
+    "SELECT id, name, email, role, `status`, `position`, avatarUrl, emailVerifiedAt, createdAt FROM `user` ORDER BY createdAt DESC"
   );
   return res.json(membros);
 }));
@@ -19,10 +19,18 @@ router.get("/", requireAdmin, ah(async (_req: AuthRequest, res: Response) => {
 router.put("/:id", requireAdmin, validate(membroUpdateSchema), ah(async (req: AuthRequest, res: Response) => {
   try {
     const { name, email, role, status, position, password } = req.body;
+    const current = await getOne<{ email: string }>("SELECT email FROM `user` WHERE id = ?", [req.params.id]);
+    if (!current) return res.status(404).json({ message: "Membro não encontrado" });
     const fields: string[] = [];
     const values: any[] = [];
     if (name !== undefined) { fields.push("name = ?"); values.push(name); }
-    if (email !== undefined) { fields.push("email = ?"); values.push(email); }
+    if (email !== undefined) {
+      fields.push("email = ?");
+      values.push(email);
+      if (email.toLowerCase() !== current.email.toLowerCase()) {
+        fields.push("emailVerifiedAt = NULL", "emailVerificationTokenHash = NULL", "emailVerificationExpiresAt = NULL");
+      }
+    }
     if (role !== undefined) { fields.push("role = ?"); values.push(role); }
     if (status !== undefined) { fields.push("`status` = ?"); values.push(status); }
     if (position !== undefined) { fields.push("`position` = ?"); values.push(position); }
@@ -35,7 +43,7 @@ router.put("/:id", requireAdmin, validate(membroUpdateSchema), ah(async (req: Au
       throw err;
     }
     const user = await getOne(
-      "SELECT id, name, email, role, `status`, `position`, avatarUrl, createdAt FROM `user` WHERE id = ?",
+      "SELECT id, name, email, role, `status`, `position`, avatarUrl, emailVerifiedAt, createdAt FROM `user` WHERE id = ?",
       [req.params.id]
     );
     return res.json(user);
