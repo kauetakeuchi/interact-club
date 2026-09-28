@@ -7810,6 +7810,108 @@ html.dark ::-webkit-scrollbar-thumb:hover {
   background: #34415F;
 }
 
+/* ============================================
+   FIX DARK — CONTRASTE NÍTIDO (prints)
+   1) about-values ("Menos discurso" + Servir/Liderar/Conectar)
+      bug: var(--about-ink) virou #E2E6F0 claro no dark -> fundo claro + texto branco = apagado
+   2) contact-intro ("Quer falar com a gente? Chega mais.")
+      bug: var(--contact-ink) virou #E2E6F0 claro no dark -> mesmo apagado
+   3) botão "Mandar mensagem"
+      bug: background var(--contact-ink) claro + color #fff = sem contraste
+   Corrige mantendo fundos escuros e deixando o texto mais opaco/nítido
+   ============================================ */
+html.dark .about-values {
+  background: #070A14 !important;
+  color: #fff !important;
+}
+html.dark .about-values-heading h2 {
+  color: #FFFFFF !important;
+}
+html.dark .about-values-heading h2 em {
+  color: #F0B63F !important;
+}
+html.dark .about-values-heading > p {
+  color: rgba(226,230,240,.88) !important;
+}
+html.dark .about-value-list {
+  border-top-color: rgba(255,255,255,.14) !important;
+}
+html.dark .about-value-row {
+  border-bottom-color: rgba(255,255,255,.14) !important;
+}
+html.dark .about-value-row h3 {
+  color: #FFFFFF !important;
+}
+html.dark .about-value-row p {
+  color: rgba(226,230,240,.84) !important;
+}
+html.dark .about-value-number {
+  color: rgba(255,255,255,.74) !important;
+}
+html.dark .about-value-mark {
+  border-color: rgba(255,255,255,.28) !important;
+  color: #F0B63F !important;
+}
+html.dark .about-section-label-light {
+  color: #F0B63F !important;
+}
+html.dark .about-section-label-light span {
+  border-color: currentColor !important;
+}
+
+/* contact-intro — mantém fundo escuro e texto nítido */
+html.dark .contact-intro {
+  background:
+    radial-gradient(circle at 83% 12%, rgba(255,255,255,.065) 0 1px, transparent 1.5px) 0 0 / 18px 18px,
+    #070A14 !important;
+  color: #fff !important;
+}
+html.dark .contact-intro::before {
+  border-color: rgba(255,255,255,.12) !important;
+}
+html.dark .contact-intro::after {
+  color: rgba(255,255,255,.30) !important;
+}
+html.dark .contact-intro h1 {
+  color: #FFFFFF !important;
+}
+html.dark .contact-intro h1 em {
+  color: #EFB43A !important;
+}
+html.dark .contact-intro-copy > p {
+  color: rgba(226,230,240,.86) !important;
+}
+html.dark .contact-kicker {
+  color: rgba(255,255,255,.74) !important;
+}
+html.dark .contact-intro-note {
+  border-top-color: rgba(255,255,255,.22) !important;
+  border-left-color: rgba(255,255,255,.12) !important;
+}
+html.dark .contact-intro-note p {
+  color: rgba(255,255,255,.76) !important;
+}
+html.dark .contact-intro-note strong {
+  color: #FFFFFF !important;
+}
+
+/* botão Mandar mensagem — alto contraste no dark */
+html.dark .contact-submit {
+  background: #EFB43A !important;
+  color: #070A14 !important;
+  border: 1px solid #EFB43A !important;
+}
+html.dark .contact-submit > span:not(.spinner) {
+  color: #070A14 !important;
+}
+html.dark .contact-submit:hover {
+  background: #F0B63F !important;
+  transform: translateY(-2px);
+}
+html.dark .contact-submit:disabled {
+  opacity: .7;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .theme-toggle,
   .theme-toggle__thumb,
