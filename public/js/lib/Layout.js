@@ -10,7 +10,7 @@ export class Layout {
         const footer = document.createElement("footer");
         footer.innerHTML = `<div class="container" style="text-align:center;">
           <p style="margin-bottom:.375rem;">© ${new Date().getFullYear()} Interact Club. Todos os direitos reservados.</p>
-          <p style="font-size:.8125rem;">Um programa juvenil do <a href="https://www.rotary.org/pt" target="_blank" rel="noopener" style="color:var(--amber);font-weight:500;">Rotary International</a> · <a href="/contato" style="color:var(--amber);font-weight:500;">Contato</a></p>
+          <p style="font-size:.8125rem;">Um programa juvenil do <a href="https://www.rotary.org/pt" target="_blank" rel="noopener" style="color:var(--amber);font-weight:500;">Rotary International</a> · <a href="/termos" style="color:var(--amber);font-weight:500;">Termos</a> · <a href="/privacidade" style="color:var(--amber);font-weight:500;">Privacidade</a> · <a href="/contato" style="color:var(--amber);font-weight:500;">Contato</a></p>
         </div>`;
         const toast = document.createElement("div");
         toast.id = "toast-container";
