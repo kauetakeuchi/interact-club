@@ -1,5 +1,6 @@
 import { auth, toast } from "../lib/index.js";
 import { initPasswordToggles } from "../lib/password.js";
+import { askTermsConsent } from "../lib/TermsModal.js";
 
 if (auth.isAuthenticated()) {
     window.location.href = "/";
@@ -12,6 +13,13 @@ document.getElementById("register-form")?.addEventListener("submit", async (e) =
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner"></span> Criando...';
     try {
+        // Concordância com Termos e Política antes de qualquer envio.
+        const accepted = await askTermsConsent();
+        if (!accepted) {
+            btn.disabled = false;
+            btn.textContent = "Criar Conta";
+            return;
+        }
         const name = document.getElementById("reg-name").value;
         const email = document.getElementById("reg-email").value;
         const phone = document.getElementById("reg-phone").value;
