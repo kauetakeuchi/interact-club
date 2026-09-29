@@ -6344,7 +6344,7 @@ footer {
     font-family: var(--font-heading);
     color: var(--admin-navy);
     font-size: 1.15rem;
-    font-weight: 600;
+  font-weight: 600;
   }
 
   .admin-page .sidebar {
@@ -7783,6 +7783,35 @@ html.dark .about-page {
   --about-muted: #9AA0B0;
   --about-cream: #111727;
   background: var(--bg) !important;
+
+  /* Botões de fundo escuro: no light o fundo é --about-ink (escuro) com
+     texto branco. Como --about-ink fica claro no dark, usá-lo como fundo
+     deixaria branco sobre branco. Aqui o fundo vira o honey do projeto
+     e o texto fica escuro. */
+  --about-btn-bg: #F0B63F;
+  --about-btn-ink: #070A14;
+  --about-btn-bg-hover: #F7C75A;
+}
+
+/* CTA "Vamos conversar" da seção de convite */
+html.dark .about-invite a {
+  background: var(--about-btn-bg) !important;
+  color: var(--about-btn-ink) !important;
+}
+
+html.dark .about-invite a:hover {
+  background: var(--about-btn-bg-hover) !important;
+}
+
+html.dark .about-invite a span {
+  color: var(--about-btn-ink) !important;
+}
+
+/* O footer usa --about-ink como fundo; no dark ele precisa continuar
+   escuro, não claro. */
+html.dark .about-page footer {
+  background: #0B0F1A !important;
+  color: var(--about-muted) !important;
 }
 
 html.dark .about-page .sobre-map-info,
@@ -7911,6 +7940,534 @@ html.dark .contact-submit:hover {
 html.dark .contact-submit:disabled {
   opacity: .7;
 }
+
+/* ============================================
+   DARK MODE — ADMIN
+   O painel tem um conjunto próprio de tokens (--admin-*) que, até aqui,
+   nunca era remapeado no dark: as cores continuavam escuras sobre
+   superfícies escuras. Remapeamos os tokens que só servem de texto ou
+   de fundo claro. --admin-navy e --admin-blue são preservados porque
+   também funcionam como superfície (sidebar e card principal).
+   ============================================ */
+html.dark .admin-page {
+  --admin-ink: #E2E6F0;
+  --admin-muted: #9AA0B0;
+  --admin-line: #232B3D;
+  --admin-canvas: #0B0F1A;
+  --admin-paper: #151B2B;
+
+  /* Texto que no light usava --admin-navy, e que precisa ficar claro. */
+  --admin-heading: #E2E6F0;
+
+  /* Texto que no light usava --admin-blue. */
+  --admin-accent: #7FB2F0;
+}
+
+/* --admin-navy como cor de texto.
+   Sem !important de propósito: .admin-page .stat-card-main .stat-value
+   tem 3 classes e vence esta regra (2 classes + 1 elemento), então o card
+   principal continua com o branco que o design já previa. */
+html.dark .admin-page .sidebar-user-avatar,
+html.dark .admin-page .dashboard-section-heading h2,
+html.dark .admin-page .quick-action-btn:hover .quick-action-plus,
+html.dark .admin-page .event-date-tile,
+html.dark .admin-page .empty-state h3,
+html.dark .admin-page .modal h2 {
+  color: var(--admin-heading) !important;
+}
+
+/* Cards secundários. O principal é deixado de fora pelo peso da
+   especificidade das regras .stat-card-main do bloco admin. */
+html.dark .admin-page .stat-value {
+  color: var(--admin-heading);
+}
+
+html.dark .admin-page .stat-label {
+  color: var(--admin-ink);
+}
+
+html.dark .admin-page .stat-note {
+  color: var(--admin-muted);
+}
+
+/* --admin-blue como cor de texto */
+html.dark .admin-page .content-header h1 em,
+html.dark .admin-page .content-header-mark,
+html.dark .admin-page .dashboard-section-heading span,
+html.dark .admin-page .quick-action-icon,
+html.dark .admin-page .recent-item-icon.noticia,
+html.dark .admin-page .recent-item:hover .recent-item-arrow,
+html.dark .admin-page .cell-avatar {
+  color: var(--admin-accent) !important;
+}
+
+html.dark .admin-page .stat-card:hover .stat-arrow {
+  color: var(--admin-accent) !important;
+}
+
+/* O h1 do cabeçalho já é coberto por html.dark .content-header h1,
+   mas o .admin-page tem especificidade maior — reforçamos aqui. */
+html.dark .admin-page .content-header h1 {
+  color: var(--admin-heading) !important;
+}
+
+/* Fundos claros que estavam fixos no light */
+html.dark .admin-page .content-header-mark,
+html.dark .admin-page .quick-actions-section,
+html.dark .admin-page .section-bar,
+html.dark .admin-page .empty-state {
+  background: var(--admin-paper) !important;
+  border-color: var(--admin-line) !important;
+}
+
+html.dark .admin-page .quick-action-icon,
+html.dark .admin-page .recent-item-icon.noticia,
+html.dark .admin-page .cell-avatar {
+  background: #1C2438 !important;
+}
+
+html.dark .admin-page .upload-area {
+  background: #111727 !important;
+  border-color: var(--admin-line) !important;
+}
+
+html.dark .admin-page .upload-area:hover {
+  background: #1C2438 !important;
+  border-color: var(--admin-accent) !important;
+}
+
+/* Texto secundário. O .stat-label/.stat-note já foram tratados acima
+   sem !important, para o card principal manter o branco do design. */
+html.dark .admin-page .quick-action-btn strong {
+  color: var(--admin-ink) !important;
+}
+
+html.dark .admin-page .quick-action-btn small {
+  color: var(--admin-muted) !important;
+}
+
+html.dark .admin-page .content-eyebrow,
+html.dark .admin-page .content-header p {
+  color: var(--admin-muted) !important;
+}
+
+/* ============================================
+   POLÍTICA DE PRIVACIDADE — DOCUMENTO
+   Leitura longa: sem hero, sem numeracao decorativa.
+   Prioridade em legibilidade e seriedade.
+   ============================================ */
+.privacy-page {
+  --pv-ink: #1a1a1a;
+  --pv-muted: #4a4f55;
+  --pv-rule: #d4d0c8;
+  --pv-soft: #f7f5f1;
+  --pv-link: #17458f;
+  background: #ffffff;
+  color: var(--pv-ink);
+}
+
+.privacy-page .privacy-doc {
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: 3.5rem 1.5rem 5rem;
+}
+
+.privacy-doc-header {
+  padding-bottom: 1.75rem;
+  border-bottom: 2px solid var(--pv-ink);
+}
+
+.privacy-doc h1 {
+  font-family: var(--font-heading);
+  font-size: clamp(1.75rem, 4vw, 2.4rem);
+  font-weight: 500;
+  letter-spacing: -.02em;
+  line-height: 1.15;
+  color: var(--pv-ink);
+}
+
+.privacy-doc-org {
+  margin-top: .6rem;
+  color: var(--pv-muted);
+  font-size: .88rem;
+}
+
+.privacy-section {
+  margin-top: 2.5rem;
+}
+
+.privacy-section h2 {
+  margin-bottom: .85rem;
+  font-family: var(--font-heading);
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: -.01em;
+  line-height: 1.3;
+  color: var(--pv-ink);
+}
+
+.privacy-section h3 {
+  margin: 1.6rem 0 .5rem;
+  font-size: .95rem;
+  font-weight: 600;
+  color: var(--pv-ink);
+}
+
+.privacy-section p {
+  margin-bottom: .9rem;
+  color: var(--pv-muted);
+  font-size: .95rem;
+  line-height: 1.75;
+}
+
+.privacy-section ul {
+  margin: 0 0 1rem;
+  padding-left: 1.25rem;
+}
+
+.privacy-section li {
+  margin-bottom: .45rem;
+  color: var(--pv-muted);
+  font-size: .95rem;
+  line-height: 1.7;
+}
+
+.privacy-section li::marker {
+  color: var(--pv-ink);
+}
+
+.privacy-section a {
+  color: var(--pv-link);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.privacy-section a:hover {
+  color: var(--pv-ink);
+}
+
+.privacy-table {
+  width: 100%;
+  margin: .5rem 0 1.25rem;
+  border-collapse: collapse;
+  font-size: .88rem;
+  text-align: left;
+}
+
+.privacy-table caption {
+  padding-bottom: .5rem;
+  color: var(--pv-muted);
+  font-size: .78rem;
+  text-align: left;
+}
+
+.privacy-table th,
+.privacy-table td {
+  padding: .6rem .7rem;
+  border: 1px solid var(--pv-rule);
+  vertical-align: top;
+  line-height: 1.6;
+}
+
+.privacy-table th {
+  background: var(--pv-soft);
+  color: var(--pv-ink);
+  font-weight: 600;
+}
+
+.privacy-table td {
+  color: var(--pv-muted);
+}
+
+.privacy-table td:first-child {
+  color: var(--pv-ink);
+}
+
+@media (max-width: 640px) {
+  .privacy-page .privacy-doc {
+    padding: 2.25rem 1.15rem 3.5rem;
+  }
+
+  .privacy-table {
+    font-size: .82rem;
+  }
+
+  .privacy-table th,
+  .privacy-table td {
+    padding: .5rem .5rem;
+  }
+}
+
+/* ---------- Dark mode ---------- */
+html.dark .privacy-page {
+  --pv-ink: #E4E7EC;
+  --pv-muted: #A2A9B4;
+  --pv-rule: #2E3644;
+  --pv-soft: #141A26;
+  --pv-link: #8FB6EC;
+  background: #0E131C !important;
+}
+
+/* ============================================
+   AVISO DE PRIVACIDADE — PRIMEIRA VISITA
+   ============================================ */
+.privacy-notice {
+  /* Tokens próprios: o aviso pode cair sobre qualquer página, e em light
+     --surface e --bg são ambos #FFFFFF (o cartão viraria branco sobre branco). */
+  --pn-ink: #1F2937;
+  --pn-muted: #5b6472;
+  --pn-card: #fbfaf7;
+  --pn-line: #d9d4ca;
+  --pn-btn: #102b4e;
+  --pn-on-btn: #ffffff;
+  position: fixed;
+  left: 1.25rem;
+  bottom: 1.25rem;
+  z-index: 10000;
+  width: min(30rem, calc(100vw - 2.5rem));
+  opacity: 0;
+  transform: translateY(1rem);
+  transition: opacity .35s ease, transform .35s ease;
+  pointer-events: none;
+}
+
+.privacy-notice.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.privacy-notice-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  padding: 1.35rem 1.4rem;
+  border: 1px solid var(--pn-line);
+  border-radius: 16px;
+  background: var(--pn-card);
+  box-shadow: 0 18px 48px rgba(0,0,0,.22);
+}
+
+.privacy-notice-title {
+  margin: 0 0 .35rem;
+  color: var(--pn-ink);
+  font-family: var(--font-heading);
+  font-size: .95rem;
+  font-weight: 600;
+  letter-spacing: -.01em;
+}
+
+.privacy-notice-text {
+  margin: 0;
+  color: var(--pn-muted);
+  font-size: .82rem;
+  line-height: 1.6;
+}
+
+.privacy-notice-text a {
+  color: var(--pn-ink);
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.privacy-notice-text a:hover {
+  color: var(--pn-btn);
+}
+
+.privacy-notice-actions {
+  display: flex;
+  align-items: center;
+  gap: .9rem;
+}
+
+.privacy-notice-link {
+  color: var(--pn-muted);
+  font-size: .78rem;
+  text-decoration: none;
+}
+
+.privacy-notice-link:hover {
+  color: var(--pn-ink);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.privacy-notice-ok {
+  margin-left: auto;
+  padding: .5rem 1.05rem;
+  border: none;
+  border-radius: 100px;
+  background: var(--pn-btn);
+  color: var(--pn-on-btn);
+  font-family: inherit;
+  font-size: .78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity .2s, transform .2s;
+}
+
+.privacy-notice-ok:hover {
+  opacity: .88;
+  transform: translateY(-1px);
+}
+
+.privacy-notice-ok:focus-visible,
+.privacy-notice-link:focus-visible,
+.privacy-notice-text a:focus-visible {
+  outline: 2px solid var(--pn-btn);
+  outline-offset: 2px;
+}
+
+html.dark .privacy-notice {
+  --pn-ink: #E2E6F0;
+  --pn-muted: #9AA0B0;
+  --pn-card: #151B2B;
+  --pn-line: #2A3350;
+  --pn-btn: #F0B63F;
+  --pn-on-btn: #070A14;
+}
+
+html.dark .privacy-notice-inner {
+  box-shadow: 0 18px 48px rgba(0,0,0,.55);
+}
+
+/* ============================================
+   MODAL DE TERMOS — CADASTRO
+   ============================================ */
+.terms-modal-overlay {
+  --tm-ink: #1a1a1a;
+  --tm-muted: #4a4f55;
+  --tm-card: #ffffff;
+  --tm-rule: #d4d0c8;
+  --tm-btn: #102b4e;
+  --tm-on-btn: #ffffff;
+  position: fixed;
+  inset: 0;
+  z-index: 10001;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background: rgba(12,16,26,.55);
+  opacity: 0;
+  transition: opacity .2s ease;
+}
+
+.terms-modal-overlay.is-visible {
+  opacity: 1;
+}
+
+.terms-modal {
+  width: min(28rem, 100%);
+  padding: 1.75rem 1.6rem 1.5rem;
+  border: 1px solid var(--tm-rule);
+  border-radius: 16px;
+  background: var(--tm-card);
+  color: var(--tm-ink);
+  box-shadow: 0 24px 64px rgba(0,0,0,.32);
+  transform: translateY(.5rem) scale(.99);
+  transition: transform .22s ease;
+}
+
+.terms-modal-overlay.is-visible .terms-modal {
+  transform: translateY(0) scale(1);
+}
+
+.terms-modal-title {
+  margin-bottom: .7rem;
+  font-family: var(--font-heading);
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: -.02em;
+  line-height: 1.25;
+}
+
+.terms-modal-desc {
+  margin-bottom: .9rem;
+  color: var(--tm-muted);
+  font-size: .9rem;
+  line-height: 1.65;
+}
+
+.terms-modal-desc a {
+  color: var(--tm-ink);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.terms-modal-desc a:hover {
+  color: var(--tm-btn);
+}
+
+.terms-modal-note {
+  margin-bottom: 1.4rem;
+  padding: .7rem .8rem;
+  border-left: 3px solid var(--tm-rule);
+  background: #f7f5f1;
+  color: var(--tm-muted);
+  font-size: .8rem;
+  line-height: 1.55;
+}
+
+.terms-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: .6rem;
+}
+
+.terms-modal-cancel,
+.terms-modal-ok {
+  padding: .6rem 1.1rem;
+  border-radius: 100px;
+  font-family: inherit;
+  font-size: .82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity .2s, transform .2s;
+}
+
+.terms-modal-cancel {
+  border: 1px solid var(--tm-rule);
+  background: transparent;
+  color: var(--tm-muted);
+}
+
+.terms-modal-cancel:hover {
+  color: var(--tm-ink);
+}
+
+.terms-modal-ok {
+  border: none;
+  background: var(--tm-btn);
+  color: var(--tm-on-btn);
+}
+
+.terms-modal-cancel:hover,
+.terms-modal-ok:hover {
+  transform: translateY(-1px);
+}
+
+.terms-modal-cancel:focus-visible,
+.terms-modal-ok:focus-visible,
+.terms-modal-desc a:focus-visible {
+  outline: 2px solid var(--tm-btn);
+  outline-offset: 2px;
+}
+
+html.dark .terms-modal-overlay {
+  --tm-ink: #E4E7EC;
+  --tm-muted: #A2A9B4;
+  --tm-card: #151B2B;
+  --tm-rule: #2E3644;
+  --tm-btn: #F0B63F;
+  --tm-on-btn: #070A14;
+}
+
+html.dark .terms-modal-note {
+  background: #1B2231;
+}
+
 
 @media (prefers-reduced-motion: reduce) {
   .theme-toggle,
