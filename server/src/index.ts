@@ -4,6 +4,7 @@ import cors from "cors";
 import path from "path";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
+import multer from "multer";
 import authRoutes from "./routes/auth";
 import eventosRoutes from "./routes/eventos";
 import projetosRoutes from "./routes/projetos";
@@ -19,7 +20,8 @@ import { closePool } from "./lib/db";
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-app.use(cors());
+// O site e a API usam a mesma origem; só APP_URL pode fazer chamadas de outra origem.
+app.use(cors({ origin: new URL(process.env.APP_URL || "http://localhost:3001").origin }));
 app.use(express.json());
 
 // Security headers
@@ -65,9 +67,14 @@ app.use("/api/contato", contatoRoutes);
 // Central error handler (erros async não tratados caem aqui via ah())
 app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   if (res.headersSent) return;
-  const status = (err as any)?.status ?? 500;
+  const error = err as { status?: number; message?: string };
+  const status = err instanceof multer.MulterError
+    ? err.code === "LIMIT_FILE_SIZE" ? 413 : 400
+    : Number.isInteger(error?.status) && error.status! >= 400 && error.status! < 500
+      ? error.status!
+      : 500;
   if (status >= 500) logError("nao-tratado", err);
-  res.status(status).json({ message: (err as any)?.message || "Erro interno do servidor" });
+  res.status(status).json({ message: status >= 500 ? "Erro interno do servidor" : error.message || "Requisição inválida" });
 });
 
 // SPA fallback (serve index.html for all non-API, non-file routes)

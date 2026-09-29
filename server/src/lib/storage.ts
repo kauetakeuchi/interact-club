@@ -62,21 +62,28 @@ export async function deleteImage(imageUrl: string | null | undefined): Promise<
 
 export function deleteLocalFile(imageUrl: string | null | undefined) {
   if (!imageUrl) return;
-  if (!imageUrl.startsWith("/uploads/")) return;
+  if (!/^\/uploads\/[A-Za-z0-9_-]+\.(?:jpe?g|png|webp|gif)$/i.test(imageUrl)) return;
   try {
-    fs.unlinkSync(path.join(__dirname, "../../../public", imageUrl));
+    fs.unlinkSync(path.join(UPLOAD_DIR, path.basename(imageUrl)));
   } catch {}
 }
 
 export function extractCloudinaryPublicId(imageUrl: string | undefined): string | null {
-  if (!imageUrl) return null;
-  const match = imageUrl.match(/\/upload\/v\d+\/(.+)$/);
-  if (!match) return null;
-  const withoutQuery = match[1].split("?")[0];
-  return decodeURIComponent(withoutQuery.replace(/\.[^/.]+$/, ""));
+  if (!isCloudinaryUrl(imageUrl)) return null;
+  const url = new URL(imageUrl!);
+  const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+  const prefix = `/${cloudName}/image/upload/`;
+  if (!url.pathname.startsWith(prefix)) return null;
+  const match = url.pathname.slice(prefix.length).match(/^v\d+\/(interact-club\/[A-Za-z0-9_-]+)\.(?:jpe?g|png|webp|gif)$/i);
+  return match?.[1] ?? null;
 }
 
 export function isCloudinaryUrl(imageUrl: string | undefined): boolean {
   if (!imageUrl) return false;
-  return imageUrl.includes("cloudinary.com") || imageUrl.startsWith("https://res.cloudinary.com");
+  try {
+    const url = new URL(imageUrl);
+    return url.protocol === "https:" && url.hostname === "res.cloudinary.com";
+  } catch {
+    return false;
+  }
 }

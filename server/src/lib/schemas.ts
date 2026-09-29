@@ -16,6 +16,14 @@ const conteudoField = () =>
 const optionalText = (max: number) =>
   z.preprocess(emptyToNull, z.string().trim().max(max).nullish());
 
+const passwordSchema = z.string()
+  .min(8, "Senha deve ter no mínimo 8 caracteres")
+  .max(100, "Senha muito longa")
+  .regex(/\p{Lu}/u, "Senha deve ter pelo menos uma letra maiúscula")
+  .regex(/\p{Ll}/u, "Senha deve ter pelo menos uma letra minúscula")
+  .regex(/\p{Nd}/u, "Senha deve ter pelo menos um número")
+  .regex(/[^\p{L}\p{N}\s]/u, "Senha deve ter pelo menos um caractere especial");
+
 // ---------- Auth ----------
 
 export const loginSchema = z.object({
@@ -26,7 +34,7 @@ export const loginSchema = z.object({
 export const registerSchema = z.object({
   name: z.string().trim().min(2, "Informe seu nome").max(255),
   email: z.string().trim().toLowerCase().min(1, "Email obrigatório").email("Email inválido").max(255),
-  password: z.string().min(6, "Senha deve ter no mínimo 6 caracteres").max(100),
+  password: passwordSchema,
   phone: optionalText(50),
   birthDate: z.preprocess(emptyToNull, z.coerce.date({ message: "Data de nascimento inválida" }).nullish()),
 });
@@ -125,7 +133,7 @@ export const membroUpdateSchema = z
     role: z.enum(["MEMBER", "DIRECTOR", "ADMIN"], { message: "Função inválida" }).optional(),
     status: z.enum(["PENDING", "ACTIVE", "INACTIVE"], { message: "Status inválido" }).optional(),
     position: optionalText(255),
-    password: z.string().min(6, "Senha deve ter no mínimo 6 caracteres").max(100).optional(),
+    password: passwordSchema.optional(),
   })
   .refine((obj) => Object.values(obj).some((v) => v !== undefined), {
     message: "Nenhum campo para atualizar",

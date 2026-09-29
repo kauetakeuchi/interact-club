@@ -1,46 +1,33 @@
 import { Router, Response } from "express";
 import multer from "multer";
 import path from "path";
-import fs from "fs";
+import fs from "fs/promises";
+import crypto from "crypto";
 import { requireAdmin } from "../middleware/auth";
 import { UPLOAD_DIR, isCloudinaryEnabled, uploadToCloudinary } from "../lib/storage";
+import { imageExtension } from "../lib/image";
 import { logError } from "../lib/logger";
 
 const router = Router();
-
-const storage = multer.diskStorage({
-  destination: (_req: any, _file: any, cb: any) => cb(null, UPLOAD_DIR),
-  filename: (_req: any, file: any, cb: any) => {
-    const ext = path.extname(file.originalname);
-    cb(null, `${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`);
-  },
-});
-
 const upload = multer({
-  storage,
-  limits: { fileSize: 5 * 1024 * 1024 },
-  fileFilter: (_req: any, file: any, cb: any) => {
-    if (/^image\/(jpeg|png|webp|gif)$/.test(file.mimetype)) return cb(null, true);
-    cb(new Error("Apenas imagens JPEG, PNG, WebP ou GIF são permitidas"));
-  },
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024, files: 1 },
 });
 
-router.post("/", requireAdmin, upload.single("file"), async (req: any, res: Response) => {
-  try {
-    if (!req.file) return res.status(400).json({ message: "Arquivo obrigatório" });
+router.post("/", requireAdmin, upload.single("file"), async (req, res: Response) => {
+  if (!req.file) return res.status(400).json({ message: "Arquivo obrigatório" });
+  const extension = imageExtension(req.file.buffer);
+  if (!extension) return res.status(400).json({ message: "Envie uma imagem JPEG, PNG, WebP ou GIF válida" });
 
+  const fileName = crypto.randomUUID();
+  try {
     if (isCloudinaryEnabled()) {
-      const buffer = fs.readFileSync(req.file.path);
-      const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-      try {
-        const { url } = await uploadToCloudinary(buffer, fileName);
-        return res.json({ url });
-      } finally {
-        fs.unlinkSync(req.file.path);
-      }
+      const { url } = await uploadToCloudinary(req.file.buffer, fileName);
+      return res.json({ url });
     }
 
-    return res.json({ url: `/uploads/${req.file.filename}` });
+    await fs.writeFile(path.join(UPLOAD_DIR, fileName + extension), req.file.buffer, { flag: "wx" });
+    return res.json({ url: `/uploads/${fileName}${extension}` });
   } catch (err) {
     logError("upload", err);
     return res.status(500).json({ message: "Erro ao fazer upload" });

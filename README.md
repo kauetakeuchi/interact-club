@@ -34,7 +34,7 @@ Copie `server/.env.example` para `server/.env` e preencha com seus valores:
 
 ```env
 DATABASE_URL="mysql://root:@localhost:3306/interact_club"
-JWT_SECRET="troque-por-um-segredo-forte"
+JWT_SECRET=""
 PORT=3001
 APP_URL="http://localhost:3001"
 
@@ -51,6 +51,16 @@ CLOUDINARY_API_SECRET=""
 ```
 
 Sem as variáveis do Cloudinary, o upload continua funcionando com armazenamento local em `public/uploads/`.
+
+Gere um segredo JWT único antes de iniciar o servidor:
+
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
+
+Sem `JWT_SECRET` com pelo menos 32 bytes, o servidor não inicia. Ao trocar esse segredo, todas as sessões existentes precisam entrar novamente.
+
+Novas senhas precisam ter pelo menos 8 caracteres, incluindo uma letra maiúscula, uma minúscula, um número e um caractere especial. A mesma regra vale quando um administrador troca a senha de um membro.
 
 As variáveis de email são necessárias para novos cadastros: a conta só pode entrar depois que o usuário clicar no link recebido. Em produção, defina `APP_URL` com o endereço público do site (por exemplo, `https://interact.exemplo.org`).
 
@@ -97,9 +107,15 @@ Acesse em http://localhost:3001.
 
 Para popular o banco com contas de acesso e conteúdo de exemplo (notícias, projetos, eventos e avisos):
 
-```bash
+No PowerShell, habilite explicitamente o seed somente para esta execução local:
+
+```powershell
+$env:ALLOW_DEMO_SEED="true"
 npm run seed
+Remove-Item Env:ALLOW_DEMO_SEED
 ```
+
+O seed é bloqueado em produção. Nunca publique as contas de demonstração com as senhas abaixo.
 
 O seed é **idempotente** — pode ser rodado várias vezes sem duplicar dados.
 

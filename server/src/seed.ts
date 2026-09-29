@@ -10,7 +10,11 @@ dotenv.config({ path: path.resolve(__dirname, "../.env") });
 const dias = (n: number) => new Date(Date.now() + n * 24 * 60 * 60 * 1000);
 
 async function main() {
-  const url = new URL(process.env.DATABASE_URL || "mysql://root:@localhost:3306/interact_club");
+  if (process.env.NODE_ENV === "production" || process.env.ALLOW_DEMO_SEED !== "true") {
+    throw new Error("Seed de demonstração bloqueado. Use ALLOW_DEMO_SEED=true apenas em ambiente local.");
+  }
+  if (!process.env.DATABASE_URL) throw new Error("DATABASE_URL não definido. Configure server/.env antes de executar o seed.");
+  const url = new URL(process.env.DATABASE_URL);
   const pool = mysql.createPool({
     host: url.hostname,
     port: parseInt(url.port || "3306"),

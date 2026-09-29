@@ -1,15 +1,22 @@
 import jwt from "jsonwebtoken";
 
-const SECRET = process.env.JWT_SECRET || "interact-club-jwt-secret-2026";
-
-if (!process.env.JWT_SECRET) {
-  console.warn("[interact-club] JWT_SECRET não definido no .env — usando segredo padrão (NÃO use em produção)");
+function getSecret(): string {
+  const secret = process.env.JWT_SECRET?.trim();
+  if (!secret || Buffer.byteLength(secret, "utf8") < 32) {
+    throw new Error("JWT_SECRET deve ter pelo menos 32 bytes aleatórios. Configure server/.env antes de iniciar.");
+  }
+  return secret;
 }
+const SECRET = getSecret();
 
-export function signToken(payload: { id: string; role: string; name: string; email: string }) {
-  return jwt.sign(payload, SECRET, { expiresIn: "7d" });
+export function signToken(id: string) {
+  return jwt.sign({}, SECRET, { subject: id, expiresIn: "7d", algorithm: "HS256" });
 }
 
 export function verifyToken(token: string) {
-  return jwt.verify(token, SECRET) as { id: string; role: string; name: string; email: string };
+  const payload = jwt.verify(token, SECRET, { algorithms: ["HS256"] });
+  if (typeof payload === "string" || !payload.sub || typeof payload.sub !== "string") {
+    throw new Error("Token inválido");
+  }
+  return payload.sub;
 }

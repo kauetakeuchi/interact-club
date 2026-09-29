@@ -36,7 +36,7 @@ router.post("/login", validate(loginSchema), ah(async (req: Request, res: Respon
     });
   }
 
-  const token = signToken({ id: user.id, role: user.role, name: user.name, email: user.email });
+  const token = signToken(user.id);
   return res.json({
     token,
     user: {

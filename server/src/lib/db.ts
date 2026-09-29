@@ -1,7 +1,13 @@
 import mysql from "mysql2/promise";
 
 function parseDbUrl(): { host: string; port: number; user: string; password: string; database: string } {
-  const url = new URL(process.env.DATABASE_URL || "mysql://root:@localhost:3306/interact_club");
+  if (!process.env.DATABASE_URL) {
+    throw new Error("DATABASE_URL não definido. Configure server/.env antes de iniciar.");
+  }
+  const url = new URL(process.env.DATABASE_URL);
+  if (url.protocol !== "mysql:" || !url.hostname || !url.pathname.slice(1)) {
+    throw new Error("DATABASE_URL deve ser uma URL MySQL válida.");
+  }
   return {
     host: url.hostname,
     port: parseInt(url.port || "3306"),

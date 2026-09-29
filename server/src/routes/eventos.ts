@@ -1,6 +1,6 @@
 import { Router, Response } from "express";
 import { query, getOne, exec, withTransaction } from "../lib/db";
-import { AuthRequest, requireAuth } from "../middleware/auth";
+import { AuthRequest, requireAuth, optionalAdmin } from "../middleware/auth";
 import { validate } from "../lib/validation";
 import { inscricaoSchema, cancelamentoSchema } from "../lib/schemas";
 import { ah } from "../lib/asyncHandler";
@@ -21,8 +21,9 @@ router.get("/", ah(async (_req: AuthRequest, res: Response) => {
   return res.json({ futuros, passados });
 }));
 
-router.get("/:id", ah(async (req: AuthRequest, res: Response) => {
-  const evento = await getOne<any>(`${EVENTO_COM_INSCRICOES} WHERE e.id = ?`, [req.params.id]);
+router.get("/:id", optionalAdmin, ah(async (req: AuthRequest, res: Response) => {
+  const visibilityFilter = req.user?.role === "ADMIN" ? "" : " AND e.isPublic = 1";
+  const evento = await getOne<any>(`${EVENTO_COM_INSCRICOES} WHERE e.id = ?${visibilityFilter}`, [req.params.id]);
   if (!evento) return res.status(404).json({ message: "Evento não encontrado" });
   return res.json(evento);
 }));
@@ -33,7 +34,7 @@ router.post("/inscrever", requireAuth, validate(inscricaoSchema), ah(async (req:
     await withTransaction(async (conn) => {
       // Lock na linha do evento garante que vagas não sejam estouradas por inscrições simultâneas
       const [rows] = await conn.execute(
-        "SELECT `date`, maxParticipants FROM `event` WHERE id = ? FOR UPDATE",
+        "SELECT `date`, maxParticipants FROM `event` WHERE id = ? AND isPublic = 1 FOR UPDATE",
         [eventId]
       );
       const evento = (rows as any[])[0];
