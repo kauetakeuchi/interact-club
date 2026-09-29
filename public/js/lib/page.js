@@ -1,6 +1,7 @@
 import { auth, dashboard } from "./index.js";
 import { Layout } from "./Layout.js";
 import { Navbar } from "./Navbar.js";
+import { showPrivacyNotice } from "./PrivacyNotice.js";
 
 /**
  * Bootstrap padrão das páginas públicas: injeta navbar/footer
@@ -9,4 +10,5 @@ import { Navbar } from "./Navbar.js";
 export function initPublicPage() {
     new Layout(auth).renderPublic();
     new Navbar(auth, () => dashboard.toggle()).init();
+    showPrivacyNotice();
 }
