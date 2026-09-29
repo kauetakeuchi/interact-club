@@ -1,6 +1,6 @@
 <!DOCTYPE html><html lang="pt-BR">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg"><title>Login - Interact Club</title><link rel="stylesheet" href="/css/style.css"></head>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg"><title>Login - Interact Club</title><script>try{const t=localStorage.getItem('theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.classList.add('dark');}catch(e){}</script><link rel="stylesheet" href="/css/style.css"></head>
 <body>
 <div id="page-content" style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem;">
   <div style="width:100%;max-width:28rem;">
@@ -21,6 +21,7 @@
   </div>
 </div>
 <div id="toast-container" class="toast-container"></div>
+<script type="module" src="/js/lib/Theme.js"></script>
 <script type="module" src="/js/pages/login.js"></script>
 </body>
 </html>
