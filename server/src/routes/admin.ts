@@ -6,6 +6,7 @@ import { validate } from "../lib/validation";
 import { eventoSchema, projetoSchema, noticiaSchema, avisoSchema } from "../lib/schemas";
 import { deleteImage } from "../lib/storage";
 import { logError } from "../lib/logger";
+import { notifyContentPublishedAsync, buildContentUrl } from "../lib/notify";
 
 const router = Router();
 router.use(requireAdmin);
@@ -58,6 +59,13 @@ router.post("/eventos", validate(eventoSchema), async (req: AuthRequest, res: Re
       "SELECT e.*, (SELECT COUNT(*) FROM eventsignup WHERE eventId = e.id) as signupCount FROM `event` e WHERE e.id = ?",
       [id]
     );
+    if (isPublic ?? true) {
+      notifyContentPublishedAsync("evento", {
+        title,
+        summary: description,
+        url: buildContentUrl("evento", id),
+      });
+    }
     return res.status(201).json(evento);
   } catch (err) {
     logError("admin/eventos:create", err);
@@ -68,13 +76,23 @@ router.post("/eventos", validate(eventoSchema), async (req: AuthRequest, res: Re
 router.put("/eventos/:id", validate(eventoSchema), async (req: AuthRequest, res: Response) => {
   try {
     const { title, description, date, location, imageUrl, isPublic, maxParticipants } = req.body;
-    const antigo = await getOne<{ imageUrl: string | null }>("SELECT imageUrl FROM `event` WHERE id = ?", [req.params.id]);
+    const antigo = await getOne<{ imageUrl: string | null; isPublic: number | boolean | null }>(
+      "SELECT imageUrl, isPublic FROM `event` WHERE id = ?",
+      [req.params.id]
+    );
     if (antigo?.imageUrl && antigo.imageUrl !== imageUrl) await deleteImage(antigo.imageUrl);
     await exec(
       "UPDATE `event` SET title=?, description=?, `date`=?, location=?, imageUrl=?, isPublic=?, maxParticipants=? WHERE id=?",
       [title, description, date, location ?? null, imageUrl ?? null, isPublic ?? true, maxParticipants ?? null, req.params.id]
     );
     const evento = await getOne<any>("SELECT * FROM `event` WHERE id = ?", [req.params.id]);
+    if (antigo && !antigo.isPublic && (isPublic ?? true)) {
+      notifyContentPublishedAsync("evento", {
+        title,
+        summary: description,
+        url: buildContentUrl("evento", req.params.id),
+      });
+    }
     return res.json(evento);
   } catch (err) {
     logError("admin/eventos:update", err);
@@ -111,11 +129,19 @@ router.get("/projetos/:id", async (req: AuthRequest, res: Response) => {
 router.post("/projetos", validate(projetoSchema), async (req: AuthRequest, res: Response) => {
   try {
     const { title, description, status, startDate, endDate, imageUrl, isPublic } = req.body;
+    const id = crypto.randomUUID();
     await exec(
-      "INSERT INTO `project` (id, title, description, `status`, startDate, endDate, imageUrl, isPublic) VALUES (UUID(), ?, ?, ?, ?, ?, ?, ?)",
-      [title, description, status, startDate ?? null, endDate ?? null, imageUrl ?? null, isPublic ?? true]
+      "INSERT INTO `project` (id, title, description, `status`, startDate, endDate, imageUrl, isPublic) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+      [id, title, description, status, startDate ?? null, endDate ?? null, imageUrl ?? null, isPublic ?? true]
     );
-    return res.status(201).json({ success: true });
+    if (isPublic ?? true) {
+      notifyContentPublishedAsync("projeto", {
+        title,
+        summary: description,
+        url: buildContentUrl("projeto", id),
+      });
+    }
+    return res.status(201).json({ success: true, id });
   } catch (err) {
     logError("admin/projetos:create", err);
     return res.status(500).json({ message: "Erro ao criar projeto" });
@@ -125,12 +151,22 @@ router.post("/projetos", validate(projetoSchema), async (req: AuthRequest, res: 
 router.put("/projetos/:id", validate(projetoSchema), async (req: AuthRequest, res: Response) => {
   try {
     const { title, description, status, startDate, endDate, imageUrl, isPublic } = req.body;
-    const antigo = await getOne<{ imageUrl: string | null }>("SELECT imageUrl FROM `project` WHERE id = ?", [req.params.id]);
+    const antigo = await getOne<{ imageUrl: string | null; isPublic: number | boolean | null }>(
+      "SELECT imageUrl, isPublic FROM `project` WHERE id = ?",
+      [req.params.id]
+    );
     if (antigo?.imageUrl && antigo.imageUrl !== imageUrl) await deleteImage(antigo.imageUrl);
     await exec(
       "UPDATE `project` SET title=?, description=?, `status`=?, startDate=?, endDate=?, imageUrl=?, isPublic=? WHERE id=?",
       [title, description, status, startDate ?? null, endDate ?? null, imageUrl ?? null, isPublic ?? true, req.params.id]
     );
+    if (antigo && !antigo.isPublic && (isPublic ?? true)) {
+      notifyContentPublishedAsync("projeto", {
+        title,
+        summary: description,
+        url: buildContentUrl("projeto", req.params.id),
+      });
+    }
     return res.json({ success: true });
   } catch (err) {
     logError("admin/projetos:update", err);
@@ -178,6 +214,13 @@ router.post("/noticias", validate(noticiaSchema), async (req: AuthRequest, res: 
       "INSERT INTO newsarticle (id, title, slug, content, excerpt, imageUrl, category, published, authorId) VALUES (UUID(), ?, ?, ?, ?, ?, ?, ?, ?)",
       [title, slug, content, excerpt ?? null, imageUrl ?? null, category ?? null, published ?? false, req.user!.id]
     );
+    if (published ?? false) {
+      notifyContentPublishedAsync("noticia", {
+        title,
+        summary: excerpt ?? content,
+        url: buildContentUrl("noticia", slug),
+      });
+    }
     return res.status(201).json({ success: true });
   } catch (err) {
     logError("admin/noticias:create", err);
@@ -193,12 +236,22 @@ router.put("/noticias/:id", validate(noticiaSchema), async (req: AuthRequest, re
       req.params.id,
     ]);
     if (existing) return res.status(409).json({ message: "Slug já existe" });
-    const antigo = await getOne<{ imageUrl: string | null }>("SELECT imageUrl FROM newsarticle WHERE id = ?", [req.params.id]);
+    const antigo = await getOne<{ imageUrl: string | null; published: number | boolean | null }>(
+      "SELECT imageUrl, published FROM newsarticle WHERE id = ?",
+      [req.params.id]
+    );
     if (antigo?.imageUrl && antigo.imageUrl !== imageUrl) await deleteImage(antigo.imageUrl);
     await exec(
       "UPDATE newsarticle SET title=?, slug=?, content=?, excerpt=?, imageUrl=?, category=?, published=? WHERE id=?",
       [title, slug, content, excerpt ?? null, imageUrl ?? null, category ?? null, published ?? false, req.params.id]
     );
+    if (antigo && !antigo.published && (published ?? false)) {
+      notifyContentPublishedAsync("noticia", {
+        title,
+        summary: excerpt ?? content,
+        url: buildContentUrl("noticia", slug),
+      });
+    }
     return res.json({ success: true });
   } catch (err) {
     logError("admin/noticias:update", err);
