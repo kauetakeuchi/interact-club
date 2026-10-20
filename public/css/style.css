@@ -3369,7 +3369,8 @@ tbody tr:nth-child(even):hover {
    ============================================ */
 .toast-container {
   position: fixed;
-  top: 1rem;
+  /* Abaixo da navbar (4rem) e do toggle flutuante de tema (top 1rem + 36px) */
+  top: calc(4rem + .75rem);
   right: 1rem;
   z-index: 999;
   display: flex;
