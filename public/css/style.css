@@ -8058,19 +8058,27 @@ html.dark .about-page .sobre-map-frame {
   border-color: var(--border) !important;
 }
 
-/* Scrollbar dark */
-html.dark ::-webkit-scrollbar {
+/* Scrollbar — mesma largura nos dois temas para o layout não deslocar */
+::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
-html.dark ::-webkit-scrollbar-track {
+::-webkit-scrollbar-track {
   background: var(--muted);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #C9CFDA;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #AEB6C4;
 }
 
 html.dark ::-webkit-scrollbar-thumb {
   background: #2A3350;
-  border-radius: 4px;
 }
 
 html.dark ::-webkit-scrollbar-thumb:hover {
