@@ -8,6 +8,7 @@ export interface ContentNotification {
   title: string;
   summary?: string | null;
   url?: string | null;
+  imageUrl?: string | null;
 }
 
 const BCC_BATCH_SIZE = 50;

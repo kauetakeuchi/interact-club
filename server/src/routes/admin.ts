@@ -63,6 +63,7 @@ router.post("/eventos", validate(eventoSchema), async (req: AuthRequest, res: Re
       notifyContentPublishedAsync("evento", {
         title,
         summary: description,
+        imageUrl,
         url: buildContentUrl("evento", id),
       });
     }
@@ -90,6 +91,7 @@ router.put("/eventos/:id", validate(eventoSchema), async (req: AuthRequest, res:
       notifyContentPublishedAsync("evento", {
         title,
         summary: description,
+        imageUrl,
         url: buildContentUrl("evento", req.params.id),
       });
     }
@@ -138,6 +140,7 @@ router.post("/projetos", validate(projetoSchema), async (req: AuthRequest, res: 
       notifyContentPublishedAsync("projeto", {
         title,
         summary: description,
+        imageUrl,
         url: buildContentUrl("projeto", id),
       });
     }
@@ -164,6 +167,7 @@ router.put("/projetos/:id", validate(projetoSchema), async (req: AuthRequest, re
       notifyContentPublishedAsync("projeto", {
         title,
         summary: description,
+        imageUrl,
         url: buildContentUrl("projeto", req.params.id),
       });
     }
@@ -218,6 +222,7 @@ router.post("/noticias", validate(noticiaSchema), async (req: AuthRequest, res: 
       notifyContentPublishedAsync("noticia", {
         title,
         summary: excerpt ?? content,
+        imageUrl,
         url: buildContentUrl("noticia", slug),
       });
     }
@@ -249,6 +254,7 @@ router.put("/noticias/:id", validate(noticiaSchema), async (req: AuthRequest, re
       notifyContentPublishedAsync("noticia", {
         title,
         summary: excerpt ?? content,
+        imageUrl,
         url: buildContentUrl("noticia", slug),
       });
     }
