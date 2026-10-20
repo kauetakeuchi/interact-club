@@ -1,6 +1,11 @@
 import nodemailer, { Transporter } from "nodemailer";
+import type Mail from "nodemailer/lib/mailer";
+import { stat } from "fs/promises";
+import path from "path";
+import { UPLOAD_DIR } from "./storage";
 
 let transporter: Transporter | null = null;
+let warnedLocalAppUrl = false;
 
 const providerPresets = {
   gmail: { host: "smtp.gmail.com", port: 465, secure: true },
@@ -86,6 +91,43 @@ export function resolveContentImageUrl(imageUrl: string | null | undefined): str
   }
 }
 
+const LOCAL_UPLOAD_PATTERN = /^\/uploads\/([A-Za-z0-9_-]+\.(?:jpe?g|png|webp|gif))$/i;
+
+async function isFile(filePath: string): Promise<boolean> {
+  try {
+    return (await stat(filePath)).isFile();
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Uploads locais não são acessíveis por servidores de email (ex.: proxy de
+ * imagens do Gmail), pois APP_URL pode apontar para localhost. Nesses casos a
+ * imagem é embutida na mensagem como anexo inline (CID).
+ */
+async function resolveLocalUpload(imageUrl: string | null | undefined): Promise<{ fileName: string; filePath: string } | null> {
+  const match = imageUrl?.trim().match(LOCAL_UPLOAD_PATTERN);
+  if (!match) return null;
+  const fileName = match[1];
+  const filePath = path.join(UPLOAD_DIR, fileName);
+  return (await isFile(filePath)) ? { fileName, filePath } : null;
+}
+
+function warnIfLocalAppUrl(): void {
+  if (warnedLocalAppUrl) return;
+  try {
+    const { hostname } = new URL(appBaseUrl());
+    if (hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1" || hostname === "0.0.0.0") {
+      warnedLocalAppUrl = true;
+      console.warn(
+        "[email] APP_URL aponta para localhost: os links do email não abrirão em outros dispositivos. " +
+          "Configure APP_URL com o endereço público do site."
+      );
+    }
+  } catch {}
+}
+
 export async function sendVerificationEmail(to: string, name: string, token: string): Promise<void> {
   const appUrl = appBaseUrl();
   const verificationUrl = `${appUrl}/verificar-email?token=${encodeURIComponent(token)}`;
@@ -132,13 +174,32 @@ export async function sendContentNotificationEmail(
   bcc: string[]
 ): Promise<void> {
   if (bcc.length === 0) return;
+  warnIfLocalAppUrl();
+
   const label = contentLabels[kind];
   const safeTitle = escapeHtml(content.title);
   const safeSummary = content.summary ? escapeHtml(content.summary.slice(0, 500)) : "";
   const safeUrl = content.url ? escapeHtml(content.url) : "";
   const imageUrl = resolveContentImageUrl(content.imageUrl);
-  const safeImageUrl = imageUrl ? escapeHtml(imageUrl) : "";
-  const logoUrl = escapeHtml(`${appBaseUrl()}/logo-interact.png`);
+  const localImage = await resolveLocalUpload(content.imageUrl);
+  const imageCid = "conteudo-notificacao";
+  const attachments: Mail.Attachment[] = [];
+
+  let safeImageUrl = "";
+  if (localImage) {
+    attachments.push({ filename: localImage.fileName, path: localImage.filePath, cid: imageCid });
+    safeImageUrl = escapeHtml(`cid:${imageCid}`);
+  } else if (imageUrl) {
+    safeImageUrl = escapeHtml(imageUrl);
+  }
+
+  const logoCid = "logo-interact-club";
+  const localLogoPath = path.join(__dirname, "../../../public/logo-interact.png");
+  const hasLocalLogo = await isFile(localLogoPath);
+  if (hasLocalLogo) {
+    attachments.push({ filename: "logo-interact.png", path: localLogoPath, cid: logoCid });
+  }
+  const logoUrl = escapeHtml(hasLocalLogo ? `cid:${logoCid}` : `${appBaseUrl()}/logo-interact.png`);
   const from = env("SMTP_FROM");
 
   const image = safeImageUrl
@@ -155,12 +216,13 @@ export async function sendContentNotificationEmail(
     to: from,
     bcc,
     subject: `${label.subject}: ${content.title}`.slice(0, 200),
+    attachments,
     text: [
       label.heading,
       "",
       content.title,
       content.summary || "",
-      imageUrl ? `Imagem: ${imageUrl}` : "",
+      localImage ? "Imagem: anexada a este email" : imageUrl ? `Imagem: ${imageUrl}` : "",
       content.url ? `Acesse: ${content.url}` : "",
     ]
       .filter(Boolean)
