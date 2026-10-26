@@ -26,7 +26,7 @@ export function buildContentUrl(kind: ContentKind, identifier: string): string {
 
 export async function getNotificationRecipients(): Promise<string[]> {
   const rows = await query<{ email: string }[]>(
-    "SELECT email FROM `user` WHERE `status` = 'ACTIVE' AND emailVerifiedAt IS NOT NULL"
+    "SELECT email FROM `user` WHERE `status` = 'ACTIVE' AND emailVerifiedAt IS NOT NULL AND emailUpdatesOptIn = 1"
   );
   return rows.map((r) => r.email).filter(Boolean);
 }

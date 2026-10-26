@@ -19,6 +19,8 @@ CREATE TABLE IF NOT EXISTS `user` (
   emailVerifiedAt TIMESTAMP NULL,
   emailVerificationTokenHash CHAR(64) NULL,
   emailVerificationExpiresAt DATETIME NULL,
+  emailUpdatesOptIn BOOLEAN NOT NULL DEFAULT FALSE,
+  emailUpdatesOptInAt DATETIME NULL,
   createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   INDEX idx_user_email_verification_token (emailVerificationTokenHash)

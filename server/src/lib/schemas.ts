@@ -35,6 +35,7 @@ export const registerSchema = z.object({
   name: z.string().trim().min(2, "Informe seu nome").max(255),
   email: z.string().trim().toLowerCase().min(1, "Email obrigatório").email("Email inválido").max(255),
   password: passwordSchema,
+  emailUpdatesOptIn: z.boolean().default(false),
   phone: optionalText(50),
   birthDate: z.preprocess(emptyToNull, z.coerce.date({ message: "Data de nascimento inválida" }).nullish()),
 });
@@ -53,6 +54,7 @@ export const perfilSchema = z.object({
   bio: optionalText(2000),
   phone: optionalText(50),
   avatarUrl: optionalText(500),
+  emailUpdatesOptIn: z.boolean().optional(),
 });
 
 // ---------- Eventos ----------

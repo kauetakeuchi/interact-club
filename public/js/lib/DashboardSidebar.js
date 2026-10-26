@@ -151,6 +151,7 @@ export class DashboardSidebar {
                         position: document.getElementById("sd-pf-position").value || null,
                         bio: document.getElementById("sd-pf-bio").value || null,
                         phone: document.getElementById("sd-pf-phone").value || null,
+                        emailUpdatesOptIn: document.getElementById("sd-pf-email-updates").checked,
                     };
                     await this.api.put("/auth/perfil", data);
                     this.toast.show("Perfil atualizado!");
@@ -205,6 +206,7 @@ export class DashboardSidebar {
         <div class="sd-field"><label>Cargo</label><input type="text" id="sd-pf-position" value="${this.esc(user.position || "")}" placeholder="Seu cargo"></div>
         <div class="sd-field"><label>Bio</label><textarea id="sd-pf-bio" placeholder="Fale sobre voce..." rows="3">${this.esc(user.bio || "")}</textarea></div>
         <div class="sd-field"><label>Telefone</label><input type="text" id="sd-pf-phone" value="${this.esc(user.phone || "")}" placeholder="(11) 99999-9999"></div>
+        <div class="sd-field email-choice"><label class="email-choice__label" for="sd-pf-email-updates"><input type="checkbox" id="sd-pf-email-updates" ${user.emailUpdatesOptIn ? "checked" : ""}><span><strong>Receber novidades por email</strong><small>Projetos, eventos e notícias. Desmarque e salve para parar de receber.</small></span></label></div>
         <button type="submit" class="btn btn-primary btn-full">Salvar</button>
       </form>
     `;

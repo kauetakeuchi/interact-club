@@ -2753,6 +2753,40 @@ input, textarea, select {
   margin-bottom: .375rem;
 }
 
+.email-choice .email-choice__label {
+  display: flex;
+  align-items: flex-start;
+  gap: .75rem;
+  padding: .875rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  cursor: pointer;
+  font-size: .875rem;
+  line-height: 1.4;
+}
+
+.email-choice .email-choice__label input[type="checkbox"] {
+  width: 1rem;
+  height: 1rem;
+  flex: none;
+  margin: .125rem 0 0;
+  padding: 0;
+  accent-color: var(--primary);
+}
+
+.email-choice .email-choice__label strong,
+.email-choice .email-choice__label small {
+  display: block;
+}
+
+.email-choice .email-choice__label small {
+  margin-top: .2rem;
+  color: var(--text-muted);
+  font-size: .75rem;
+  font-weight: 400;
+}
+
 .form-control {
   width: 100%;
   padding: .75rem 1rem;

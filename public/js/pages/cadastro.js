@@ -25,7 +25,8 @@ document.getElementById("register-form")?.addEventListener("submit", async (e) =
         const phone = document.getElementById("reg-phone").value;
         const birthDate = document.getElementById("reg-birth").value;
         const password = document.getElementById("reg-password").value;
-        await auth.register(name, email, password, phone, birthDate);
+        const emailUpdatesOptIn = document.getElementById("reg-email-updates").checked;
+        await auth.register(name, email, password, phone, birthDate, emailUpdatesOptIn);
         toast.show("Enviamos um link de confirmação para seu email.");
         setTimeout(() => {
             window.location.href = `/verificar-email?sent=1&email=${encodeURIComponent(email)}`;

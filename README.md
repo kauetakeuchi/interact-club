@@ -82,6 +82,14 @@ Se o banco já existia antes da verificação de email, execute uma vez:
 server/migrations/002_email_verification.sql
 ```
 
+Em bancos já existentes, execute também uma vez a atualização da preferência de novidades **antes de publicar esta versão**:
+
+```
+server/migrations/003_email_updates_consent.sql
+```
+
+Novos cadastros podem escolher, antes do email de confirmação, se querem receber novidades de projetos, eventos e notícias. A opção começa desmarcada e pode ser alterada no perfil. Contas existentes ficam com a opção desligada após a atualização do banco; só contas ativas, com email confirmado e opção ligada recebem novidades. O email necessário para confirmar o cadastro continua sendo enviado independentemente dessa escolha.
+
 ### 3. Instale as dependências
 
 As dependências ficam na pasta `server/`:

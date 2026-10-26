@@ -224,6 +224,7 @@ export async function sendContentNotificationEmail(
       content.summary || "",
       localImage ? "Imagem: anexada a este email" : imageUrl ? `Imagem: ${imageUrl}` : "",
       content.url ? `Acesse: ${content.url}` : "",
+      "Você recebe estas novidades porque escolheu recebê-las. Para parar, desmarque a opção de novidades no seu perfil.",
     ]
       .filter(Boolean)
       .join("\n"),
@@ -242,7 +243,7 @@ export async function sendContentNotificationEmail(
               ${safeUrl ? `<p style="margin:24px 0 0"><a href="${safeUrl}" style="background:#17458f;color:#fff;text-decoration:none;padding:12px 20px;border-radius:6px;display:inline-block;font-weight:bold">${label.cta}</a></p>` : ""}
             </div>
           </div>
-          <p style="margin:16px 0 0;text-align:center;font-size:12px;color:#6b7280">Você recebeu este email porque é membro ativo do Interact Club.</p>
+          <p style="margin:16px 0 0;text-align:center;font-size:12px;color:#6b7280">Você recebe estas novidades porque escolheu recebê-las. Para parar, desmarque a opção de novidades no seu perfil.</p>
         </div>
       </div>
     `,

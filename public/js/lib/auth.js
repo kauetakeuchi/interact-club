@@ -40,11 +40,11 @@ export class Auth {
         this.setSession(data.token, data.user);
         return data;
     }
-    async register(name, email, password, phone, birthDate) {
+    async register(name, email, password, phone, birthDate, emailUpdatesOptIn = false) {
         const res = await fetch("/api/auth/register", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ name, email, password, phone, birthDate }),
+            body: JSON.stringify({ name, email, password, phone, birthDate, emailUpdatesOptIn }),
         });
         const data = await res.json();
         if (!res.ok) {

@@ -43,12 +43,13 @@ router.post("/login", validate(loginSchema), ah(async (req: Request, res: Respon
       id: user.id, name: user.name, email: user.email,
       role: user.role, status: user.status,
       avatarUrl: user.avatarUrl, position: user.position,
+      emailUpdatesOptIn: Boolean(user.emailUpdatesOptIn),
     },
   });
 }));
 
 router.post("/register", validate(registerSchema), ah(async (req: Request, res: Response) => {
-  const { name, email, password, phone, birthDate } = req.body;
+  const { name, email, password, phone, birthDate, emailUpdatesOptIn } = req.body;
 
   const exists = await getOne<any>("SELECT id, emailVerifiedAt FROM `user` WHERE email = ?", [email]);
   if (exists) {
@@ -67,8 +68,8 @@ router.post("/register", validate(registerSchema), ah(async (req: Request, res: 
   const verificationExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
   try {
     await exec(
-      "INSERT INTO `user` (id, name, email, passwordHash, role, `status`, phone, birthDate, emailVerificationTokenHash, emailVerificationExpiresAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-      [id, name, email, passwordHash, "MEMBER", "PENDING", phone ?? null, birthDate ?? null, verificationTokenHash, verificationExpiresAt]
+      "INSERT INTO `user` (id, name, email, passwordHash, role, `status`, phone, birthDate, emailVerificationTokenHash, emailVerificationExpiresAt, emailUpdatesOptIn, emailUpdatesOptInAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      [id, name, email, passwordHash, "MEMBER", "PENDING", phone ?? null, birthDate ?? null, verificationTokenHash, verificationExpiresAt, emailUpdatesOptIn, emailUpdatesOptIn ? new Date() : null]
     );
   } catch (err) {
     if (isDuplicateKeyError(err)) return res.status(409).json({ message: "Email já cadastrado" });
@@ -144,18 +145,19 @@ router.post("/resend-verification", validate(resendVerificationSchema), ah(async
 
 router.get("/me", requireAuth, ah(async (req: AuthRequest, res: Response) => {
   const user = await getOne(
-    "SELECT id, name, email, role, `status`, avatarUrl, `position`, bio, phone, birthDate FROM `user` WHERE id = ?",
+    "SELECT id, name, email, role, `status`, avatarUrl, `position`, bio, phone, birthDate, emailUpdatesOptIn FROM `user` WHERE id = ?",
     [req.user!.id]
   );
   return res.json(user);
 }));
 
 router.put("/perfil", requireAuth, validate(perfilSchema), ah(async (req: AuthRequest, res: Response) => {
-  const { name, bio = null, phone = null, position = null, avatarUrl = null } = req.body;
+  const { name, bio = null, phone = null, position = null, avatarUrl = null, emailUpdatesOptIn } = req.body;
+  const preference = emailUpdatesOptIn ?? null;
   try {
     await exec(
-      "UPDATE `user` SET name = ?, bio = ?, phone = ?, `position` = ?, avatarUrl = ? WHERE id = ?",
-      [name, bio, phone, position, avatarUrl, req.user!.id]
+      "UPDATE `user` SET name = ?, bio = ?, phone = ?, `position` = ?, avatarUrl = ?, emailUpdatesOptIn = COALESCE(?, emailUpdatesOptIn), emailUpdatesOptInAt = CASE WHEN ? IS NULL THEN emailUpdatesOptInAt WHEN ? = 1 THEN COALESCE(emailUpdatesOptInAt, CURRENT_TIMESTAMP) ELSE NULL END WHERE id = ?",
+      [name, bio, phone, position, avatarUrl, preference, preference, preference, req.user!.id]
     );
   } catch (err) {
     logError("auth/perfil", err);
@@ -165,6 +167,7 @@ router.put("/perfil", requireAuth, validate(perfilSchema), ah(async (req: AuthRe
   return res.json({
     id: user!.id, name: user!.name, email: user!.email, role: user!.role, status: user!.status,
     avatarUrl: user!.avatarUrl, position: user!.position, bio: user!.bio, phone: user!.phone,
+    emailUpdatesOptIn: Boolean(user!.emailUpdatesOptIn),
   });
 }));
 
