@@ -70,6 +70,13 @@ function appBaseUrl(): string {
   return (env("APP_URL") || "http://localhost:3001").replace(/\/$/, "");
 }
 
+export const DEFAULT_INTERACT_LOGO_URL =
+  "https://res.cloudinary.com/d9qauhwe/image/upload/v1793057886/logo-interact.png";
+
+export function getInteractLogoUrl(): string {
+  return env("INTERACT_LOGO_URL") || DEFAULT_INTERACT_LOGO_URL;
+}
+
 /**
  * Converte a imagem salva no conteúdo para uma URL pública absoluta.
  * Uploads locais usam /uploads/... e são servidos pelo próprio site.
@@ -133,6 +140,7 @@ export async function sendVerificationEmail(to: string, name: string, token: str
   const verificationUrl = `${appUrl}/verificar-email?token=${encodeURIComponent(token)}`;
   const safeName = escapeHtml(name);
   const safeUrl = escapeHtml(verificationUrl);
+  const logoUrl = escapeHtml(getInteractLogoUrl());
 
   await getTransporter().sendMail({
     from: env("SMTP_FROM"),
@@ -147,14 +155,21 @@ export async function sendVerificationEmail(to: string, name: string, token: str
       "Este link expira em 24 horas. Se você não fez este cadastro, ignore esta mensagem.",
     ].join("\n"),
     html: `
-      <div style="font-family:Arial,sans-serif;max-width:560px;margin:auto;color:#1f2937;line-height:1.6">
-        <h1 style="color:#17458f;font-size:24px">Confirme seu email</h1>
-        <p>Olá, ${safeName}!</p>
-        <p>Clique no botão abaixo para concluir seu cadastro no Interact Club.</p>
-        <p style="margin:28px 0">
-          <a href="${safeUrl}" style="background:#17458f;color:#fff;text-decoration:none;padding:12px 20px;border-radius:6px;display:inline-block">Confirmar meu email</a>
-        </p>
-        <p style="font-size:14px;color:#6b7280">O link expira em 24 horas. Se você não fez este cadastro, ignore esta mensagem.</p>
+      <div style="background:#f3f4f6;padding:24px 12px;font-family:Arial,sans-serif;color:#1f2937;line-height:1.6">
+        <div style="max-width:560px;margin:0 auto">
+          <div style="text-align:center;padding:0 0 18px">
+            <img src="${logoUrl}" alt="Interact Club" width="120" style="display:inline-block;width:120px;max-width:120px;height:auto;border:0">
+          </div>
+          <div style="background:#ffffff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;padding:24px">
+            <h1 style="color:#17458f;font-size:24px;margin:0 0 16px">Confirme seu email</h1>
+            <p style="margin:0 0 12px">Olá, ${safeName}!</p>
+            <p style="margin:0 0 20px">Clique no botão abaixo para concluir seu cadastro no Interact Club.</p>
+            <p style="margin:24px 0">
+              <a href="${safeUrl}" style="background:#17458f;color:#fff;text-decoration:none;padding:12px 20px;border-radius:6px;display:inline-block;font-weight:bold">Confirmar meu email</a>
+            </p>
+            <p style="font-size:14px;color:#6b7280;margin:0">Este link expira em 24 horas. Se você não fez este cadastro, ignore esta mensagem.</p>
+          </div>
+        </div>
       </div>
     `,
   });
@@ -193,13 +208,7 @@ export async function sendContentNotificationEmail(
     safeImageUrl = escapeHtml(imageUrl);
   }
 
-  const logoCid = "logo-interact-club";
-  const localLogoPath = path.join(__dirname, "../../../public/logo-interact.png");
-  const hasLocalLogo = await isFile(localLogoPath);
-  if (hasLocalLogo) {
-    attachments.push({ filename: "logo-interact.png", path: localLogoPath, cid: logoCid });
-  }
-  const logoUrl = escapeHtml(hasLocalLogo ? `cid:${logoCid}` : `${appBaseUrl()}/logo-interact.png`);
+  const logoUrl = escapeHtml(getInteractLogoUrl());
   const from = env("SMTP_FROM");
 
   const image = safeImageUrl

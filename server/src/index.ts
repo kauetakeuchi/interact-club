@@ -80,6 +80,8 @@ app.use((err: unknown, _req: express.Request, res: express.Response, _next: expr
 // SPA fallback (serve index.html for all non-API, non-file routes)
 app.get("*", (req, res) => {
   if (req.path.startsWith("/api/")) return res.status(404).json({ message: "Rota não encontrada" });
+  const ext = path.extname(req.path);
+  if (ext && ext !== ".html") return res.status(404).end();
   const publicDir = path.join(__dirname, "../../public");
   const requested = req.path === "/" ? "index.html" : req.path + ".html";
   const resolved = path.normalize(path.join(publicDir, requested));
