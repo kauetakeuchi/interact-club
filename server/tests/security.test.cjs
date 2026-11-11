@@ -15,7 +15,7 @@ const { signToken } = require("../dist/lib/jwt");
 const db = require("../dist/lib/db");
 const { requireAuth, requireAdmin } = require("../dist/middleware/auth");
 const storage = require("../dist/lib/storage");
-const { loginSchema, registerSchema, membroUpdateSchema } = require("../dist/lib/schemas");
+const { loginSchema, registerSchema, membroUpdateSchema, projetoSchema } = require("../dist/lib/schemas");
 
 test("servidor rejeita JWT_SECRET ausente", () => {
   const result = spawnSync(process.execPath, ["-e", "require('./dist/lib/jwt')"], {
@@ -52,6 +52,15 @@ test("novas senhas exigem 8 caracteres, maiúscula, minúscula, número e especi
   }
   assert.equal(membroUpdateSchema.safeParse({ password: registration.password }).success, true);
   assert.equal(loginSchema.safeParse({ email: registration.email, password: "senhaantiga" }).success, true);
+});
+
+test("datas de projeto permanecem no dia informado", () => {
+  const base = { title: "Projeto de teste", description: "Descrição do projeto" };
+  const parsed = projetoSchema.parse({ ...base, startDate: "2026-11-10", endDate: "" });
+  assert.equal(parsed.startDate, "2026-11-10");
+  assert.equal(parsed.endDate, null);
+  assert.equal(projetoSchema.safeParse({ ...base, startDate: "2026-02-31" }).success, false);
+  assert.equal(projetoSchema.safeParse({ ...base, endDate: "10/11/2026" }).success, false);
 });
 
 test("conta desativada ou rebaixada perde acesso imediatamente", async () => {

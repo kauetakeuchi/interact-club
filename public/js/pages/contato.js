@@ -69,13 +69,17 @@ document.addEventListener("DOMContentLoaded", async () => {
           <form id="contato-form" class="contact-form">
         <div class="form-row">
           <div class="form-group"><label for="ct-name">Seu nome <span>*</span></label><input type="text" id="ct-name" class="form-control" required maxlength="255" autocomplete="name" placeholder="Como podemos te chamar?"></div>
-          <div class="form-group"><label for="ct-email">Seu melhor e-mail <span>*</span></label><input type="email" id="ct-email" class="form-control" required autocomplete="email" placeholder="voce@email.com"></div>
+          <div class="form-group"><label for="ct-email">Seu melhor e-mail <span>*</span></label><input type="email" id="ct-email" class="form-control" required autocomplete="email" placeholder="seu@email.com"></div>
         </div>
         <div class="form-row">
           <div class="form-group"><label for="ct-phone">WhatsApp <small>se quiser</small></label><input type="tel" id="ct-phone" class="form-control" autocomplete="tel" placeholder="(00) 00000-0000"></div>
           <div class="form-group"><label for="ct-subject">Assunto <span>*</span></label><input type="text" id="ct-subject" class="form-control" required maxlength="255" placeholder="Quero participar..."></div>
         </div>
-        <div class="form-group"><label for="ct-message">Seu recado <span>*</span></label><textarea id="ct-message" class="form-control" required rows="6" placeholder="Manda os detalhes por aqui..."></textarea></div>
+        <div class="form-group"><label for="ct-message">Seu recado <span>*</span></label><textarea id="ct-message" class="form-control" required rows="6" maxlength="10000" placeholder="Manda os detalhes por aqui..."></textarea></div>
+        <div class="hp-field" aria-hidden="true">
+          <label for="ct-website">Não preencha este campo</label>
+          <input type="text" id="ct-website" name="website" tabindex="-1" autocomplete="off">
+        </div>
         <div class="contact-form-foot">
           <p>Normalmente respondemos em até 2 dias.</p>
           <button type="submit" class="contact-submit" id="ct-btn">Mandar mensagem <span aria-hidden="true">↗</span></button>
@@ -102,6 +106,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             phone: document.getElementById("ct-phone").value || null,
             subject: document.getElementById("ct-subject").value,
             message: document.getElementById("ct-message").value,
+            website: document.getElementById("ct-website").value,
         };
         btn.disabled = true;
         btn.innerHTML = '<span class="spinner"></span> Mandando...';

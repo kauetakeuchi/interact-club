@@ -55,14 +55,14 @@ async function renderList(page) {
                 </a>`;
             }).join("");
         };
-        page.innerHTML = `<section class="hero"><div class="container"><span class="tag">Nossas acoes</span><h1>Nossos <span>Projetos</span></h1><p>Conheca os projetos que transformam a comunidade com a energia dos jovens e a seriedade do Rotary.</p></div></section><section class="section" style="padding: 5rem 0;"><div class="container">
+        page.innerHTML = `<section class="hero"><div class="container"><span class="tag">Nossas ações</span><h1>Nossos <span>Projetos</span></h1><p>Conheça os projetos que transformam a comunidade com a energia dos jovens e a seriedade do Rotary.</p></div></section><section class="section" style="padding: 5rem 0;"><div class="container">
           <div class="encontre-head">
             <h1>Encontre projetos</h1>
             <div class="encontre-filters" id="encontre-filters">
               <button data-filter="all" class="encontre-filter encontre-filter--active">Todos</button>
               <button data-filter="PLANNING" class="encontre-filter">Planejamento</button>
               <button data-filter="IN_PROGRESS" class="encontre-filter">Em andamento</button>
-              <button data-filter="COMPLETED" class="encontre-filter">Concluidos</button>
+              <button data-filter="COMPLETED" class="encontre-filter">Concluídos</button>
             </div>
           </div>
           <p class="encontre-count" id="encontre-count">${projects.length} projetos encontrados</p>

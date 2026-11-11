@@ -13,7 +13,7 @@
   <meta property="og:description" content="Como o Interact Club de Taquaritinga coleta, usa, guarda e protege os seus dados pessoais, conforme a LGPD.">
   <meta name="twitter:card" content="summary">
 <title>Política de Privacidade - Interact Club</title>
-<script>try{const t=localStorage.getItem('theme');if(t==='dark'||(!t&&matchMedia('(prefers-color-scheme:dark)').matches))document.documentElement.classList.add('dark');}catch(e){}</script>
+<script src="/js/theme-init.js"></script>
 <link rel="stylesheet" href="/css/style.css">
 </head>
 <body class="privacy-page">
@@ -123,20 +123,22 @@
 </section>
 
 <section class="privacy-section">
-  <h2>8. Armazenamento local no navegador</h2>
-  <p>Para funcionamento do site, gravamos no armazenamento local do navegador as seguintes informações, sem uso de cookies de rastreamento ou publicidade:</p>
+  <h2>8. Cookies e armazenamento no navegador</h2>
+  <p>O site não usa cookies de rastreamento ou publicidade. Utilizamos apenas um cookie essencial de sessão e algumas chaves no armazenamento do navegador:</p>
   <table class="privacy-table">
-    <caption>Chaves gravadas no navegador</caption>
+    <caption>Cookies e chaves gravados no navegador</caption>
     <thead>
-      <tr><th scope="col">Chave</th><th scope="col">Conteúdo</th><th scope="col">Finalidade</th></tr>
+      <tr><th scope="col">Nome</th><th scope="col">Onde fica</th><th scope="col">Conteúdo</th><th scope="col">Finalidade</th></tr>
     </thead>
     <tbody>
-      <tr><td>theme</td><td>Tema de exibição escolhido.</td><td>Manter a preferência visual entre visitas.</td></tr>
-      <tr><td>token</td><td>Token de sessão.</td><td>Manter a pessoa conectada à conta.</td></tr>
-      <tr><td>user</td><td>Nome e dados básicos do perfil.</td><td>Exibir identificação no menu.</td></tr>
+      <tr><td>interact_session</td><td>Cookie HttpOnly</td><td>Identificador de sessão assinado.</td><td>Manter a pessoa conectada à conta com segurança. Expira em até 7 dias ou no logout.</td></tr>
+      <tr><td>theme</td><td>Armazenamento local</td><td>Tema de exibição escolhido.</td><td>Manter a preferência visual entre visitas.</td></tr>
+      <tr><td>user</td><td>Armazenamento local</td><td>Nome e dados básicos do perfil.</td><td>Exibir a identificação no menu. É apagado no logout.</td></tr>
+      <tr><td>privacy-notice</td><td>Armazenamento local</td><td>Indicação de que este aviso foi visto.</td><td>Não repetir o aviso de privacidade a cada visita.</td></tr>
+      <tr><td>sd-section</td><td>Armazenamento de sessão</td><td>Última seção aberta na área do membro.</td><td>Reabrir a mesma seção durante a visita. É apagado ao fechar a aba.</td></tr>
     </tbody>
   </table>
-  <p>A limpeza desse armazenamento pelo navegador é permitida a qualquer momento, com a consequência de encerrar a sessão iniciada.</p>
+  <p>O cookie de sessão é essencial para a área de membros: sem ele, não é possível permanecer conectado. Ele não é acessível por scripts da página e não é usado para publicidade. A limpeza desses dados pelo navegador é permitida a qualquer momento, com a consequência de encerrar a sessão iniciada.</p>
 </section>
 
 <section class="privacy-section">

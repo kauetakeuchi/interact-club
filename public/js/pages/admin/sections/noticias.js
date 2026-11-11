@@ -1,55 +1,82 @@
 import { api, toast } from "../../../lib/index.js";
 import { CATEGORY_COLORS } from "../../../lib/constants.js";
-import { esc, modalForm } from "../ui.js";
+import { esc, modalForm, closeModal, uploadField, bindActions } from "../ui.js";
 import { icons } from "../icons.js";
 
+const CATEGORIES = ["Projetos", "Eventos", "Clube", "Campanhas", "Parcerias"];
+
 export async function render() {
-    const n = await api.get("/admin/noticias");
-    const pub = n.filter((x) => x.published).length;
+    const noticias = await api.get("/admin/noticias");
+    const publicadas = noticias.filter((noticia) => noticia.published).length;
     return `<div class="section-bar">
       <div class="section-bar-stats">
-        <span class="section-bar-stat">${n.length} notícias</span>
+        <span class="section-bar-stat">${noticias.length} notícias</span>
         <span class="section-bar-divider"></span>
-        <span class="section-bar-stat">${pub} publicadas</span>
+        <span class="section-bar-stat">${publicadas} publicadas</span>
       </div>
       <div class="section-bar-actions">
-        <div class="search-wrap"><input class="search-input" placeholder="Buscar notícias..." onkeyup="filtrarTabela(this)">${icons.search}</div>
-        <button class="btn btn-secondary" onclick="mostrarFormNoticia()">${icons.plus} Nova Notícia</button>
+        <div class="search-wrap"><input class="search-input" data-table-search="tabela-noticias" placeholder="Buscar notícias..." aria-label="Buscar notícias">${icons.search}</div>
+        <button class="btn btn-secondary" data-action="novo">${icons.plus} Nova Notícia</button>
       </div>
     </div>
     <div class="table-wrap"><table class="admin-table" id="tabela-noticias"><thead><tr><th>Título</th><th>Categoria</th><th>Autor</th><th>Data</th><th>Status</th><th class="th-actions">Ações</th></tr></thead><tbody>
-      ${n.map((x) => `<tr>
-        <td>${esc(x.title)}</td>
-        <td>${x.category ? `<span class="cat-badge" style="--cat-cor:${CATEGORY_COLORS[x.category] || "#666"}">${esc(x.category)}</span>` : '<span class="cell-empty">—</span>'}</td>
-        <td>${x.author?.name ? esc(x.author.name) : "—"}</td>
-        <td><div class="cell-date">${new Date(x.createdAt).toLocaleDateString("pt-BR")}</div></td>
-        <td><span class="pub-indicator ${x.published ? "pub-yes" : "pub-no"}"></span><span>${x.published ? "Publicado" : "Rascunho"}</span></td>
+      ${noticias.map((noticia) => `<tr>
+        <td>${esc(noticia.title)}</td>
+        <td>${noticia.category ? `<span class="cat-badge" style="--cat-cor:${esc(CATEGORY_COLORS[noticia.category] || "#666")}">${esc(noticia.category)}</span>` : '<span class="cell-empty">—</span>'}</td>
+        <td>${noticia.author?.name ? esc(noticia.author.name) : "—"}</td>
+        <td><div class="cell-date">${new Date(noticia.createdAt).toLocaleDateString("pt-BR")}</div></td>
+        <td><span class="pub-indicator ${noticia.published ? "pub-yes" : "pub-no"}"></span><span>${noticia.published ? "Publicado" : "Rascunho"}</span></td>
         <td class="td-actions">
-          <a href="/noticias?slug=${encodeURIComponent(x.slug)}" target="_blank" class="btn-icon" title="Visualizar">${icons.eye}</a>
-          <button class="btn-icon btn-icon-edit" onclick="editarNoticia('${x.id}')" title="Editar">${icons.edit}</button>
-          <button class="btn-icon btn-icon-danger" onclick="excluirNoticia('${x.id}')" title="Excluir">${icons.trash}</button>
+          <a href="/noticias?slug=${encodeURIComponent(noticia.slug)}" target="_blank" rel="noopener" class="btn-icon" title="${noticia.published ? "Visualizar" : "Pré-visualizar rascunho"}">${icons.eye}</a>
+          <button class="btn-icon btn-icon-edit" data-action="editar" data-id="${esc(noticia.id)}" title="Editar">${icons.edit}</button>
+          <button class="btn-icon btn-icon-danger" data-action="excluir" data-id="${esc(noticia.id)}" title="Excluir">${icons.trash}</button>
         </td>
       </tr>`).join("")}
     </tbody></table></div>`;
 }
 
-window.mostrarFormNoticia = () => {
-    modalForm("Nova Notícia", `
-    <div class="form-group"><label>Título</label><input type="text" id="f-no-title" class="form-control" required></div>
+export function bind(root, { refresh }) {
+    bindActions(root, {
+        novo: () => openForm(refresh),
+        editar: ({ id }) => openEditForm(id, refresh),
+        excluir: ({ id }) => remove(id, refresh),
+    });
+}
+
+function slugify(value) {
+    return String(value)
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "")
+        .slice(0, 200);
+}
+
+function categoryOptions(selected) {
+    const options = CATEGORIES.includes(selected) || !selected ? CATEGORIES : [...CATEGORIES, selected];
+    return `<option value="">Geral</option>` + options.map((category) =>
+        `<option value="${esc(category)}" ${selected === category ? "selected" : ""}>${esc(category)}</option>`
+    ).join("");
+}
+
+function newsForm(noticia = null) {
+    const isEdit = Boolean(noticia);
+    return `
+    <div class="form-group"><label>Título</label><input type="text" id="f-no-title" class="form-control" value="${esc(noticia?.title || "")}" maxlength="255" required></div>
     <div class="form-row">
-      <div class="form-group"><label>Slug</label><input type="text" id="f-no-slug" class="form-control" required placeholder="meu-slug"></div>
-      <div class="form-group"><label>Categoria</label><select id="f-no-cat" class="form-control"><option value="">Geral</option><option>Projetos</option><option>Eventos</option><option>Clube</option><option>Campanhas</option><option>Parcerias</option></select></div>
+      <div class="form-group"><label>Slug</label><input type="text" id="f-no-slug" class="form-control" value="${esc(noticia?.slug || "")}" maxlength="255" placeholder="meu-slug" required></div>
+      <div class="form-group"><label>Categoria</label><select id="f-no-cat" class="form-control">${categoryOptions(noticia?.category || "")}</select></div>
     </div>
-    <div class="form-group"><label>Resumo</label><textarea id="f-no-excerpt" class="form-control" rows="2"></textarea></div>
-    <div class="form-group"><label>Conteúdo</label><textarea id="f-no-content" class="form-control" required rows="6"></textarea></div>
-    <div class="form-group"><label>Imagem</label><div class="upload-area" id="no-img-area" onclick="document.getElementById('f-no-img-file').click()"><div class="upload-placeholder">Clique para adicionar imagem</div></div><input type="file" id="f-no-img-file" accept="image/*" style="display:none" onchange="handleImageUpload(event,'f-no-img','no-img-area')"><input type="hidden" id="f-no-img"></div>
-    <label class="toggle"><input type="checkbox" id="f-no-pub"><div class="toggle-slider"></div><span class="toggle-label">Publicar</span></label>
-    <button type="submit" class="btn btn-primary btn-full" style="margin-top:1.5rem;">Criar Notícia</button>`, "return salvarNoticia(event)");
-};
+    <div class="form-group"><label>Resumo</label><textarea id="f-no-excerpt" class="form-control" rows="2" maxlength="500">${esc(noticia?.excerpt || "")}</textarea></div>
+    <div class="form-group"><label>Conteúdo</label><textarea id="f-no-content" class="form-control" rows="6" maxlength="10000" required>${esc(noticia?.content || "")}</textarea></div>
+    <div class="form-group"><label>Imagem</label>${uploadField("f-no-img", noticia?.imageUrl || "")}</div>
+    <label class="toggle"><input type="checkbox" id="f-no-pub" ${noticia?.published ? "checked" : ""}><div class="toggle-slider"></div><span class="toggle-label">Publicar</span></label>
+    <button type="submit" class="btn btn-primary btn-full" style="margin-top:1.5rem;">${isEdit ? "Salvar" : "Criar Notícia"}</button>`;
+}
 
-window.salvarNoticia = async (e) => {
-    e.preventDefault();
-    const data = {
+function readForm() {
+    return {
         title: document.getElementById("f-no-title").value,
         slug: document.getElementById("f-no-slug").value,
         category: document.getElementById("f-no-cat").value || null,
@@ -58,66 +85,38 @@ window.salvarNoticia = async (e) => {
         imageUrl: document.getElementById("f-no-img").value || null,
         published: document.getElementById("f-no-pub").checked,
     };
-    try {
-        await api.post("/admin/noticias", data);
+}
+
+export function openForm(refresh = () => location.reload()) {
+    const overlay = modalForm("Nova Notícia", newsForm(), async () => {
+        await api.post("/admin/noticias", readForm());
+        closeModal();
         toast.show("Notícia criada!");
-        location.reload();
-    }
-    catch (err) {
-        toast.show(err.message, "error");
-    }
-};
+        refresh();
+    });
 
-window.editarNoticia = async (id) => {
-    try {
-        const n = await api.get(`/admin/noticias/${id}`);
-        modalForm("Editar Notícia", `
-      <div class="form-group"><label>Título</label><input type="text" id="f-no-title" class="form-control" value="${esc(n.title)}" required></div>
-      <div class="form-row">
-        <div class="form-group"><label>Slug</label><input type="text" id="f-no-slug" class="form-control" value="${esc(n.slug)}" required placeholder="meu-slug"></div>
-        <div class="form-group"><label>Categoria</label><select id="f-no-cat" class="form-control"><option value="">Geral</option><option ${n.category === "Projetos" ? "selected" : ""}>Projetos</option><option ${n.category === "Eventos" ? "selected" : ""}>Eventos</option><option ${n.category === "Clube" ? "selected" : ""}>Clube</option><option ${n.category === "Campanhas" ? "selected" : ""}>Campanhas</option><option ${n.category === "Parcerias" ? "selected" : ""}>Parcerias</option></select></div>
-      </div>
-      <div class="form-group"><label>Resumo</label><textarea id="f-no-excerpt" class="form-control" rows="2">${esc(n.excerpt || "")}</textarea></div>
-      <div class="form-group"><label>Conteúdo</label><textarea id="f-no-content" class="form-control" required rows="6">${esc(n.content)}</textarea></div>
-      <div class="form-group"><label>Imagem</label><div class="upload-area" id="no-edit-img-area" onclick="document.getElementById('f-no-edit-img-file').click()">${n.imageUrl ? `<img src="${esc(n.imageUrl)}" style="max-height:12rem;margin:0 auto;">` : `<div class="upload-placeholder">Clique para adicionar imagem</div>`}</div><input type="file" id="f-no-edit-img-file" accept="image/*" style="display:none" onchange="handleImageUpload(event,'f-no-img','no-edit-img-area')"><input type="hidden" id="f-no-img" value="${esc(n.imageUrl || "")}"></div>
-      <label class="toggle"><input type="checkbox" id="f-no-pub" ${n.published ? "checked" : ""}><div class="toggle-slider"></div><span class="toggle-label">Publicar</span></label>
-      <button type="submit" class="btn btn-primary btn-full" style="margin-top:1.5rem;">Salvar</button>`, "return salvarEdicaoNoticia(event, '" + id + "')");
-    }
-    catch (err) {
-        toast.show(err.message, "error");
-    }
-};
+    const title = overlay.querySelector("#f-no-title");
+    const slug = overlay.querySelector("#f-no-slug");
+    let slugEdited = false;
+    slug.addEventListener("input", () => { slugEdited = slug.value.trim() !== ""; });
+    title.addEventListener("input", () => {
+        if (!slugEdited) slug.value = slugify(title.value);
+    });
+}
 
-window.salvarEdicaoNoticia = async (e, id) => {
-    e.preventDefault();
-    const data = {
-        title: document.getElementById("f-no-title").value,
-        slug: document.getElementById("f-no-slug").value,
-        category: document.getElementById("f-no-cat").value || null,
-        excerpt: document.getElementById("f-no-excerpt").value || null,
-        content: document.getElementById("f-no-content").value,
-        imageUrl: document.getElementById("f-no-img").value || null,
-        published: document.getElementById("f-no-pub").checked,
-    };
-    try {
-        await api.put(`/admin/noticias/${id}`, data);
+async function openEditForm(id, refresh) {
+    const noticia = await api.get(`/admin/noticias/${encodeURIComponent(id)}`);
+    modalForm("Editar Notícia", newsForm(noticia), async () => {
+        await api.put(`/admin/noticias/${encodeURIComponent(id)}`, readForm());
+        closeModal();
         toast.show("Notícia atualizada!");
-        location.reload();
-    }
-    catch (err) {
-        toast.show(err.message, "error");
-    }
-};
+        refresh();
+    });
+}
 
-window.excluirNoticia = async (id) => {
-    if (!confirm("Excluir notícia?"))
-        return;
-    try {
-        await api.del(`/admin/noticias/${id}`);
-        toast.show("Notícia excluída!");
-        location.reload();
-    }
-    catch (err) {
-        toast.show(err.message, "error");
-    }
-};
+async function remove(id, refresh) {
+    if (!confirm("Excluir esta notícia? Esta ação não pode ser desfeita.")) return;
+    await api.del(`/admin/noticias/${encodeURIComponent(id)}`);
+    toast.show("Notícia excluída!");
+    refresh();
+}

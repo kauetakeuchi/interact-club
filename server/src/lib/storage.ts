@@ -2,7 +2,8 @@ import { v2 as cloudinary } from "cloudinary";
 import path from "path";
 import fs from "fs";
 
-export const UPLOAD_DIR = path.join(__dirname, "../../../public/uploads");
+export const publicDir = path.resolve(__dirname, "../../../public");
+export const UPLOAD_DIR = path.join(publicDir, "uploads");
 
 if (!fs.existsSync(UPLOAD_DIR)) {
   fs.mkdirSync(UPLOAD_DIR, { recursive: true });

@@ -7,16 +7,22 @@ function getSecret(): string {
   }
   return secret;
 }
+
 const SECRET = getSecret();
 
-export function signToken(id: string) {
+export interface VerifiedToken {
+  userId: string;
+  issuedAt: number;
+}
+
+export function signToken(id: string): string {
   return jwt.sign({}, SECRET, { subject: id, expiresIn: "7d", algorithm: "HS256" });
 }
 
-export function verifyToken(token: string) {
+export function verifyToken(token: string): VerifiedToken {
   const payload = jwt.verify(token, SECRET, { algorithms: ["HS256"] });
   if (typeof payload === "string" || !payload.sub || typeof payload.sub !== "string") {
     throw new Error("Token inválido");
   }
-  return payload.sub;
+  return { userId: payload.sub, issuedAt: Number(payload.iat ?? 0) * 1000 };
 }

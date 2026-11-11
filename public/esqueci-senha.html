@@ -1,0 +1,29 @@
+<!DOCTYPE html><html lang="pt-BR">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg"><title>Recuperar senha - Interact Club</title>
+  <script src="/js/theme-init.js"></script>
+  <link rel="stylesheet" href="/css/style.css"></head>
+<body>
+<div id="page-content" style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem;">
+  <div style="width:100%;max-width:28rem;">
+    <div style="text-align:center;margin-bottom:2rem;">
+      <a href="/login" style="display:inline-flex;align-items:center;gap:.5rem;font-size:.875rem;color:var(--text);margin-bottom:2rem;">← Voltar ao login</a>
+      <h1 style="font-family:var(--font-heading);font-size:2.5rem;color:var(--primary-dark);">Recuperar <span style="color:var(--secondary);">senha</span></h1>
+      <p style="color:var(--text);font-size:.875rem;margin-top:.5rem;">Informe seu email para receber um link de redefinição.</p>
+    </div>
+    <div style="border:1px solid var(--border);padding:2rem;">
+      <form id="forgot-form">
+        <div class="form-group"><label>Email</label><input type="email" id="forgot-email" class="form-control" required autocomplete="email" placeholder="seu@email.com"></div>
+        <button type="submit" class="btn btn-primary btn-full" id="forgot-btn">Enviar link</button>
+        <p id="forgot-status" role="status" aria-live="polite" hidden style="margin-top:1rem;font-size:.9rem;line-height:1.6;color:var(--text);"></p>
+        <p style="text-align:center;margin-top:1rem;font-size:.875rem;color:var(--text);">Lembrou a senha? <a href="/login" style="color:var(--primary);font-weight:500;">Entrar</a></p>
+      </form>
+    </div>
+  </div>
+</div>
+<div id="toast-container" class="toast-container"></div>
+<script type="module" src="/js/lib/Theme.js"></script>
+<script type="module" src="/js/pages/esqueci-senha.js"></script>
+</body>
+</html>

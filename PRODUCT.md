@@ -1,7 +1,5 @@
 # Product
 
-<!-- impeccable:product-schema 1 -->
-
 ## Platform
 
 web
@@ -10,11 +8,12 @@ web
 
 - **Primário:** comunidade local — escolas, pais e jovens de 12–18 anos descobrindo o clube. Chegam sem contexto, precisam entender o que é o Interact e como participar. (Prioridade confirmada pelo responsável: divulgar o clube.)
 - **Membros ativos:** jovens já cadastrados que entram para ver eventos, se inscrever e ler avisos.
-- **Admin/Diretoria:** voluntários do clube que criam e mantêm todo o conteúdo pelo painel administrativo, sem conhecimento técnico.
+- **Diretoria (`DIRECTOR`):** voluntários que criam e mantêm eventos, projetos, notícias, avisos e mensagens recebidas pelo painel.
+- **Administração (`ADMIN`):** além do conteúdo, gerencia membros, funções e status das contas.
 
 ## Product Purpose
 
-Site oficial de um Interact Club (programa juvenil do Rotary International). Existiria para divulgar as ações do clube e atrair novos jovens; também funciona como área do membro (inscrição em eventos, avisos, perfil) e ferramenta de gestão de conteúdo para a diretoria. Sucesso: um visitante externo entende o clube e se anima a participar; um membro acompanha a agenda sem depender de redes sociais.
+Site oficial do Interact Club de Taquaritinga (programa juvenil do Rotary International). Existe para divulgar as ações do clube e atrair novos jovens; também funciona como área do membro (inscrição em eventos, avisos, perfil) e ferramenta de gestão de conteúdo para a diretoria. Sucesso: um visitante externo entende o clube e se anima a participar; um membro acompanha a agenda sem depender de redes sociais.
 
 ## Positioning
 
@@ -25,17 +24,19 @@ Canal oficial e autoadministrado do clube — o próprio conteúdo (projetos, ev
 - Todo o conteúdo em português brasileiro (pt-BR).
 - Mantido por voluntários rotativos (gestão escolar/juvenil): simplicidade operacional importa mais que recursos avançados.
 - Ambiente típico de desenvolvimento local: XAMPP + MySQL; hospedagem ainda indefinida.
+- Fuso de referência do clube: America/Sao_Paulo.
 
 ## Capabilities and Constraints
 
-- Funcionalidades existentes: páginas públicas (início, sobre, projetos, eventos, notícias, contato), cadastro/login de membro, inscrição em eventos com limite de vagas, avisos, dashboard do membro e painel admin completo (membros, eventos, projetos, notícias, avisos, contatos recebidos).
+- Funcionalidades existentes: páginas públicas (início, sobre, projetos, eventos, notícias, contato), cadastro/login de membro com confirmação de email, recuperação de senha, inscrição em eventos com limite de vagas, avisos, dashboard do membro e painel administrativo (membros, eventos, projetos, notícias, avisos e contatos recebidos).
 - **Restrição técnica vinculante (decisão do responsável):** frontend permanece HTML/CSS/JavaScript puro, sem frameworks e sem etapa de build; TypeScript apenas no backend (Express + MySQL). Qualquer trabalho futuro de design deve preservar isso.
-- Autenticação JWT; uploads de imagem locais (Multer).
-- Fato não definido (não inventar): cidade/região do clube e nome do Rotary Club patrocinador — decisão explícita foi não citar nomes locais por enquanto.
+- Autenticação por JWT em cookie HttpOnly; uploads de imagem locais (Multer) ou no Cloudinary quando configurado.
+- Permissões: `DIRECTOR` mantém o conteúdo; apenas `ADMIN` gerencia membros e funções.
+- Fato não definido (não inventar): nome do Rotary Club patrocinador — decisão explícita foi não citar o nome do clube patrocinador por enquanto.
 
 ## Brand Commitments
 
-- Nome: "Interact Club", sem citação de cidade ou clube patrocinador.
+- Nome: "Interact Club de Taquaritinga"; o clube patrocinador não é nomeado.
 - Afiliação institucional ao Rotary International deve ser respeitada no tom (serviço, liderança, integridade).
 
 ## Evidence on Hand

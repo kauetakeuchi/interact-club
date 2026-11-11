@@ -8,11 +8,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.querySelector('a[href="/cadastro"]')?.addEventListener("click", (e) => {
         if (!auth.isAuthenticated()) return;
         e.preventDefault();
-        toast.show("Voce ja esta cadastrado!");
+        toast.show("Você já está cadastrado!");
     });
-    await initNewsCarousel();
-    await initEventosHome();
-    await renderProjects();
+    await Promise.all([initNewsCarousel(), initEventosHome(), renderProjects()]);
 });
 
 async function initNewsCarousel() {
@@ -22,7 +20,7 @@ async function initNewsCarousel() {
     if (!root) return;
     section.hidden = false;
     root.setAttribute("role", "region");
-    root.setAttribute("aria-label", "Noticias em destaque");
+    root.setAttribute("aria-label", "Notícias em destaque");
     root.innerHTML = `<div class="news-edition"><article class="news-lead"><div class="skeleton skeleton-light" style="aspect-ratio:16/10.2;border-radius:16px 16px 0 0;"></div><div style="padding:1.25rem;"><div class="skeleton skeleton-light" style="height:.75rem;width:6rem;margin-bottom:.9rem;"></div><div class="skeleton skeleton-light" style="height:1.4rem;width:90%;margin-bottom:.6rem;"></div><div class="skeleton skeleton-light" style="height:.85rem;width:100%;"></div></div></article><div class="news-stack"><div class="skeleton skeleton-light" style="height:112px;border-radius:12px;"></div><div class="skeleton skeleton-light" style="height:112px;border-radius:12px;"></div><div class="skeleton skeleton-light" style="height:112px;border-radius:12px;"></div></div></div>`;
     let status = document.getElementById("news-status");
     if (!status) {
@@ -32,13 +30,13 @@ async function initNewsCarousel() {
         status.setAttribute("aria-live", "polite");
         section.appendChild(status);
     }
-    status.textContent = "Carregando noticias...";
+    status.textContent = "Carregando notícias...";
     let noticias;
     try {
         noticias = await api.get("/noticias");
     } catch (err) {
-        status.textContent = err.message || "Erro ao carregar noticias.";
-        root.innerHTML = `<div class="news-empty"><p style="margin-bottom:1rem;font-size:.875rem;">` + esc(err.message || "Nao foi possivel carregar as noticias agora.") + `</p><button class="btn btn-primary" id="retry-news">Tentar novamente</button></div>`;
+        status.textContent = err.message || "Erro ao carregar notícias.";
+        root.innerHTML = `<div class="news-empty"><p style="margin-bottom:1rem;font-size:.875rem;">` + esc(err.message || "Não foi possível carregar as notícias agora.") + `</p><button class="btn btn-primary" id="retry-news">Tentar novamente</button></div>`;
         document.getElementById("retry-news")?.addEventListener("click", (e) => {
             const b = e.currentTarget;
             if (b.disabled) return;
@@ -51,7 +49,7 @@ async function initNewsCarousel() {
         section.hidden = true;
         return;
     }
-    status.textContent = "Noticias carregadas.";
+    status.textContent = "Notícias carregadas.";
     const items = noticias.slice(0, 5);
     const lead = items[0];
     const rest = items.slice(1, 5);
@@ -62,7 +60,7 @@ async function initNewsCarousel() {
     const leadMedia = lead.imageUrl
         ? `<img src="` + esc(lead.imageUrl) + `" alt="` + esc(lead.title) + `" loading="lazy" decoding="async">`
         : `<div class="news-stack__thumb--placeholder" style="background:linear-gradient(135deg,` + leadCor + `, #2E63C4);width:100%;height:100%;aspect-ratio:16/10.2;display:flex;align-items:center;justify-content:center;font-size:3rem;color:#fff;">` + esc((lead.category || "N").charAt(0)) + `</div>`;
-    const leadHtml = `<article class="news-lead"><a href="/noticias?slug=` + encodeURIComponent(lead.slug) + `" class="news-lead__media">` + leadMedia + (lead.category ? `<span class="news-lead__badge">` + esc(lead.category) + `</span>` : "") + `</a><div class="news-lead__body"><div class="news-lead__meta"><span>` + leadDate + `</span>` + (lead.author?.name ? `<span> - Por ` + esc(lead.author.name) + `</span>` : "") + `</div><h3><a href="/noticias?slug=` + encodeURIComponent(lead.slug) + `">` + esc(lead.title) + `</a></h3><p>` + esc(leadTexto) + `</p><a href="/noticias?slug=` + encodeURIComponent(lead.slug) + `" class="news-lead__cta">Ler materia <span aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9" opacity="0.3"/><path d="M9 12h7M12 8.5l4 3.5-4 3.5"/></svg></span></a></div></article>`;
+    const leadHtml = `<article class="news-lead"><a href="/noticias?slug=` + encodeURIComponent(lead.slug) + `" class="news-lead__media">` + leadMedia + (lead.category ? `<span class="news-lead__badge">` + esc(lead.category) + `</span>` : "") + `</a><div class="news-lead__body"><div class="news-lead__meta"><span>` + leadDate + `</span>` + (lead.author?.name ? `<span> - Por ` + esc(lead.author.name) + `</span>` : "") + `</div><h3><a href="/noticias?slug=` + encodeURIComponent(lead.slug) + `">` + esc(lead.title) + `</a></h3><p>` + esc(leadTexto) + `</p><a href="/noticias?slug=` + encodeURIComponent(lead.slug) + `" class="news-lead__cta">Ler matéria <span aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9" opacity="0.3"/><path d="M9 12h7M12 8.5l4 3.5-4 3.5"/></svg></span></a></div></article>`;
     let stackHtml = "";
     if (rest.length) {
         stackHtml = `<div class="news-stack">` + rest.map((n) => {
@@ -87,12 +85,14 @@ async function initEventosHome() {
     grid.innerHTML = Array(3).fill('<div class="skeleton skeleton-light" style="height:96px;border-radius:14px;"></div>').join("");
     calCard.innerHTML = '<div class="skeleton skeleton-light" style="height:320px;border-radius:16px;"></div>';
     let futuros = [];
+    let agenda = [];
     try {
         const data = await api.get("/eventos");
-        futuros = (data.futuros || []).slice(0, 3);
-        if (!futuros.length) { section.hidden = true; return; }
-    } catch (err) {
-        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:2rem 1rem;color:var(--text-muted);font-size:.875rem;">Nao foi possivel carregar a agenda agora.</div>';
+        agenda = data.futuros || [];
+        futuros = agenda.slice(0, 3);
+        if (!agenda.length) { section.hidden = true; return; }
+    } catch {
+        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:2rem 1rem;color:var(--text-muted);font-size:.875rem;">Não foi possível carregar a agenda agora.</div>';
         calCard.hidden = true;
         return;
     }
@@ -107,7 +107,7 @@ async function initEventosHome() {
         const prevLast = new Date(year, month, 0).getDate();
         const monthName = new Date(year, month, 1).toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
         const eventsByDay = new Map();
-        futuros.forEach((ev) => {
+        agenda.forEach((ev) => {
             const d = new Date(ev.date);
             if (d.getFullYear() === year && d.getMonth() === month) {
                 const k = d.getDate();
@@ -136,8 +136,8 @@ async function initEventosHome() {
           <div class="cal-head">
             <h3>` + monthName + `</h3>
             <div class="cal-head__nav">
-              <button aria-label="Mes anterior" id="cal-prev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
-              <button aria-label="Proximo mes" id="cal-next"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></button>
+              <button aria-label="Mês anterior" id="cal-prev"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+              <button aria-label="Próximo mês" id="cal-next"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></button>
             </div>
           </div>
           <div class="cal-weekdays">` + weekdays.map((w)=>`<span>`+w+`</span>`).join("") + `</div>
@@ -163,10 +163,10 @@ async function initEventosHome() {
         return `<article class="cal-event">
           <div class="cal-event__date ` + (isToday ? "cal-event__date--today" : "") + `"><b>` + dia + `</b><span>` + mes + `</span></div>
           <div class="cal-event__body">
-            <h4><a href="/eventos">` + esc(ev.title) + `</a></h4>
+            <h4><a href="/eventos?id=` + encodeURIComponent(ev.id) + `">` + esc(ev.title) + `</a></h4>
             <div class="cal-event__meta">` + (loc ? `<span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s7-5.5 7-11a7 7 0 1 0-14 0c0 5.5 7 11 7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg> ` + loc + `</span>` : "") + `<span>` + esc(d.toLocaleDateString("pt-BR", { weekday: "short" })) + ` ` + esc(d.toLocaleTimeString("pt-BR", {hour:"2-digit", minute:"2-digit"})) + `</span></div>
             <p class="cal-event__desc">` + esc((ev.description || "").slice(0, 90)) + ((ev.description||"").length>90?"...":"") + `</p>
-            <div class="cal-event__foot"><span class="cal-event__vagas">` + vagasTxt + `</span><a href="/eventos" class="cal-event__cta">Ver <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9" opacity="0.3"/><path d="M9 12h7M12 8.5l4 3.5-4 3.5"/></svg><span style="display:none" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9" opacity="0.3"/><path d="M9 12h7M12 8.5l4 3.5-4 3.5"/></svg></span></a></div>
+            <div class="cal-event__foot"><span class="cal-event__vagas">` + vagasTxt + `</span><a href="/eventos?id=` + encodeURIComponent(ev.id) + `" class="cal-event__cta">Ver <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9" opacity="0.3"/><path d="M9 12h7M12 8.5l4 3.5-4 3.5"/></svg><span style="display:none" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9" opacity="0.3"/><path d="M9 12h7M12 8.5l4 3.5-4 3.5"/></svg></span></a></div>
           </div>
         </article>`;
     }).join("");
@@ -196,7 +196,7 @@ async function renderProjects() {
         }
         const fmt = (d) => d ? new Date(d).toLocaleDateString("pt-BR", { day: "numeric", month: "short", year: "numeric" }) : "--";
         container.innerHTML = publicos.map((p) => {
-            const label = ({ PLANNING: "Planejamento", IN_PROGRESS: "Em Andamento", COMPLETED: "Concluido" }[p.status] || p.status);
+            const label = ({ PLANNING: "Planejamento", IN_PROGRESS: "Em Andamento", COMPLETED: "Concluído" }[p.status] || p.status);
             const grad = ({ PLANNING: "#f59e0b", IN_PROGRESS: "#2E63C4", COMPLETED: "#10b981" }[p.status] || "#6b7280");
             const badgeCls = "ficha__badge--" + p.status.toLowerCase();
             const media = p.imageUrl
@@ -207,8 +207,8 @@ async function renderProjects() {
               <div class="ficha__body">
                 <h3 class="ficha__title"><a href="/projetos?id=` + p.id + `">` + esc(p.title) + `</a></h3>
                 <dl class="ficha__meta">
-                  <div><dt>Inicio</dt><dd>` + esc(fmt(p.startDate)) + `</dd></div>
-                  <div><dt>Termino</dt><dd>` + esc(fmt(p.endDate)) + `</dd></div>
+                  <div><dt>Início</dt><dd>` + esc(fmt(p.startDate)) + `</dd></div>
+                  <div><dt>Término</dt><dd>` + esc(fmt(p.endDate)) + `</dd></div>
                 </dl>
                 <p class="ficha__desc">` + esc(p.description.slice(0, 145)) + (p.description.length > 145 ? "..." : "") + `</p>
                 <div class="ficha__foot">
@@ -222,7 +222,7 @@ async function renderProjects() {
     } catch (err) {
         status.textContent = err.message || "Erro ao carregar projetos.";
         container.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:2rem 1rem;">
-          <p style="color:var(--text-muted);font-size:.875rem;margin-bottom:1rem;">` + esc(err.message || "Nao foi possivel carregar os projetos agora.") + `</p>
+          <p style="color:var(--text-muted);font-size:.875rem;margin-bottom:1rem;">` + esc(err.message || "Não foi possível carregar os projetos agora.") + `</p>
           <button class="btn btn-primary" id="retry-projetos">Tentar novamente</button>
         </div>`;
         document.getElementById("retry-projetos")?.addEventListener("click", (e) => {

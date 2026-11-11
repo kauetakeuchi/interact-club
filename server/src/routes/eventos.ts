@@ -1,6 +1,6 @@
 import { Router, Response } from "express";
 import { query, getOne, exec, withTransaction } from "../lib/db";
-import { AuthRequest, requireAuth, optionalAdmin } from "../middleware/auth";
+import { AuthRequest, requireAuth, optionalStaff } from "../middleware/auth";
 import { validate } from "../lib/validation";
 import { inscricaoSchema, cancelamentoSchema } from "../lib/schemas";
 import { ah } from "../lib/asyncHandler";
@@ -21,8 +21,8 @@ router.get("/", ah(async (_req: AuthRequest, res: Response) => {
   return res.json({ futuros, passados });
 }));
 
-router.get("/:id", optionalAdmin, ah(async (req: AuthRequest, res: Response) => {
-  const visibilityFilter = req.user?.role === "ADMIN" ? "" : " AND e.isPublic = 1";
+router.get("/:id", optionalStaff, ah(async (req: AuthRequest, res: Response) => {
+  const visibilityFilter = req.user ? "" : " AND e.isPublic = 1";
   const evento = await getOne<any>(`${EVENTO_COM_INSCRICOES} WHERE e.id = ?${visibilityFilter}`, [req.params.id]);
   if (!evento) return res.status(404).json({ message: "Evento não encontrado" });
   return res.json(evento);

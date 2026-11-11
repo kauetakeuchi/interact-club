@@ -12,3 +12,10 @@ export const auth = new Auth();
 export const api = new Api(auth);
 export const toast = new Toast();
 export const dashboard = new DashboardSidebar(auth, api, toast);
+
+// A sessão expirou enquanto a área do membro estava aberta.
+window.addEventListener("auth:expired", () => {
+    if (document.getElementById("dashboard-sidebar")) {
+        window.location.href = "/login";
+    }
+});

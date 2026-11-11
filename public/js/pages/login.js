@@ -2,7 +2,9 @@ import { auth, toast } from "../lib/index.js";
 import { initPasswordToggles } from "../lib/password.js";
 
 if (auth.isAuthenticated()) {
-    window.location.href = "/";
+    auth.refresh().then((user) => {
+        if (user) window.location.replace("/");
+    });
 }
 initPasswordToggles();
 

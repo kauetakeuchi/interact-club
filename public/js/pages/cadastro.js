@@ -3,7 +3,9 @@ import { initPasswordToggles } from "../lib/password.js";
 import { askTermsConsent } from "../lib/TermsModal.js";
 
 if (auth.isAuthenticated()) {
-    window.location.href = "/";
+    auth.refresh().then((user) => {
+        if (user) window.location.replace("/");
+    });
 }
 initPasswordToggles();
 

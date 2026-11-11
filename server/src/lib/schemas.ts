@@ -16,6 +16,22 @@ const conteudoField = () =>
 const optionalText = (max: number) =>
   z.preprocess(emptyToNull, z.string().trim().max(max).nullish());
 
+// Datas sem horário (colunas DATE) permanecem como texto YYYY-MM-DD.
+// Converter para Date deslocaria o dia ao gravar no fuso do clube.
+const dateOnlyField = (message: string) =>
+  z.preprocess(
+    emptyToNull,
+    z
+      .string()
+      .trim()
+      .refine((value) => {
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+        const date = new Date(`${value}T00:00:00Z`);
+        return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value;
+      }, message)
+      .nullish()
+  );
+
 const passwordSchema = z.string()
   .min(8, "Senha deve ter no mínimo 8 caracteres")
   .max(100, "Senha muito longa")
@@ -46,6 +62,15 @@ export const verifyEmailSchema = z.object({
 
 export const resendVerificationSchema = z.object({
   email: z.string().trim().toLowerCase().min(1, "Email obrigatório").email("Email inválido").max(255),
+});
+
+export const forgotPasswordSchema = z.object({
+  email: z.string().trim().toLowerCase().min(1, "Email obrigatório").email("Email inválido").max(255),
+});
+
+export const resetPasswordSchema = z.object({
+  token: z.string().trim().regex(/^[a-f0-9]{64}$/i, "Link de redefinição inválido"),
+  password: passwordSchema,
 });
 
 export const perfilSchema = z.object({
@@ -90,8 +115,8 @@ export const projetoSchema = z.object({
   title: tituloField(),
   description: descricaoField(),
   status: z.enum(["PLANNING", "IN_PROGRESS", "COMPLETED"]).default("PLANNING"),
-  startDate: z.preprocess(emptyToNull, z.coerce.date({ message: "Data de início inválida" }).nullish()),
-  endDate: z.preprocess(emptyToNull, z.coerce.date({ message: "Data de término inválida" }).nullish()),
+  startDate: dateOnlyField("Data de início inválida"),
+  endDate: dateOnlyField("Data de término inválida"),
   imageUrl: optionalText(500),
   isPublic: z.boolean().default(true),
 });
@@ -124,6 +149,8 @@ export const contatoSchema = z.object({
   phone: optionalText(50),
   subject: z.string().trim().min(1, "Assunto obrigatório").max(255, "Assunto muito longo (máx. 255)"),
   message: conteudoField(),
+  // Campo invisível para humanos: quando preenchido, o envio é descartado.
+  website: z.string().max(500).optional(),
 });
 
 // ---------- Admin: membros ----------

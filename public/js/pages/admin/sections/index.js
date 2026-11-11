@@ -1,12 +1,12 @@
-// Importar todas as seções registra seus handlers globais (window.*)
-import { render as painel } from "./painel.js";
-import { render as membros } from "./membros.js";
-import { render as eventos } from "./eventos.js";
-import { render as projetos } from "./projetos.js";
-import { render as noticias } from "./noticias.js";
-import { render as avisos } from "./avisos.js";
-import { render as contatos } from "./contatos.js";
+import * as painel from "./painel.js";
+import * as membros from "./membros.js";
+import * as eventos from "./eventos.js";
+import * as projetos from "./projetos.js";
+import * as noticias from "./noticias.js";
+import * as avisos from "./avisos.js";
+import * as contatos from "./contatos.js";
 
+// Cada seção expõe `render()` e, quando necessário, `bind(root, contexto)`.
 export const sections = {
     painel,
     membros,

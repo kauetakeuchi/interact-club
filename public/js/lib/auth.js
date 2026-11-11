@@ -1,86 +1,126 @@
+const CONNECTION_ERROR = "Não foi possível conectar ao servidor. Verifique sua internet e tente novamente.";
+
+async function readJson(res) {
+    try {
+        return await res.json();
+    } catch {
+        return {};
+    }
+}
+
+function errorFromResponse(res, data, fallback) {
+    const error = new Error(data.message || fallback);
+    error.status = res.status;
+    error.code = data.code;
+    return error;
+}
+
 export class Auth {
     constructor() {
-        this.tokenKey = "token";
         this.userKey = "user";
     }
-    getToken() {
-        return localStorage.getItem(this.tokenKey);
-    }
+
     getUser() {
-        const raw = localStorage.getItem(this.userKey);
-        return raw ? JSON.parse(raw) : null;
+        try {
+            const raw = localStorage.getItem(this.userKey);
+            return raw ? JSON.parse(raw) : null;
+        } catch {
+            return null;
+        }
     }
+
+    setUser(user) {
+        try {
+            localStorage.setItem(this.userKey, JSON.stringify(user));
+        } catch {}
+    }
+
     isAuthenticated() {
-        return !!this.getToken();
+        return Boolean(this.getUser());
     }
-    setSession(token, user) {
-        localStorage.setItem(this.tokenKey, token);
-        localStorage.setItem(this.userKey, JSON.stringify(user));
-    }
+
     clearSession() {
-        localStorage.removeItem(this.tokenKey);
-        localStorage.removeItem(this.userKey);
+        try {
+            localStorage.removeItem(this.userKey);
+        } catch {}
     }
+
     updateUser(user) {
-        const current = this.getUser() || {};
-        this.setSession(this.getToken(), { ...current, ...user });
+        this.setUser({ ...(this.getUser() || {}), ...user });
     }
+
+    async request(path, options = {}) {
+        let res;
+        try {
+            res = await fetch(`/api/auth${path}`, {
+                credentials: "same-origin",
+                ...options,
+            });
+        } catch {
+            const error = new Error(CONNECTION_ERROR);
+            error.status = 0;
+            throw error;
+        }
+
+        const data = await readJson(res);
+        if (!res.ok) throw errorFromResponse(res, data, "Erro na requisição");
+        return data;
+    }
+
+    json(method, path, body) {
+        return this.request(path, {
+            method,
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+        });
+    }
+
+    async refresh() {
+        try {
+            const user = await this.request("/me");
+            this.setUser(user);
+            return user;
+        } catch (err) {
+            if (err.status === 401) {
+                this.clearSession();
+                return null;
+            }
+            // Falha de rede não deve deslogar quem já estava conectado.
+            return this.getUser();
+        }
+    }
+
     async login(email, password) {
-        const res = await fetch("/api/auth/login", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, password }),
-        });
-        const data = await res.json();
-        if (!res.ok) {
-            const error = new Error(data.message || "Erro no login");
-            error.code = data.code;
-            throw error;
-        }
-        this.setSession(data.token, data.user);
+        const data = await this.json("POST", "/login", { email, password });
+        this.setUser(data.user);
         return data;
     }
-    async register(name, email, password, phone, birthDate, emailUpdatesOptIn = false) {
-        const res = await fetch("/api/auth/register", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ name, email, password, phone, birthDate, emailUpdatesOptIn }),
-        });
-        const data = await res.json();
-        if (!res.ok) {
-            const error = new Error(data.message || "Erro no cadastro");
-            error.code = data.code;
-            throw error;
-        }
-        return data;
+
+    register(name, email, password, phone, birthDate, emailUpdatesOptIn = false) {
+        return this.json("POST", "/register", { name, email, password, phone, birthDate, emailUpdatesOptIn });
     }
-    async verifyEmail(token) {
-        const res = await fetch("/api/auth/verify-email", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ token }),
-        });
-        const data = await res.json();
-        if (!res.ok) {
-            const error = new Error(data.message || "Erro ao confirmar email");
-            error.code = data.code;
-            throw error;
-        }
-        return data;
+
+    verifyEmail(token) {
+        return this.json("POST", "/verify-email", { token });
     }
-    async resendVerification(email) {
-        const res = await fetch("/api/auth/resend-verification", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email }),
-        });
-        const data = await res.json();
-        if (!res.ok)
-            throw new Error(data.message || "Erro ao reenviar verificação");
-        return data;
+
+    resendVerification(email) {
+        return this.json("POST", "/resend-verification", { email });
     }
-    logout() {
+
+    forgotPassword(email) {
+        return this.json("POST", "/forgot-password", { email });
+    }
+
+    resetPassword(token, password) {
+        return this.json("POST", "/reset-password", { token, password });
+    }
+
+    async logout({ redirect = true } = {}) {
+        try {
+            await fetch("/api/auth/logout", { method: "POST", credentials: "same-origin" });
+        } catch {}
         this.clearSession();
-        window.location.href = "/";
+        if (redirect) window.location.href = "/";
     }
 }

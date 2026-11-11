@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS `user` (
   name VARCHAR(255) NOT NULL,
   email VARCHAR(255) NOT NULL UNIQUE,
   passwordHash VARCHAR(255) NOT NULL,
+  passwordChangedAt DATETIME NULL,
   role ENUM('MEMBER', 'DIRECTOR', 'ADMIN') NOT NULL DEFAULT 'MEMBER',
   `status` ENUM('PENDING', 'ACTIVE', 'INACTIVE') NOT NULL DEFAULT 'PENDING',
   avatarUrl VARCHAR(500) NULL,
@@ -19,11 +20,14 @@ CREATE TABLE IF NOT EXISTS `user` (
   emailVerifiedAt TIMESTAMP NULL,
   emailVerificationTokenHash CHAR(64) NULL,
   emailVerificationExpiresAt DATETIME NULL,
+  passwordResetTokenHash CHAR(64) NULL,
+  passwordResetExpiresAt DATETIME NULL,
   emailUpdatesOptIn BOOLEAN NOT NULL DEFAULT FALSE,
   emailUpdatesOptInAt DATETIME NULL,
   createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  INDEX idx_user_email_verification_token (emailVerificationTokenHash)
+  INDEX idx_user_email_verification_token (emailVerificationTokenHash),
+  INDEX idx_user_password_reset_token (passwordResetTokenHash)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `event` (
@@ -36,7 +40,8 @@ CREATE TABLE IF NOT EXISTS `event` (
   isPublic BOOLEAN DEFAULT TRUE,
   maxParticipants INT NULL,
   createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_event_public_date (isPublic, `date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS eventsignup (
@@ -59,7 +64,8 @@ CREATE TABLE IF NOT EXISTS `project` (
   imageUrl VARCHAR(500) NULL,
   isPublic BOOLEAN DEFAULT TRUE,
   createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_project_public_created (isPublic, createdAt)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS newsarticle (
@@ -74,7 +80,8 @@ CREATE TABLE IF NOT EXISTS newsarticle (
   authorId VARCHAR(36) NULL,
   createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  FOREIGN KEY (authorId) REFERENCES `user`(id) ON DELETE SET NULL
+  FOREIGN KEY (authorId) REFERENCES `user`(id) ON DELETE SET NULL,
+  INDEX idx_news_published_created (published, createdAt)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS notice (
@@ -84,7 +91,8 @@ CREATE TABLE IF NOT EXISTS notice (
   userId VARCHAR(36) NULL,
   createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  FOREIGN KEY (userId) REFERENCES `user`(id) ON DELETE SET NULL
+  FOREIGN KEY (userId) REFERENCES `user`(id) ON DELETE SET NULL,
+  INDEX idx_notice_created (createdAt)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS contact (
@@ -95,7 +103,8 @@ CREATE TABLE IF NOT EXISTS contact (
   subject VARCHAR(255) NOT NULL,
   message TEXT NOT NULL,
   isRead BOOLEAN DEFAULT FALSE,
-  createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_contact_read_created (isRead, createdAt)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================================

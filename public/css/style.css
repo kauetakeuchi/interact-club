@@ -1,7 +1,40 @@
 /* ============================================
-   IMPORTS & VARIABLES
+   FONTES & VARIÁVEIS
+   Sora e Outfit (SIL OFL) hospedadas localmente:
+   sem requisições a terceiros e sem bloqueio de renderização.
    ============================================ */
-@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap');
+@font-face {
+  font-family: 'Outfit';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('/fonts/outfit-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Outfit';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('/fonts/outfit-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Sora';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('/fonts/sora-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Sora';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('/fonts/sora-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
 
 :root {
   --primary: #17458F;
@@ -1091,17 +1124,17 @@ input, textarea, select {
 .hero .btn-hero-secondary:hover { background: rgba(255,255,255,.15); border-color: rgba(255,255,255,.4); transform: translateY(-2px); }
 
 /* ============================================
-   HERO � FOCUS (foto dos jovens como fundo, layout totalmente novo)
-   Foto full-bleed como protagonista, texto ancorado, dock flutuante
+   HERO — FOCUS (fundo gráfico, layout editorial)
+   Composição em gradientes: não depende de fotos externas.
    ============================================ */
 .hero--focus {
   position: relative;
   overflow: visible;
   padding: 5.5rem 0 6.5rem;
   background:
-    linear-gradient(90deg, rgba(7,20,48,.88) 0%, rgba(15,52,110,.78) 38%, rgba(15,52,110,.42) 62%, rgba(15,52,110,.18) 78%),
-    linear-gradient(180deg, rgba(7,20,48,.22) 0%, transparent 45%, rgba(7,20,48,.35) 100%),
-    url("/uploads/12487769-grupo-de-adolescentes-felizes-gratis-foto.JPG") center 32% / cover no-repeat;
+    radial-gradient(ellipse 900px 520px at 82% 18%, rgba(46,99,196,.55) 0%, transparent 62%),
+    radial-gradient(ellipse 700px 480px at 12% 92%, rgba(245,158,11,.16) 0%, transparent 58%),
+    linear-gradient(115deg, #071430 0%, #0f346e 52%, #17458f 100%);
   color: #fff;
 }
 .hero--focus::after {
@@ -1265,7 +1298,7 @@ input, textarea, select {
 }
 @media (max-width: 768px) {
   .hero-focus__container { padding: 0 1.25rem; }
-  .hero--focus { padding: 3.5rem 0 4.5rem; background-position: center 28%; }
+  .hero--focus { padding: 3.5rem 0 4.5rem; }
   .hero-focus__content { padding-left: 1rem; border-left-width: 2px; }
   .hero-focus__content h1 { font-size: 2.25rem; }
   .hero-focus__content p { font-size: .9375rem; }
@@ -1291,7 +1324,7 @@ input, textarea, select {
 .hero-deco-4 { width: 80px; height: 80px; border: 1px solid rgba(255,255,255,.08); top: 20%; left: 8%; animation: float 12s ease-in-out infinite; }
 
 /* ============================================
-   HOME � PROJETOS FICHA TECNICA (processo vivo, 3 ricos)
+   HOME — PROJETOS FICHA TÉCNICA (processo vivo, 3 blocos)
    ============================================ */
 .projetos-section {
   background: #FFFFFF;
@@ -1489,7 +1522,7 @@ input, textarea, select {
 
 
 /* ============================================
-   HOME � EVENTOS (pr�ximos encontros)
+   HOME — EVENTOS (próximos encontros)
    ============================================ */
 .eventos-home {
   background: #F9FAFB;
@@ -1671,7 +1704,7 @@ input, textarea, select {
 }
 
 /* ============================================
-   HOME � FAQ
+   HOME — FAQ
    ============================================ */
 .faq-section {
   background: #FFFFFF;
@@ -1746,7 +1779,7 @@ input, textarea, select {
 .faq-item p a:hover { text-decoration: underline; }
 
 
-/* HOME � EVENTOS CALENDARIO JOVEM */
+/* HOME — EVENTOS CALENDÁRIO JOVEM */
 .eventos-home--cal {
   background: #F9FAFB;
   padding: 4.5rem 0 5rem;
@@ -1980,7 +2013,7 @@ input, textarea, select {
 }
 
 
-/* PROJETOS � LINHA DO TEMPO IMPACTO (Provar que faz + Equilibrio) */
+/* PROJETOS — LINHA DO TEMPO IMPACTO (Provar que faz + Equilíbrio) */
 .timeline-impact {
   position: relative;
   max-width: 880px;
@@ -2152,7 +2185,7 @@ input, textarea, select {
 }
 
 
-/* PROJETOS � GALERIA EDITORIAL (foto domina, emocional) */
+/* PROJETOS — GALERIA EDITORIAL (foto domina, emocional) */
 .gallery {
   max-width: 1100px;
   margin: 0 auto;
@@ -2283,7 +2316,7 @@ input, textarea, select {
 }
 
 
-/* PROJETOS � ENCONTRE (estilo Sympla / 4 colunas + filtros) */
+/* PROJETOS — ENCONTRE (estilo Sympla / 4 colunas + filtros) */
 .encontre-head {
   display: flex;
   align-items: center;
@@ -2751,6 +2784,15 @@ input, textarea, select {
   font-weight: 600;
   color: var(--text);
   margin-bottom: .375rem;
+}
+
+/* Campo armadilha para bots: invisível e fora do fluxo de foco. */
+.hp-field {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
 }
 
 .email-choice .email-choice__label {
@@ -5231,8 +5273,8 @@ tbody tr:nth-child(even):hover {
 }
 
 /* ============================================
-   HOME � NEWS EDITION (jornal editorial, imagem domina)
-   Dr�stica: 1 destaque grande + pilha lateral
+   HOME — NEWS EDITION (jornal editorial, imagem domina)
+   Drástica: 1 destaque grande + pilha lateral
    ============================================ */
 .news-section {
   background: #FFFFFF;

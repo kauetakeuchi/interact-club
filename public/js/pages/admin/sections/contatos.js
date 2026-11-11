@@ -1,57 +1,53 @@
 import { api, toast } from "../../../lib/index.js";
-import { esc } from "../ui.js";
+import { esc, bindActions } from "../ui.js";
 import { icons } from "../icons.js";
 
 export async function render() {
-    const c = await api.get("/admin/contatos");
-    const novas = c.filter((x) => !x.isRead).length;
+    const contatos = await api.get("/admin/contatos");
+    const novas = contatos.filter((contato) => !contato.isRead).length;
     return `<div class="section-bar">
       <div class="section-bar-stats">
-        <span class="section-bar-stat">${c.length} mensagens</span>
+        <span class="section-bar-stat">${contatos.length} mensagens</span>
         <span class="section-bar-divider"></span>
         <span class="section-bar-stat">${novas} não lidas</span>
       </div>
       <div class="section-bar-actions">
-        <div class="search-wrap"><input class="search-input" placeholder="Buscar mensagens..." onkeyup="filtrarTabela(this)">${icons.search}</div>
+        <div class="search-wrap"><input class="search-input" data-table-search="tabela-contatos" placeholder="Buscar mensagens..." aria-label="Buscar mensagens">${icons.search}</div>
       </div>
     </div>
-    ${c.length === 0 ? `<div class="empty-state"><h3>Nenhuma mensagem recebida</h3><p>Mensagens enviadas pelo formulário de contato aparecem aqui.</p></div>` : `
+    ${contatos.length === 0 ? `<div class="empty-state"><h3>Nenhuma mensagem recebida</h3><p>Mensagens enviadas pelo formulário de contato aparecem aqui.</p></div>` : `
     <div class="table-wrap"><table class="admin-table" id="tabela-contatos"><thead><tr><th>Nome</th><th>Email</th><th>Assunto</th><th>Mensagem</th><th>Data</th><th>Status</th><th class="th-actions">Ações</th></tr></thead><tbody>
-      ${c.map((x) => `<tr>
-        <td><div class="cell-name"><div class="cell-avatar">${esc(x.name.charAt(0).toUpperCase())}</div>${esc(x.name)}</div></td>
-        <td><span class="cell-email">${esc(x.email)}</span>${x.phone ? `<div class="cell-time">${esc(x.phone)}</div>` : ""}</td>
-        <td>${esc(x.subject)}</td>
-        <td><div class="cell-preview">${esc(x.message)}</div></td>
-        <td><div class="cell-date">${new Date(x.createdAt).toLocaleDateString("pt-BR")}</div></td>
-        <td><span class="status-dot status-${x.isRead ? "green" : "amber"}"></span><span class="status-label">${x.isRead ? "Lida" : "Nova"}</span></td>
+      ${contatos.map((contato) => `<tr>
+        <td><div class="cell-name"><div class="cell-avatar">${esc(contato.name.charAt(0).toUpperCase())}</div>${esc(contato.name)}</div></td>
+        <td><span class="cell-email">${esc(contato.email)}</span>${contato.phone ? `<div class="cell-time">${esc(contato.phone)}</div>` : ""}</td>
+        <td>${esc(contato.subject)}</td>
+        <td><div class="cell-preview">${esc(contato.message)}</div></td>
+        <td><div class="cell-date">${new Date(contato.createdAt).toLocaleDateString("pt-BR")}</div></td>
+        <td><span class="status-dot status-${contato.isRead ? "green" : "amber"}"></span><span class="status-label">${contato.isRead ? "Lida" : "Nova"}</span></td>
         <td class="td-actions">
-          ${x.isRead ? "" : `<button class="btn-icon" onclick="marcarContatoLido('${x.id}')" title="Marcar como lida">${icons.check}</button>`}
-          <button class="btn-icon btn-icon-danger" onclick="excluirContato('${x.id}')" title="Excluir">${icons.trash}</button>
+          ${contato.isRead ? "" : `<button class="btn-icon" data-action="lida" data-id="${esc(contato.id)}" title="Marcar como lida">${icons.check}</button>`}
+          <button class="btn-icon btn-icon-danger" data-action="excluir" data-id="${esc(contato.id)}" title="Excluir">${icons.trash}</button>
         </td>
       </tr>`).join("")}
     </tbody></table></div>`}`;
 }
 
-window.marcarContatoLido = async (id) => {
-    try {
-        await api.put(`/admin/contatos/${id}/lida`);
-        toast.show("Mensagem marcada como lida!");
-        location.reload();
-    }
-    catch (err) {
-        toast.show(err.message, "error");
-    }
-};
+export function bind(root, { refresh }) {
+    bindActions(root, {
+        lida: ({ id }) => markRead(id, refresh),
+        excluir: ({ id }) => remove(id, refresh),
+    });
+}
 
-window.excluirContato = async (id) => {
-    if (!confirm("Excluir esta mensagem?"))
-        return;
-    try {
-        await api.del(`/admin/contatos/${id}`);
-        toast.show("Mensagem excluída!");
-        location.reload();
-    }
-    catch (err) {
-        toast.show(err.message, "error");
-    }
-};
+async function markRead(id, refresh) {
+    await api.put(`/admin/contatos/${encodeURIComponent(id)}/lida`);
+    toast.show("Mensagem marcada como lida!");
+    refresh();
+}
+
+async function remove(id, refresh) {
+    if (!confirm("Excluir esta mensagem? Esta ação não pode ser desfeita.")) return;
+    await api.del(`/admin/contatos/${encodeURIComponent(id)}`);
+    toast.show("Mensagem excluída!");
+    refresh();
+}

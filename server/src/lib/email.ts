@@ -160,6 +160,38 @@ export async function sendVerificationEmail(to: string, name: string, token: str
   });
 }
 
+export async function sendPasswordResetEmail(to: string, name: string, token: string): Promise<void> {
+  const appUrl = appBaseUrl();
+  const resetUrl = `${appUrl}/redefinir-senha?token=${encodeURIComponent(token)}`;
+  const safeName = escapeHtml(name);
+  const safeUrl = escapeHtml(resetUrl);
+
+  await getTransporter().sendMail({
+    from: env("SMTP_FROM"),
+    to,
+    subject: "Redefinição de senha — Interact Club",
+    text: [
+      `Olá, ${name}!`,
+      "",
+      "Recebemos um pedido para redefinir sua senha no Interact Club:",
+      resetUrl,
+      "",
+      "Este link expira em 1 hora. Se você não pediu a redefinição, ignore esta mensagem: sua senha continua a mesma.",
+    ].join("\n"),
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:560px;margin:auto;color:#1f2937;line-height:1.6">
+        <h1 style="color:#17458f;font-size:24px">Redefinir sua senha</h1>
+        <p>Olá, ${safeName}!</p>
+        <p>Recebemos um pedido para redefinir sua senha no Interact Club.</p>
+        <p style="margin:28px 0">
+          <a href="${safeUrl}" style="background:#17458f;color:#fff;text-decoration:none;padding:12px 20px;border-radius:6px;display:inline-block">Criar nova senha</a>
+        </p>
+        <p style="font-size:14px;color:#6b7280">O link expira em 1 hora. Se você não pediu a redefinição, ignore esta mensagem: sua senha continua a mesma.</p>
+      </div>
+    `,
+  });
+}
+
 export type ContentKind = "noticia" | "evento" | "projeto";
 
 const contentLabels: Record<ContentKind, { subject: string; heading: string; cta: string }> = {

@@ -5,12 +5,34 @@ import { getOne, exec, isDuplicateKeyError } from "../lib/db";
 import { signToken } from "../lib/jwt";
 import { requireAuth, AuthRequest } from "../middleware/auth";
 import { validate } from "../lib/validation";
-import { loginSchema, registerSchema, perfilSchema, verifyEmailSchema, resendVerificationSchema } from "../lib/schemas";
+import {
+  loginSchema,
+  registerSchema,
+  perfilSchema,
+  verifyEmailSchema,
+  resendVerificationSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
+} from "../lib/schemas";
 import { ah } from "../lib/asyncHandler";
 import { logError } from "../lib/logger";
-import { sendVerificationEmail } from "../lib/email";
+import { sendVerificationEmail, sendPasswordResetEmail } from "../lib/email";
+import { setSessionCookie, clearSessionCookie } from "../lib/session";
+import { issueEmailVerification } from "../lib/verification";
 
 const router = Router();
+
+const RESET_TOKEN_TTL_MS = 60 * 60 * 1000;
+
+// Respostas de autenticação nunca devem ser cacheadas por proxies ou navegador.
+router.use((_req, res, next) => {
+  res.setHeader("Cache-Control", "no-store");
+  next();
+});
+
+function hashToken(token: string): string {
+  return crypto.createHash("sha256").update(token).digest("hex");
+}
 
 router.post("/login", validate(loginSchema), ah(async (req: Request, res: Response) => {
   const { email, password } = req.body;
@@ -36,9 +58,9 @@ router.post("/login", validate(loginSchema), ah(async (req: Request, res: Respon
     });
   }
 
-  const token = signToken(user.id);
+  // A sessão fica em cookie HttpOnly; o token nunca é exposto ao JavaScript da página.
+  setSessionCookie(res, signToken(user.id));
   return res.json({
-    token,
     user: {
       id: user.id, name: user.name, email: user.email,
       role: user.role, status: user.status,
@@ -47,6 +69,11 @@ router.post("/login", validate(loginSchema), ah(async (req: Request, res: Respon
     },
   });
 }));
+
+router.post("/logout", (_req: Request, res: Response) => {
+  clearSessionCookie(res);
+  return res.json({ success: true });
+});
 
 router.post("/register", validate(registerSchema), ah(async (req: Request, res: Response) => {
   const { name, email, password, phone, birthDate, emailUpdatesOptIn } = req.body;
@@ -64,7 +91,7 @@ router.post("/register", validate(registerSchema), ah(async (req: Request, res: 
   const passwordHash = await bcrypt.hash(password, 12);
   const id = crypto.randomUUID();
   const verificationToken = crypto.randomBytes(32).toString("hex");
-  const verificationTokenHash = crypto.createHash("sha256").update(verificationToken).digest("hex");
+  const verificationTokenHash = hashToken(verificationToken);
   const verificationExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
   try {
     await exec(
@@ -94,7 +121,7 @@ router.post("/register", validate(registerSchema), ah(async (req: Request, res: 
 }));
 
 router.post("/verify-email", validate(verifyEmailSchema), ah(async (req: Request, res: Response) => {
-  const tokenHash = crypto.createHash("sha256").update(req.body.token).digest("hex");
+  const tokenHash = hashToken(req.body.token);
   const user = await getOne<any>(
     "SELECT id, emailVerifiedAt, emailVerificationExpiresAt FROM `user` WHERE emailVerificationTokenHash = ?",
     [tokenHash]
@@ -126,21 +153,55 @@ router.post("/resend-verification", validate(resendVerificationSchema), ah(async
   );
   if (!user || user.emailVerifiedAt) return res.json(genericResponse);
 
-  const verificationToken = crypto.randomBytes(32).toString("hex");
-  const verificationTokenHash = crypto.createHash("sha256").update(verificationToken).digest("hex");
-  const verificationExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
-
-  await exec(
-    "UPDATE `user` SET emailVerificationTokenHash = ?, emailVerificationExpiresAt = ? WHERE id = ? AND emailVerifiedAt IS NULL",
-    [verificationTokenHash, verificationExpiresAt, user.id]
-  );
   try {
-    await sendVerificationEmail(user.email, user.name, verificationToken);
+    await issueEmailVerification(user);
   } catch (err) {
     logError("auth/resend-verification", err);
-    return res.status(503).json({ message: "Não foi possível enviar o email agora. Tente novamente mais tarde." });
   }
   return res.json(genericResponse);
+}));
+
+router.post("/forgot-password", validate(forgotPasswordSchema), ah(async (req: Request, res: Response) => {
+  const genericResponse = {
+    message: "Se houver uma conta ativa com esse email, enviaremos um link para redefinir a senha.",
+  };
+  const user = await getOne<{ id: string; name: string; email: string }>(
+    "SELECT id, name, email FROM `user` WHERE email = ? AND emailVerifiedAt IS NOT NULL AND `status` = 'ACTIVE'",
+    [req.body.email]
+  );
+  if (!user) return res.json(genericResponse);
+
+  const token = crypto.randomBytes(32).toString("hex");
+  await exec(
+    "UPDATE `user` SET passwordResetTokenHash = ?, passwordResetExpiresAt = ? WHERE id = ?",
+    [hashToken(token), new Date(Date.now() + RESET_TOKEN_TTL_MS), user.id]
+  );
+
+  try {
+    await sendPasswordResetEmail(user.email, user.name, token);
+  } catch (err) {
+    // Não revela falha de envio: a resposta é a mesma para qualquer email.
+    logError("auth/forgot-password-email", err);
+  }
+  return res.json(genericResponse);
+}));
+
+router.post("/reset-password", validate(resetPasswordSchema), ah(async (req: Request, res: Response) => {
+  const user = await getOne<{ id: string }>(
+    "SELECT id FROM `user` WHERE passwordResetTokenHash = ? AND passwordResetExpiresAt > NOW() LIMIT 1",
+    [hashToken(req.body.token)]
+  );
+  if (!user) {
+    return res.status(400).json({ message: "Link de redefinição inválido ou expirado. Solicite um novo." });
+  }
+
+  const passwordHash = await bcrypt.hash(req.body.password, 12);
+  await exec(
+    "UPDATE `user` SET passwordHash = ?, passwordChangedAt = CURRENT_TIMESTAMP, passwordResetTokenHash = NULL, passwordResetExpiresAt = NULL WHERE id = ?",
+    [passwordHash, user.id]
+  );
+  clearSessionCookie(res);
+  return res.json({ message: "Senha redefinida! Agora você já pode entrar com a nova senha." });
 }));
 
 router.get("/me", requireAuth, ah(async (req: AuthRequest, res: Response) => {
@@ -154,16 +215,11 @@ router.get("/me", requireAuth, ah(async (req: AuthRequest, res: Response) => {
 router.put("/perfil", requireAuth, validate(perfilSchema), ah(async (req: AuthRequest, res: Response) => {
   const { name, bio = null, phone = null, position = null, avatarUrl = null, emailUpdatesOptIn } = req.body;
   const preference = emailUpdatesOptIn ?? null;
-  try {
-    await exec(
-      "UPDATE `user` SET name = ?, bio = ?, phone = ?, `position` = ?, avatarUrl = ?, emailUpdatesOptIn = COALESCE(?, emailUpdatesOptIn), emailUpdatesOptInAt = CASE WHEN ? IS NULL THEN emailUpdatesOptInAt WHEN ? = 1 THEN COALESCE(emailUpdatesOptInAt, CURRENT_TIMESTAMP) ELSE NULL END WHERE id = ?",
-      [name, bio, phone, position, avatarUrl, preference, preference, preference, req.user!.id]
-    );
-  } catch (err) {
-    logError("auth/perfil", err);
-    return res.status(500).json({ message: "Erro ao atualizar perfil" });
-  }
-  const user = await getOne("SELECT * FROM `user` WHERE id = ?", [req.user!.id]);
+  await exec(
+    "UPDATE `user` SET name = ?, bio = ?, phone = ?, `position` = ?, avatarUrl = ?, emailUpdatesOptIn = COALESCE(?, emailUpdatesOptIn), emailUpdatesOptInAt = CASE WHEN ? IS NULL THEN emailUpdatesOptInAt WHEN ? = 1 THEN COALESCE(emailUpdatesOptInAt, CURRENT_TIMESTAMP) ELSE NULL END WHERE id = ?",
+    [name, bio, phone, position, avatarUrl, preference, preference, preference, req.user!.id]
+  );
+  const user = await getOne<any>("SELECT * FROM `user` WHERE id = ?", [req.user!.id]);
   return res.json({
     id: user!.id, name: user!.name, email: user!.email, role: user!.role, status: user!.status,
     avatarUrl: user!.avatarUrl, position: user!.position, bio: user!.bio, phone: user!.phone,

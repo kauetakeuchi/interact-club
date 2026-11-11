@@ -25,6 +25,10 @@ export class DashboardSidebar {
         document.body.appendChild(overlay);
         document.body.appendChild(sidebar);
         const user = this.auth.getUser();
+        if (!user)
+            return;
+        const roleLabel = { ADMIN: "Administração", DIRECTOR: "Diretoria", MEMBER: "Membro" }[user.role] || "Membro";
+        const isStaff = user.role === "ADMIN" || user.role === "DIRECTOR";
         const links = [
             { h: "visao-geral", l: "Visão Geral" },
             { h: "perfil", l: "Meu Perfil" },
@@ -36,13 +40,13 @@ export class DashboardSidebar {
         <div class="avatar">${this.esc(user.name.charAt(0).toUpperCase())}</div>
         <div class="info">
           <div class="name">${this.esc(user.name)}</div>
-          <div class="role">${user.role === "ADMIN" ? "Administrador" : "Membro"}</div>
+          <div class="role">${roleLabel}</div>
         </div>
-        <button class="sidebar-dash-close">&times;</button>
+        <button class="sidebar-dash-close" aria-label="Fechar">&times;</button>
       </div>
       <nav class="sidebar-dash-nav">
         ${links.map(l => `<a href="#" data-section="${l.h}" class="${this.currentSection === l.h ? "active" : ""}">${l.l}</a>`).join("")}
-        ${user.role === "ADMIN" ? `<a href="#" id="sidebar-admin-link">Admin</a>` : ""}
+        ${isStaff ? `<a href="/admin" id="sidebar-admin-link">Painel do clube</a>` : ""}
       </nav>
       <div class="sidebar-dash-content" id="sidebar-dash-content">
         <div class="sidebar-dash-loading">Carregando...</div>
@@ -57,10 +61,8 @@ export class DashboardSidebar {
                 this.switchSection(section);
             });
         });
-        document.getElementById("sidebar-admin-link")?.addEventListener("click", (e) => {
-            e.preventDefault();
+        document.getElementById("sidebar-admin-link")?.addEventListener("click", () => {
             sessionStorage.setItem("sd-reopen", "1");
-            window.location.href = "/admin";
         });
         sidebar.querySelector(".sidebar-dash-close")?.addEventListener("click", () => this.close());
         document.getElementById("sidebar-logout")?.addEventListener("click", () => this.auth.logout());
@@ -114,8 +116,13 @@ export class DashboardSidebar {
             "avisos": () => this.renderAvisos(),
         };
         const render = renderers[section];
-        if (render)
-            content.innerHTML = await render();
+        if (render) {
+            try {
+                content.innerHTML = await render();
+            } catch (err) {
+                content.innerHTML = `<p class="sd-empty">${this.esc(err.message || "Erro ao carregar.")}</p>`;
+            }
+        }
         this.attachEvents();
     }
     attachEvents() {
@@ -186,7 +193,7 @@ export class DashboardSidebar {
           <span class="sd-stat-label">Projetos Ativos</span>
         </div>
       </div>
-      <h4 class="sd-section-title">Proximos Eventos</h4>
+      <h4 class="sd-section-title">Próximos Eventos</h4>
       ${eventos.length === 0 ? `<p class="sd-empty">Nenhum evento inscrito.</p>` :
             eventos.slice(0, 3).map((i) => `
           <div class="sd-item">
@@ -204,7 +211,7 @@ export class DashboardSidebar {
         <div class="sd-field"><label>Nome</label><input type="text" id="sd-pf-name" value="${this.esc(user.name)}"></div>
         <div class="sd-field"><label>Email</label><input type="email" value="${this.esc(user.email)}" disabled></div>
         <div class="sd-field"><label>Cargo</label><input type="text" id="sd-pf-position" value="${this.esc(user.position || "")}" placeholder="Seu cargo"></div>
-        <div class="sd-field"><label>Bio</label><textarea id="sd-pf-bio" placeholder="Fale sobre voce..." rows="3">${this.esc(user.bio || "")}</textarea></div>
+        <div class="sd-field"><label>Bio</label><textarea id="sd-pf-bio" placeholder="Fale sobre você..." rows="3">${this.esc(user.bio || "")}</textarea></div>
         <div class="sd-field"><label>Telefone</label><input type="text" id="sd-pf-phone" value="${this.esc(user.phone || "")}" placeholder="(11) 99999-9999"></div>
         <div class="sd-field email-choice"><label class="email-choice__label" for="sd-pf-email-updates"><input type="checkbox" id="sd-pf-email-updates" ${user.emailUpdatesOptIn ? "checked" : ""}><span><strong>Receber novidades por email</strong><small>Projetos, eventos e notícias. Desmarque e salve para parar de receber.</small></span></label></div>
         <button type="submit" class="btn btn-primary btn-full">Salvar</button>
@@ -215,7 +222,7 @@ export class DashboardSidebar {
         try {
             const inscricoes = await this.api.get("/eventos/user/inscricoes");
             if (inscricoes.length === 0)
-                return `<p class="sd-empty">Voce nao esta inscrito em nenhum evento.</p>`;
+                return `<p class="sd-empty">Você não está inscrito em nenhum evento.</p>`;
             return inscricoes.map((i) => `
         <div class="sd-item">
           <div>
