@@ -1,4 +1,4 @@
-import { v2 as cloudinary } from "cloudinary";
+import { v2 as cloudinary, type UploadApiErrorResponse, type UploadApiResponse } from "cloudinary";
 import path from "path";
 import fs from "fs";
 
@@ -33,8 +33,8 @@ export async function uploadToCloudinary(fileBuffer: Buffer, fileName: string): 
   return new Promise((resolve, reject) => {
     const uploadStream = cloudinary.uploader.upload_stream(
       { folder: "interact-club", public_id: fileName, resource_type: "image" },
-      (error: any, result: any) => {
-        if (error) return reject(error);
+      (error?: UploadApiErrorResponse, result?: UploadApiResponse) => {
+        if (error || !result) return reject(error ?? new Error("Upload sem resposta do Cloudinary"));
         resolve({ url: result.secure_url, publicId: result.public_id });
       }
     );
@@ -44,7 +44,7 @@ export async function uploadToCloudinary(fileBuffer: Buffer, fileName: string): 
 
 export async function deleteFromCloudinary(publicId: string): Promise<void> {
   return new Promise((resolve, reject) => {
-    cloudinary.uploader.destroy(publicId, (error: any) => {
+    cloudinary.uploader.destroy(publicId, (error?: UploadApiErrorResponse) => {
       if (error) return reject(error);
       resolve();
     });

@@ -1,12 +1,13 @@
 import { Router, Response } from "express";
 import bcrypt from "bcryptjs";
-import { query, getOne, exec, isDuplicateKeyError } from "../lib/db";
+import { query, getOne, exec, isDuplicateKeyError, type SqlParam } from "../lib/db";
 import { AuthRequest, requireAdmin } from "../middleware/auth";
 import { validate } from "../lib/validation";
 import { membroUpdateSchema } from "../lib/schemas";
 import { ah } from "../lib/asyncHandler";
 import { logError } from "../lib/logger";
 import { issueEmailVerification } from "../lib/verification";
+import type { UserRow } from "../lib/types";
 
 const router = Router();
 
@@ -36,7 +37,7 @@ router.put("/:id", requireAdmin, validate(membroUpdateSchema), ah(async (req: Au
   }
 
   const fields: string[] = [];
-  const values: unknown[] = [];
+  const values: SqlParam[] = [];
   if (name !== undefined) { fields.push("name = ?"); values.push(name); }
   if (email !== undefined) {
     fields.push("email = ?");
@@ -61,7 +62,7 @@ router.put("/:id", requireAdmin, validate(membroUpdateSchema), ah(async (req: Au
     throw err;
   }
 
-  const user = await getOne<any>(`SELECT ${MEMBER_FIELDS} FROM \`user\` WHERE id = ?`, [req.params.id]);
+  const user = await getOne<Pick<UserRow, "id" | "name" | "email">>(`SELECT ${MEMBER_FIELDS} FROM \`user\` WHERE id = ?`, [req.params.id]);
   const emailChanged = Boolean(email && email.toLowerCase() !== current.email.toLowerCase());
   let emailVerificationSent = false;
   if (emailChanged && user) {

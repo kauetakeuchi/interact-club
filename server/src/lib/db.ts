@@ -1,4 +1,7 @@
-import mysql from "mysql2/promise";
+import mysql, { type ResultSetHeader } from "mysql2/promise";
+
+/** Valores aceitos nos placeholders `?` das consultas. */
+export type SqlParam = string | number | boolean | Date | null;
 
 function parseDbUrl(): { host: string; port: number; user: string; password: string; database: string } {
   if (!process.env.DATABASE_URL) {
@@ -29,24 +32,27 @@ const pool = mysql.createPool({
   queueLimit: 0,
 });
 
-export async function query<T = any>(sql: string, params?: any[]): Promise<T> {
+/** Lista de linhas. Informe o formato: `query<EventRow[]>(...)`. */
+export async function query<T = unknown[]>(sql: string, params?: SqlParam[]): Promise<T> {
   const [rows] = await pool.execute(sql, params || []);
   return rows as T;
 }
 
-export async function getOne<T = any>(sql: string, params?: any[]): Promise<T | null> {
+/** Primeira linha do resultado, ou null. */
+export async function getOne<T = Record<string, unknown>>(sql: string, params?: SqlParam[]): Promise<T | null> {
   const [rows] = await pool.execute(sql, params || []);
-  const arr = rows as any[];
+  const arr = rows as T[];
   return arr.length > 0 ? arr[0] : null;
 }
 
-export async function exec(sql: string, params?: any[]): Promise<any> {
-  const [result] = await pool.execute(sql, params || []);
+/** INSERT/UPDATE/DELETE: devolve linhas afetadas, id inserido etc. */
+export async function exec(sql: string, params?: SqlParam[]): Promise<ResultSetHeader> {
+  const [result] = await pool.execute<ResultSetHeader>(sql, params || []);
   return result;
 }
 
 export function isDuplicateKeyError(err: unknown): boolean {
-  return (err as any)?.code === "ER_DUP_ENTRY";
+  return (err as { code?: string } | null)?.code === "ER_DUP_ENTRY";
 }
 
 export async function closePool() {

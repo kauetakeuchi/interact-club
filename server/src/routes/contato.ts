@@ -1,4 +1,4 @@
-import { Router, Response } from "express";
+import { Router, Request, Response } from "express";
 import crypto from "crypto";
 import { exec } from "../lib/db";
 import { validate } from "../lib/validation";
@@ -8,7 +8,7 @@ import { ah } from "../lib/asyncHandler";
 const router = Router();
 
 // Público: qualquer visitante pode enviar mensagem pelo formulário.
-router.post("/", validate(contatoSchema), ah(async (req: any, res: Response) => {
+router.post("/", validate(contatoSchema), ah(async (req: Request, res: Response) => {
   const { name, email, phone, subject, message, website } = req.body;
 
   // Honeypot: campo invisível que humanos não preenchem. Bots recebem sucesso e nada é gravado.

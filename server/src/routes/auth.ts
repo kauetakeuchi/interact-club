@@ -19,6 +19,7 @@ import { logError } from "../lib/logger";
 import { sendVerificationEmail, sendPasswordResetEmail } from "../lib/email";
 import { setSessionCookie, clearSessionCookie } from "../lib/session";
 import { issueEmailVerification } from "../lib/verification";
+import type { UserRow } from "../lib/types";
 
 const router = Router();
 
@@ -37,7 +38,7 @@ function hashToken(token: string): string {
 router.post("/login", validate(loginSchema), ah(async (req: Request, res: Response) => {
   const { email, password } = req.body;
 
-  const user = await getOne<any>("SELECT * FROM `user` WHERE email = ?", [email]);
+  const user = await getOne<UserRow>("SELECT * FROM `user` WHERE email = ?", [email]);
   if (!user) return res.status(401).json({ message: "Email ou senha inválidos" });
 
   const valid = await bcrypt.compare(password, user.passwordHash);
@@ -78,7 +79,7 @@ router.post("/logout", (_req: Request, res: Response) => {
 router.post("/register", validate(registerSchema), ah(async (req: Request, res: Response) => {
   const { name, email, password, phone, birthDate, emailUpdatesOptIn } = req.body;
 
-  const exists = await getOne<any>("SELECT id, emailVerifiedAt FROM `user` WHERE email = ?", [email]);
+  const exists = await getOne<Pick<UserRow, "id" | "emailVerifiedAt">>("SELECT id, emailVerifiedAt FROM `user` WHERE email = ?", [email]);
   if (exists) {
     return res.status(409).json({
       code: exists.emailVerifiedAt ? "EMAIL_ALREADY_REGISTERED" : "EMAIL_NOT_VERIFIED",
@@ -122,7 +123,7 @@ router.post("/register", validate(registerSchema), ah(async (req: Request, res: 
 
 router.post("/verify-email", validate(verifyEmailSchema), ah(async (req: Request, res: Response) => {
   const tokenHash = hashToken(req.body.token);
-  const user = await getOne<any>(
+  const user = await getOne<Pick<UserRow, "id" | "emailVerifiedAt" | "emailVerificationExpiresAt">>(
     "SELECT id, emailVerifiedAt, emailVerificationExpiresAt FROM `user` WHERE emailVerificationTokenHash = ?",
     [tokenHash]
   );
@@ -147,7 +148,7 @@ router.post("/resend-verification", validate(resendVerificationSchema), ah(async
   const genericResponse = {
     message: "Se houver um cadastro pendente para esse email, um novo link será enviado.",
   };
-  const user = await getOne<any>(
+  const user = await getOne<Pick<UserRow, "id" | "name" | "email" | "emailVerifiedAt">>(
     "SELECT id, name, email, emailVerifiedAt FROM `user` WHERE email = ?",
     [req.body.email]
   );
@@ -219,7 +220,7 @@ router.put("/perfil", requireAuth, validate(perfilSchema), ah(async (req: AuthRe
     "UPDATE `user` SET name = ?, bio = ?, phone = ?, `position` = ?, avatarUrl = ?, emailUpdatesOptIn = COALESCE(?, emailUpdatesOptIn), emailUpdatesOptInAt = CASE WHEN ? IS NULL THEN emailUpdatesOptInAt WHEN ? = 1 THEN COALESCE(emailUpdatesOptInAt, CURRENT_TIMESTAMP) ELSE NULL END WHERE id = ?",
     [name, bio, phone, position, avatarUrl, preference, preference, preference, req.user!.id]
   );
-  const user = await getOne<any>("SELECT * FROM `user` WHERE id = ?", [req.user!.id]);
+  const user = await getOne<UserRow>("SELECT * FROM `user` WHERE id = ?", [req.user!.id]);
   return res.json({
     id: user!.id, name: user!.name, email: user!.email, role: user!.role, status: user!.status,
     avatarUrl: user!.avatarUrl, position: user!.position, bio: user!.bio, phone: user!.phone,
