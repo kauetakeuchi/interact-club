@@ -60,7 +60,7 @@ function projectForm(projeto = null) {
     <div class="form-group"><label>Descrição</label><textarea id="f-pr-desc" class="form-control" rows="4" maxlength="10000" required>${esc(projeto?.description || "")}</textarea></div>
     <div class="form-group"><label>Imagem</label>${uploadField("f-pr-img", projeto?.imageUrl || "")}</div>
     <label class="toggle"><input type="checkbox" id="f-pr-public" ${isPublic ? "checked" : ""}><div class="toggle-slider"></div><span class="toggle-label">Público</span></label>
-    <button type="submit" class="btn btn-primary btn-full" style="margin-top:1.5rem;">${isEdit ? "Salvar" : "Criar Projeto"}</button>`;
+    <button type="submit" class="btn btn-primary btn-full modal-submit">${isEdit ? "Salvar" : "Criar Projeto"}</button>`;
 }
 
 function readForm() {

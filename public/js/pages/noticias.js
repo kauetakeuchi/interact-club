@@ -29,7 +29,7 @@ async function renderList(page) {
             if (countEl) countEl.textContent = `${list.length} matérias encontradas`;
             if (!grid) return;
             if (!list.length) {
-                grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:3rem 1rem;color:var(--text-muted);">Nenhuma matéria com esse filtro.</div>`;
+                grid.innerHTML = `<div class="list-empty">Nenhuma matéria com esse filtro.</div>`;
                 return;
             }
             grid.innerHTML = list.map((n)=>{
@@ -55,7 +55,7 @@ async function renderList(page) {
               ${cats.map(c=>`<button data-cat="${esc(c)}" class="encontre-filter">${esc(c)}</button>`).join("")}
             </div>
           </div>
-          <div class="encontre-grid" id="noticias-grid" style="grid-template-columns: repeat(3, 1fr);"></div>
+          <div class="encontre-grid encontre-grid--3" id="noticias-grid"></div>
         </div></section>`;
         renderGrid(noticias);
         document.getElementById("noticias-filters")?.addEventListener("click", (e)=>{

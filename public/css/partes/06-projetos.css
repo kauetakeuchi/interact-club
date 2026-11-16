@@ -1,0 +1,157 @@
+/* PROJETOS — ENCONTRE (estilo Sympla / 4 colunas + filtros) */
+.encontre-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem 0 1rem;
+  flex-wrap: wrap;
+}
+.encontre-head h1 {
+  font-family: var(--font-heading);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--primary-dark);
+  letter-spacing: -.02em;
+  margin: 0;
+}
+.encontre-filters {
+  display: flex;
+  gap: .5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.encontre-filter {
+  appearance: none;
+  background: #fff;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: .8125rem;
+  font-weight: 500;
+  padding: .5rem .85rem;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+}
+.encontre-filter--active {
+  background: #E8F0FF;
+  border-color: #BFDBFE;
+  color: var(--primary);
+}
+.encontre-count {
+  font-size: .8125rem;
+  color: var(--text-muted);
+  margin: .25rem 0 1.25rem;
+}
+.encontre-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem 1.25rem;
+}
+/* Notícias usam 3 colunas no desktop; as media queries abaixo reduzem no celular. */
+.encontre-grid--3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+.encontre-card {
+  background: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(15,52,110,.06), 0 1px 3px rgba(0,0,0,.04);
+  transition: transform .3s cubic-bezier(.22,1,.36,1), box-shadow .3s, border-color .3s;
+  display: flex;
+  flex-direction: column;
+}
+.encontre-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 32px rgba(15,52,110,.12), 0 4px 16px rgba(0,0,0,.06);
+  border-color: #D9E6F8;
+}
+.encontre-card__media {
+  aspect-ratio: 16 / 10;
+  position: relative;
+  background: #E8EEF9;
+  overflow: hidden;
+  border-radius: 12px;
+  position: relative;
+}
+.encontre-card__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform .4s;
+}
+.encontre-card:hover .encontre-card__media img { transform: scale(1.04); }
+.encontre-card__badge {
+  position: absolute;
+  top: .5rem;
+  left: .5rem;
+  font-size: .625rem;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  padding: .25rem .5rem;
+  border-radius: 100px;
+  color: #fff;
+  line-height: 1;
+}
+.encontre-card__body {
+  padding: 1rem 1rem .9rem;
+  display: flex;
+  flex-direction: column;
+  gap: .25rem;
+}
+.encontre-card__title {
+  font-family: var(--font-heading);
+  font-size: .875rem;
+  line-height: 1.45;
+  letter-spacing: .01em;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 2.2rem;
+}
+.encontre-card__meta {
+  font-size: .75rem;
+  letter-spacing: .02em;
+  color: var(--text-muted);
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.encontre-card__date {
+  font-size: .75rem;
+  margin-top: .35rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+  margin-top: .15rem;
+}
+@media (max-width: 1100px) { .encontre-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 768px) { .encontre-grid { grid-template-columns: repeat(2, 1fr); gap: .75rem; } }
+@media (max-width: 480px) { .encontre-grid { grid-template-columns: 1fr; } }
+
+
+.hero--compact {
+  padding: 2.5rem 0 2rem;
+}
+.hero-back {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  color: rgba(255,255,255,.75);
+  font-size: .8125rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color .2s;
+}
+.hero-back:hover { color: #fff; }
+.prose p { margin-bottom: 1.25rem; }

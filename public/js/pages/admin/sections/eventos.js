@@ -53,7 +53,7 @@ function eventForm(evento = null) {
     <div class="form-group"><label>Descrição</label><textarea id="f-ev-desc" class="form-control" rows="4" maxlength="10000" required>${esc(evento?.description || "")}</textarea></div>
     <div class="form-group"><label>Imagem</label>${uploadField("f-ev-img", evento?.imageUrl || "")}</div>
     <label class="toggle"><input type="checkbox" id="f-ev-public" ${isPublic ? "checked" : ""}><div class="toggle-slider"></div><span class="toggle-label">Público</span></label>
-    <button type="submit" class="btn btn-primary btn-full" style="margin-top:1.5rem;">${isEdit ? "Salvar" : "Criar Evento"}</button>`;
+    <button type="submit" class="btn btn-primary btn-full modal-submit">${isEdit ? "Salvar" : "Criar Evento"}</button>`;
 }
 
 function readForm() {

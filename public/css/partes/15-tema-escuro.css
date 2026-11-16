@@ -1,0 +1,812 @@
+/* ============================================
+   DARK MODE — TOGGLE (LIGHT / DARK) + OVERRIDES
+   Toggle idêntico à imagem: pílula com sol/lua
+   ============================================ */
+.theme-toggle {
+  position: relative;
+  width: 132px;
+  height: 36px;
+  border-radius: 999px;
+  background: #E9E9EE;
+  border: 1px solid #E3E3E8;
+  box-shadow:
+    inset 0 2px 5px rgba(0,0,0,.08),
+    inset 0 1px 1px rgba(255,255,255,.9),
+    0 1px 2px rgba(0,0,0,.06);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px 0 12px;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: background .38s cubic-bezier(.22,1,.36,1), border-color .38s, box-shadow .38s;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.theme-toggle:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.theme-toggle[data-theme="dark"] {
+  background: #1C1C20;
+  border-color: #2A2A2E;
+  box-shadow:
+    inset 0 2px 8px rgba(0,0,0,.45),
+    inset 0 1px 0 rgba(255,255,255,.04),
+    0 1px 2px rgba(0,0,0,.2);
+}
+
+.theme-toggle__text {
+  font-family: var(--font-heading);
+  font-size: .48rem;
+  font-weight: 800;
+  letter-spacing: .06em;
+  line-height: 1.05;
+  text-transform: uppercase;
+  transition: color .3s ease, opacity .3s ease, transform .3s ease;
+  pointer-events: none;
+  text-align: center;
+  display: inline-block;
+}
+
+.theme-toggle__text--light {
+  color: #FFFFFF;
+  text-shadow: 0 1px 1px rgba(0,0,0,.07);
+  margin-left: 2px;
+}
+
+.theme-toggle__text--dark {
+  color: #9AA0A6;
+  margin-right: 2px;
+}
+
+.theme-toggle[data-theme="dark"] .theme-toggle__text--light {
+  color: #5A5E66;
+  text-shadow: none;
+}
+
+.theme-toggle[data-theme="dark"] .theme-toggle__text--dark {
+  color: #CFCFD3;
+  font-weight: 700;
+}
+
+/* Esconde texto do lado oposto atrás do thumb para replicar a imagem (só um label visível) */
+.theme-toggle[data-theme="light"] .theme-toggle__text--dark {
+  opacity: 0;
+  transform: translateX(6px);
+  pointer-events: none;
+}
+.theme-toggle[data-theme="dark"] .theme-toggle__text--light {
+  opacity: 0;
+  transform: translateX(-6px);
+  pointer-events: none;
+}
+.theme-toggle[data-theme="light"] .theme-toggle__text--light,
+.theme-toggle[data-theme="dark"] .theme-toggle__text--dark {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.theme-toggle__thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  box-shadow:
+    0 3px 10px rgba(0,0,0,.14),
+    0 1px 2px rgba(0,0,0,.12),
+    inset 0 1px 1px rgba(255,255,255,1);
+  display: grid;
+  place-items: center;
+  transition: transform .42s cubic-bezier(.34,1.56,.64,1), background .3s ease, box-shadow .3s ease;
+  will-change: transform;
+}
+
+.theme-toggle[data-theme="light"] .theme-toggle__thumb {
+  transform: translateX(96px);
+}
+
+.theme-toggle[data-theme="dark"] .theme-toggle__thumb {
+  transform: translateX(0);
+  background: #F2F2F3;
+  box-shadow:
+    0 3px 10px rgba(0,0,0,.35),
+    0 1px 2px rgba(0,0,0,.3),
+    inset 0 1px 1px rgba(255,255,255,.9);
+}
+
+.theme-toggle__icon {
+  width: 16px;
+  height: 16px;
+  display: grid;
+  place-items: center;
+  transition: opacity .22s ease, transform .32s cubic-bezier(.34,1.56,.64,1), rotate .32s ease;
+  position: absolute;
+}
+
+.theme-toggle__icon--sun {
+  color: #9AA0A6;
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
+}
+
+.theme-toggle__icon--moon {
+  color: #1C1C20;
+  opacity: 0;
+  transform: scale(.7) rotate(-30deg);
+}
+
+.theme-toggle[data-theme="dark"] .theme-toggle__icon--sun {
+  opacity: 0;
+  transform: scale(.7) rotate(30deg);
+}
+
+.theme-toggle[data-theme="dark"] .theme-toggle__icon--moon {
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
+}
+
+.theme-toggle__icon--moon::after {
+  content: '';
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: currentColor;
+  border-radius: 50%;
+  opacity: .9;
+  top: 4px;
+  right: 2px;
+  box-shadow:
+    -6px 7px 0 -1px currentColor,
+    4px 6px 0 -1.2px currentColor;
+}
+
+/* Navbar integration */
+.navbar .theme-toggle {
+  margin-right: .25rem;
+}
+
+.theme-toggle--floating {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 9999;
+  box-shadow:
+    inset 0 2px 6px rgba(0,0,0,.08),
+    inset 0 1px 1px rgba(255,255,255,.9),
+    0 8px 24px rgba(0,0,0,.12);
+}
+
+html.dark .theme-toggle--floating {
+  box-shadow:
+    inset 0 2px 8px rgba(0,0,0,.45),
+    0 8px 24px rgba(0,0,0,.35);
+}
+
+/* Garante que o toggle continue visível no mobile mesmo com menu fechado */
+@media (max-width: 768px) {
+  .navbar .container {
+    gap: .75rem;
+  }
+  .navbar .nav-right {
+    display: flex !important;
+    align-items: center;
+    gap: .75rem;
+    margin-left: auto;
+  }
+  .navbar .nav-right #login-link,
+  .navbar .nav-right #user-menu {
+    display: none;
+  }
+  .mobile-open .nav-right #login-link,
+  .mobile-open .nav-right #user-menu {
+    display: flex;
+  }
+  .navbar .theme-toggle {
+    width: 118px;
+    height: 32px;
+    padding: 0 6px 0 10px;
+    order: 2;
+  }
+  .theme-toggle[data-theme="light"] .theme-toggle__thumb {
+    transform: translateX(84px);
+  }
+  .theme-toggle__thumb {
+    width: 24px;
+    height: 24px;
+    top: 3px;
+    left: 3px;
+  }
+  .theme-toggle__text {
+    font-size: .44rem;
+  }
+  .theme-toggle__icon {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+/* ============================================
+   DARK MODE — GLOBAL OVERRIDES
+   ============================================ */
+html.dark body {
+  background: var(--bg);
+  color: var(--text);
+}
+
+html.dark .navbar {
+  background: rgba(11,15,26,.88);
+  border-bottom-color: var(--border);
+  backdrop-filter: blur(14px);
+}
+
+html.dark .navbar .logo {
+  color: var(--text);
+}
+
+html.dark .navbar .nav-links a {
+  color: var(--text-muted);
+}
+
+html.dark .navbar .nav-links a:hover,
+html.dark .navbar .nav-links a.active {
+  color: var(--text);
+}
+
+html.dark .mobile-toggle {
+  color: var(--text);
+}
+
+html.dark .mobile-open .nav-links,
+html.dark .mobile-open .nav-right {
+  background: #0F1423;
+  border-bottom-color: var(--border);
+}
+
+/* Sections */
+html.dark .projetos-section,
+html.dark .faq-section,
+html.dark .news-section,
+html.dark .section,
+html.dark .about-page,
+html.dark .contact-page {
+  background: var(--bg) !important;
+  border-top-color: var(--border) !important;
+  color: var(--text);
+}
+
+html.dark .eventos-home,
+html.dark .eventos-home--cal,
+html.dark .news-empty,
+html.dark .contact-main {
+  background: var(--muted) !important;
+  border-top-color: var(--border) !important;
+}
+
+html.dark .section-title,
+html.dark .news-title,
+html.dark .faq-section .section-title,
+html.dark .encontre-head h1,
+html.dark .contact-directory > h2,
+html.dark .contact-letter h2 {
+  color: var(--text) !important;
+}
+
+html.dark .faq-subtitle,
+html.dark .news-title span,
+html.dark .contact-letter-head > p {
+  color: var(--text-muted) !important;
+}
+
+/* Cards */
+html.dark .ficha,
+html.dark .cal-card,
+html.dark .cal-event,
+html.dark .card,
+html.dark .news-lead,
+html.dark .news-stack__item,
+html.dark .encontre-card,
+html.dark .encontre-filter,
+html.dark .encontre-card__media,
+html.dark .contact-letter,
+html.dark .sobre-map-info,
+html.dark .stat-card,
+html.dark .table-wrap,
+html.dark .info-card,
+html.dark .faq-item {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,.3) !important;
+}
+
+html.dark .ficha:hover,
+html.dark .encontre-card:hover,
+html.dark .news-lead:hover,
+html.dark .news-stack__item:hover {
+  border-color: #2A3350 !important;
+  box-shadow: 0 12px 32px rgba(0,0,0,.35) !important;
+}
+
+html.dark .ficha__title,
+html.dark .cal-event__body h4,
+html.dark .news-lead__body h3,
+html.dark .news-stack__body h4,
+html.dark .encontre-card__title {
+  color: var(--text) !important;
+}
+
+html.dark .ficha__desc,
+html.dark .cal-event__desc,
+html.dark .news-lead__body p,
+html.dark .news-stack__body p,
+html.dark .encontre-card__meta,
+html.dark .encontre-card__date,
+html.dark .faq-item p {
+  color: var(--text-muted) !important;
+}
+
+html.dark .ficha__meta,
+html.dark .cal-event__foot,
+html.dark .encontre-grid,
+html.dark .contact-lines,
+html.dark .sobre-map-item {
+  border-color: var(--border) !important;
+}
+
+html.dark .ficha__meta dt,
+html.dark .cal-event__vagas,
+html.dark .sobre-map-item span {
+  color: var(--text-muted) !important;
+}
+
+html.dark .ficha__meta dd {
+  color: var(--text) !important;
+}
+
+html.dark .ficha__media,
+html.dark .news-lead__media,
+html.dark .news-stack__media,
+html.dark .encontre-card__media {
+  background: #0F1423 !important;
+}
+
+html.dark .hero-focus__dock {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,.4) !important;
+}
+
+html.dark .hero-focus__dock-item strong {
+  color: var(--text) !important;
+}
+
+html.dark .hero-focus__dock-item span {
+  color: var(--text-muted) !important;
+}
+
+html.dark .hero-focus__dock-sep {
+  background: var(--border) !important;
+}
+
+html.dark .cal-head {
+  background: linear-gradient(135deg, #0F1423 0%, var(--primary) 55%, #1E4A9A 100%) !important;
+}
+
+html.dark .cal-weekdays {
+  color: var(--text-muted) !important;
+}
+
+html.dark .cal-day {
+  color: var(--text) !important;
+}
+
+html.dark .cal-day--muted {
+  opacity: .28 !important;
+}
+
+html.dark .cal-day--today {
+  background: var(--amber) !important;
+  color: #0B0F1A !important;
+}
+
+html.dark .cal-day--event {
+  background: #1A2540 !important;
+  border-color: #24365E !important;
+  color: var(--text) !important;
+}
+
+html.dark .cal-event__date {
+  background: #1A2540 !important;
+  border-color: #24365E !important;
+}
+
+html.dark .cal-event__date b {
+  color: var(--text) !important;
+}
+
+html.dark .faq-item summary {
+  color: var(--text) !important;
+}
+
+html.dark .faq-item summary::after {
+  background: var(--muted) !important;
+  color: var(--text) !important;
+}
+
+html.dark .faq-item[open] {
+  border-color: #24365E !important;
+}
+
+html.dark .news-all,
+html.dark .eventos-head__link,
+html.dark .encontre-filter {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+  color: var(--text) !important;
+}
+
+html.dark .news-all:hover,
+html.dark .eventos-head__link:hover {
+  background: #1A2540 !important;
+  border-color: #2A3E66 !important;
+}
+
+html.dark .eventos-head__link {
+  color: var(--primary-light);
+}
+
+html.dark .form-control,
+html.dark .search-input {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+  color: var(--text) !important;
+}
+
+html.dark .form-control::placeholder,
+html.dark .search-input::placeholder {
+  color: var(--text-light) !important;
+}
+
+html.dark .modal {
+  background: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+}
+
+html.dark .modal h2,
+html.dark .content-header h1 {
+  color: var(--text) !important;
+}
+
+html.dark .table-wrap,
+html.dark .admin-table {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+}
+
+html.dark thead th {
+  background: #111727 !important;
+  color: var(--text-muted) !important;
+  border-bottom-color: var(--border) !important;
+}
+
+html.dark tbody td {
+  color: var(--text) !important;
+  border-bottom-color: var(--border) !important;
+}
+
+html.dark tbody tr:nth-child(even) {
+  background: rgba(255,255,255,.02) !important;
+}
+
+html.dark tbody tr:hover {
+  background: rgba(255,255,255,.04) !important;
+}
+
+html.dark .site-footer {
+  --footer-bg: #070A14;
+  --footer-text: #E2E6F0;
+  --footer-muted: #AAB6CB;
+  --footer-line: #232B3D;
+  --footer-accent: var(--amber);
+}
+
+html.dark .contact-page {
+  --contact-canvas: #0B0F1A;
+  --contact-paper: #151B2B;
+  --contact-ink: #E2E6F0;
+  --contact-line: #232B3D;
+  --contact-muted: #9AA0B0;
+}
+
+html.dark .contact-page .contact-main {
+  background: var(--bg) !important;
+}
+
+html.dark .contact-page .contact-letter,
+html.dark .contact-page .contact-line,
+html.dark .contact-page .contact-lines,
+html.dark .contact-page .contact-meeting {
+  border-color: var(--border) !important;
+}
+
+html.dark .about-page {
+  --about-paper: #0B0F1A;
+  --about-ink: #E2E6F0;
+  --about-line: #232B3D;
+  --about-muted: #9AA0B0;
+  --about-cream: #111727;
+  background: var(--bg) !important;
+
+  /* Botões de fundo escuro: no light o fundo é --about-ink (escuro) com
+     texto branco. Como --about-ink fica claro no dark, usá-lo como fundo
+     deixaria branco sobre branco. Aqui o fundo vira o honey do projeto
+     e o texto fica escuro. */
+  --about-btn-bg: #F0B63F;
+  --about-btn-ink: #070A14;
+  --about-btn-bg-hover: #F7C75A;
+}
+
+/* CTA "Vamos conversar" da seção de convite */
+html.dark .about-invite a {
+  background: var(--about-btn-bg) !important;
+  color: var(--about-btn-ink) !important;
+}
+
+html.dark .about-invite a:hover {
+  background: var(--about-btn-bg-hover) !important;
+}
+
+html.dark .about-invite a span {
+  color: var(--about-btn-ink) !important;
+}
+
+html.dark .about-page .sobre-map-info,
+html.dark .about-page .sobre-map-frame {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+}
+
+/* Scrollbar — mesma largura nos dois temas para o layout não deslocar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--muted);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #C9CFDA;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #AEB6C4;
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  background: #2A3350;
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: #34415F;
+}
+
+/* ============================================
+   FIX DARK — CONTRASTE NÍTIDO (prints)
+   1) about-values ("Menos discurso" + Servir/Liderar/Conectar)
+      bug: var(--about-ink) virou #E2E6F0 claro no dark -> fundo claro + texto branco = apagado
+   2) contact-intro ("Quer falar com a gente? Chega mais.")
+      bug: var(--contact-ink) virou #E2E6F0 claro no dark -> mesmo apagado
+   3) botão "Mandar mensagem"
+      bug: background var(--contact-ink) claro + color #fff = sem contraste
+   Corrige mantendo fundos escuros e deixando o texto mais opaco/nítido
+   ============================================ */
+html.dark .about-values {
+  background: #070A14 !important;
+  color: #fff !important;
+}
+html.dark .about-values-heading h2 {
+  color: #FFFFFF !important;
+}
+html.dark .about-values-heading h2 em {
+  color: #F0B63F !important;
+}
+html.dark .about-values-heading > p {
+  color: rgba(226,230,240,.88) !important;
+}
+html.dark .about-value-list {
+  border-top-color: rgba(255,255,255,.14) !important;
+}
+html.dark .about-value-row {
+  border-bottom-color: rgba(255,255,255,.14) !important;
+}
+html.dark .about-value-row h3 {
+  color: #FFFFFF !important;
+}
+html.dark .about-value-row p {
+  color: rgba(226,230,240,.84) !important;
+}
+html.dark .about-value-number {
+  color: rgba(255,255,255,.74) !important;
+}
+html.dark .about-value-mark {
+  border-color: rgba(255,255,255,.28) !important;
+  color: #F0B63F !important;
+}
+html.dark .about-section-label-light {
+  color: #F0B63F !important;
+}
+html.dark .about-section-label-light span {
+  border-color: currentColor !important;
+}
+
+/* contact-intro — mantém fundo escuro e texto nítido */
+html.dark .contact-intro {
+  background:
+    radial-gradient(circle at 83% 12%, rgba(255,255,255,.065) 0 1px, transparent 1.5px) 0 0 / 18px 18px,
+    #070A14 !important;
+  color: #fff !important;
+}
+html.dark .contact-intro::before {
+  border-color: rgba(255,255,255,.12) !important;
+}
+html.dark .contact-intro::after {
+  color: rgba(255,255,255,.30) !important;
+}
+html.dark .contact-intro h1 {
+  color: #FFFFFF !important;
+}
+html.dark .contact-intro h1 em {
+  color: #EFB43A !important;
+}
+html.dark .contact-intro-copy > p {
+  color: rgba(226,230,240,.86) !important;
+}
+html.dark .contact-kicker {
+  color: rgba(255,255,255,.74) !important;
+}
+html.dark .contact-intro-note {
+  border-top-color: rgba(255,255,255,.22) !important;
+  border-left-color: rgba(255,255,255,.12) !important;
+}
+html.dark .contact-intro-note p {
+  color: rgba(255,255,255,.76) !important;
+}
+html.dark .contact-intro-note strong {
+  color: #FFFFFF !important;
+}
+
+/* botão Mandar mensagem — alto contraste no dark */
+html.dark .contact-submit {
+  background: #EFB43A !important;
+  color: #070A14 !important;
+  border: 1px solid #EFB43A !important;
+}
+html.dark .contact-submit > span:not(.spinner) {
+  color: #070A14 !important;
+}
+html.dark .contact-submit:hover {
+  background: #F0B63F !important;
+  transform: translateY(-2px);
+}
+html.dark .contact-submit:disabled {
+  opacity: .7;
+}
+
+/* ============================================
+   DARK MODE — ADMIN
+   O painel tem um conjunto próprio de tokens (--admin-*) que, até aqui,
+   nunca era remapeado no dark: as cores continuavam escuras sobre
+   superfícies escuras. Remapeamos os tokens que só servem de texto ou
+   de fundo claro. --admin-navy e --admin-blue são preservados porque
+   também funcionam como superfície (sidebar e card principal).
+   ============================================ */
+html.dark .admin-page {
+  --admin-ink: #E2E6F0;
+  --admin-muted: #9AA0B0;
+  --admin-line: #232B3D;
+  --admin-canvas: #0B0F1A;
+  --admin-paper: #151B2B;
+
+  /* Texto que no light usava --admin-navy, e que precisa ficar claro. */
+  --admin-heading: #E2E6F0;
+
+  /* Texto que no light usava --admin-blue. */
+  --admin-accent: #7FB2F0;
+}
+
+/* --admin-navy como cor de texto.
+   Sem !important de propósito: .admin-page .stat-card-main .stat-value
+   tem 3 classes e vence esta regra (2 classes + 1 elemento), então o card
+   principal continua com o branco que o design já previa. */
+html.dark .admin-page .sidebar-user-avatar,
+html.dark .admin-page .dashboard-section-heading h2,
+html.dark .admin-page .quick-action-btn:hover .quick-action-plus,
+html.dark .admin-page .event-date-tile,
+html.dark .admin-page .empty-state h3,
+html.dark .admin-page .modal h2 {
+  color: var(--admin-heading) !important;
+}
+
+/* Cards secundários. O principal é deixado de fora pelo peso da
+   especificidade das regras .stat-card-main do bloco admin. */
+html.dark .admin-page .stat-value {
+  color: var(--admin-heading);
+}
+
+html.dark .admin-page .stat-label {
+  color: var(--admin-ink);
+}
+
+html.dark .admin-page .stat-note {
+  color: var(--admin-muted);
+}
+
+/* --admin-blue como cor de texto */
+html.dark .admin-page .content-header h1 em,
+html.dark .admin-page .content-header-mark,
+html.dark .admin-page .dashboard-section-heading span,
+html.dark .admin-page .quick-action-icon,
+html.dark .admin-page .recent-item-icon.noticia,
+html.dark .admin-page .recent-item:hover .recent-item-arrow,
+html.dark .admin-page .cell-avatar {
+  color: var(--admin-accent) !important;
+}
+
+html.dark .admin-page .stat-card:hover .stat-arrow {
+  color: var(--admin-accent) !important;
+}
+
+/* O h1 do cabeçalho já é coberto por html.dark .content-header h1,
+   mas o .admin-page tem especificidade maior — reforçamos aqui. */
+html.dark .admin-page .content-header h1 {
+  color: var(--admin-heading) !important;
+}
+
+/* Fundos claros que estavam fixos no light */
+html.dark .admin-page .content-header-mark,
+html.dark .admin-page .quick-actions-section,
+html.dark .admin-page .section-bar,
+html.dark .admin-page .empty-state {
+  background: var(--admin-paper) !important;
+  border-color: var(--admin-line) !important;
+}
+
+html.dark .admin-page .quick-action-icon,
+html.dark .admin-page .recent-item-icon.noticia,
+html.dark .admin-page .cell-avatar {
+  background: #1C2438 !important;
+}
+
+html.dark .admin-page .upload-area {
+  background: #111727 !important;
+  border-color: var(--admin-line) !important;
+}
+
+html.dark .admin-page .upload-area:hover {
+  background: #1C2438 !important;
+  border-color: var(--admin-accent) !important;
+}
+
+/* Texto secundário. O .stat-label/.stat-note já foram tratados acima
+   sem !important, para o card principal manter o branco do design. */
+html.dark .admin-page .quick-action-btn strong {
+  color: var(--admin-ink) !important;
+}
+
+html.dark .admin-page .quick-action-btn small {
+  color: var(--admin-muted) !important;
+}
+
+html.dark .admin-page .content-eyebrow,
+html.dark .admin-page .content-header p {
+  color: var(--admin-muted) !important;
+}

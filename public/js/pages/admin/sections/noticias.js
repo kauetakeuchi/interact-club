@@ -72,7 +72,7 @@ function newsForm(noticia = null) {
     <div class="form-group"><label>Conteúdo</label><textarea id="f-no-content" class="form-control" rows="6" maxlength="10000" required>${esc(noticia?.content || "")}</textarea></div>
     <div class="form-group"><label>Imagem</label>${uploadField("f-no-img", noticia?.imageUrl || "")}</div>
     <label class="toggle"><input type="checkbox" id="f-no-pub" ${noticia?.published ? "checked" : ""}><div class="toggle-slider"></div><span class="toggle-label">Publicar</span></label>
-    <button type="submit" class="btn btn-primary btn-full" style="margin-top:1.5rem;">${isEdit ? "Salvar" : "Criar Notícia"}</button>`;
+    <button type="submit" class="btn btn-primary btn-full modal-submit">${isEdit ? "Salvar" : "Criar Notícia"}</button>`;
 }
 
 function readForm() {

@@ -1,0 +1,145 @@
+/* ============================================
+   MODAL DE TERMOS — CADASTRO
+   ============================================ */
+.terms-modal-overlay {
+  --tm-ink: #1a1a1a;
+  --tm-muted: #4a4f55;
+  --tm-card: #ffffff;
+  --tm-rule: #d4d0c8;
+  --tm-btn: #102b4e;
+  --tm-on-btn: #ffffff;
+  position: fixed;
+  inset: 0;
+  z-index: 10001;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background: rgba(12,16,26,.55);
+  opacity: 0;
+  transition: opacity .2s ease;
+}
+
+.terms-modal-overlay.is-visible {
+  opacity: 1;
+}
+
+.terms-modal {
+  width: min(28rem, 100%);
+  padding: 1.75rem 1.6rem 1.5rem;
+  border: 1px solid var(--tm-rule);
+  border-radius: 16px;
+  background: var(--tm-card);
+  color: var(--tm-ink);
+  box-shadow: 0 24px 64px rgba(0,0,0,.32);
+  transform: translateY(.5rem) scale(.99);
+  transition: transform .22s ease;
+}
+
+.terms-modal-overlay.is-visible .terms-modal {
+  transform: translateY(0) scale(1);
+}
+
+.terms-modal-title {
+  margin-bottom: .7rem;
+  font-family: var(--font-heading);
+  font-size: 1.15rem;
+  font-weight: 600;
+  letter-spacing: -.02em;
+  line-height: 1.25;
+}
+
+.terms-modal-desc {
+  margin-bottom: .9rem;
+  color: var(--tm-muted);
+  font-size: .9rem;
+  line-height: 1.65;
+}
+
+.terms-modal-desc a {
+  color: var(--tm-ink);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.terms-modal-desc a:hover {
+  color: var(--tm-btn);
+}
+
+.terms-modal-note {
+  margin-bottom: 1.4rem;
+  padding: .7rem .8rem;
+  border-left: 3px solid var(--tm-rule);
+  background: #f7f5f1;
+  color: var(--tm-muted);
+  font-size: .8rem;
+  line-height: 1.55;
+}
+
+.terms-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: .6rem;
+}
+
+.terms-modal-cancel,
+.terms-modal-ok {
+  padding: .6rem 1.1rem;
+  border-radius: 100px;
+  font-family: inherit;
+  font-size: .82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity .2s, transform .2s;
+}
+
+.terms-modal-cancel {
+  border: 1px solid var(--tm-rule);
+  background: transparent;
+  color: var(--tm-muted);
+}
+
+.terms-modal-cancel:hover {
+  color: var(--tm-ink);
+}
+
+.terms-modal-ok {
+  border: none;
+  background: var(--tm-btn);
+  color: var(--tm-on-btn);
+}
+
+.terms-modal-cancel:hover,
+.terms-modal-ok:hover {
+  transform: translateY(-1px);
+}
+
+.terms-modal-cancel:focus-visible,
+.terms-modal-ok:focus-visible,
+.terms-modal-desc a:focus-visible {
+  outline: 2px solid var(--tm-btn);
+  outline-offset: 2px;
+}
+
+html.dark .terms-modal-overlay {
+  --tm-ink: #E4E7EC;
+  --tm-muted: #A2A9B4;
+  --tm-card: #151B2B;
+  --tm-rule: #2E3644;
+  --tm-btn: #F0B63F;
+  --tm-on-btn: #070A14;
+}
+
+html.dark .terms-modal-note {
+  background: #1B2231;
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-toggle,
+  .theme-toggle__thumb,
+  .theme-toggle__icon,
+  .theme-toggle__text {
+    transition: none !important;
+  }
+}

@@ -2,23 +2,23 @@
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg"><title>Cadastro - Interact Club</title><script src="/js/theme-init.js"></script><link rel="stylesheet" href="/css/style.css"></head>
 <body>
-<div id="page-content" style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem;">
-  <div style="width:100%;max-width:28rem;">
-    <div style="text-align:center;margin-bottom:2rem;">
-      <a href="/" style="display:inline-flex;align-items:center;gap:.5rem;font-size:.875rem;color:var(--text);margin-bottom:2rem;">← Voltar ao site</a>
-      <h1 style="font-family:var(--font-heading);font-size:2.5rem;color:var(--primary-dark);">Criar <span style="color:var(--secondary);">Conta</span></h1>
-      <p style="color:var(--text);font-size:.875rem;margin-top:.5rem;">Faça parte do Interact Club</p>
+<div id="page-content" class="auth-page">
+  <div class="auth-card">
+    <div class="auth-head">
+      <a href="/" class="auth-back">← Voltar ao site</a>
+      <h1 class="auth-title">Criar <span>Conta</span></h1>
+      <p class="auth-subtitle">Faça parte do Interact Club</p>
     </div>
-    <div style="border:1px solid var(--border);padding:2rem;">
+    <div class="auth-box">
       <form id="register-form">
         <div class="form-group"><label>Nome</label><input type="text" id="reg-name" class="form-control" required placeholder="Seu nome completo"></div>
         <div class="form-group"><label>Email</label><input type="email" id="reg-email" class="form-control" required placeholder="seu@email.com"></div>
         <div class="form-group"><label>Telefone</label><input type="tel" id="reg-phone" class="form-control" placeholder="(11) 99999-9999"></div>
         <div class="form-group"><label>Data de Nascimento</label><input type="date" id="reg-birth" class="form-control"></div>
-        <div class="form-group"><label>Senha</label><div class="password-wrap"><input type="password" id="reg-password" class="form-control" required minlength="8" autocomplete="new-password" aria-describedby="password-hint" placeholder="Mínimo 8 caracteres"><button type="button" class="password-toggle" tabindex="-1" aria-label="Mostrar senha"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></div><small id="password-hint" style="color:var(--text-muted);">Use maiúscula, minúscula, número e caractere especial.</small></div>
+        <div class="form-group"><label>Senha</label><div class="password-wrap"><input type="password" id="reg-password" class="form-control" required minlength="8" autocomplete="new-password" aria-describedby="password-hint" placeholder="Mínimo 8 caracteres"><button type="button" class="password-toggle" tabindex="-1" aria-label="Mostrar senha"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></div><small id="password-hint" class="auth-hint">Use maiúscula, minúscula, número e caractere especial.</small></div>
         <div class="form-group email-choice"><label class="email-choice__label" for="reg-email-updates"><input type="checkbox" id="reg-email-updates"><span><strong>Quero receber novidades por email</strong><small>Projetos, eventos e notícias do clube. Opcional; você pode mudar essa escolha no perfil.</small></span></label></div>
         <button type="submit" class="btn btn-primary btn-full" id="register-btn">Criar Conta</button>
-        <p style="text-align:center;margin-top:1rem;font-size:.875rem;color:var(--text);">Já tem conta? <a href="/login" style="color:var(--primary);font-weight:500;">Faça login</a></p>
+        <p class="auth-form-foot">Já tem conta? <a href="/login" class="auth-link">Faça login</a></p>
       </form>
     </div>
   </div>

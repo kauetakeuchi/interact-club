@@ -34,7 +34,7 @@ async function renderList(page) {
             const grid = document.getElementById("encontre-grid");
             if (!grid) return;
             if (list.length === 0) {
-                grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:3rem 1rem;color:var(--text-muted);">Nenhum projeto com esse filtro.</div>`;
+                grid.innerHTML = `<div class="list-empty">Nenhum projeto com esse filtro.</div>`;
                 return;
             }
             grid.innerHTML = list.map((proj) => {
@@ -89,11 +89,11 @@ async function renderDetail(page) {
         const inicio = p.startDate ? new Date(p.startDate).toLocaleDateString("pt-BR", { day: "numeric", month: "long", year: "numeric" }) : "—";
         const termino = p.endDate ? new Date(p.endDate).toLocaleDateString("pt-BR", { day: "numeric", month: "long", year: "numeric" }) : "—";
         page.innerHTML = `
-      <section class="hero"><div class="container"><a href="/projetos" style="display:inline-flex;align-items:center;gap:.5rem;color:rgba(255,255,255,.6);font-size:.875rem;margin-bottom:1.5rem;">← Voltar para Projetos</a><h1>${esc(p.title)}</h1></div></section>
-      <section class="section"><div class="container"><div class="event-sidebar"><div>${p.imageUrl ? `<img src="${esc(p.imageUrl)}" alt="${esc(p.title)}" style="width:100%;height:20rem;object-fit:cover;margin-bottom:2rem;">` : `<div style="height:20rem;background:linear-gradient(135deg,${cor}22,${cor}44);margin-bottom:2rem;"></div>`}<div style="line-height:1.8;color:var(--text);">${p.description.split("\n").filter((s) => s.trim()).map((s) => `<p style="margin-bottom:1rem;">${esc(s)}</p>`).join("")}</div></div>
-      <div><div class="info-card" style="position:sticky;top:6rem;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;"><span style="font-size:.875rem;font-weight:500;color:var(--text);">Status</span><span style="font-size:1.5rem;font-family:var(--font-heading);color:var(--primary-dark);">${statusLabels[p.status] || p.status}</span></div>
-      <div style="line-height:2;font-size:.875rem;color:var(--text);"><div style="display:flex;justify-content:space-between;"><span>Início</span><span>${inicio}</span></div><div style="display:flex;justify-content:space-between;"><span>Término</span><span>${termino}</span></div></div>
-      <p style="font-size:.75rem;color:var(--text);text-align:center;margin-top:.75rem;">${statusLabels[p.status] || p.status}</p></div></div></div></div></section>`;
+      <section class="hero"><div class="container"><a href="/projetos" class="detail-back">← Voltar para Projetos</a><h1>${esc(p.title)}</h1></div></section>
+      <section class="section"><div class="container"><div class="event-sidebar"><div>${p.imageUrl ? `<img src="${esc(p.imageUrl)}" alt="${esc(p.title)}" class="detail-cover">` : `<div class="detail-cover--empty" style="background:linear-gradient(135deg,${cor}22,${cor}44);"></div>`}<div class="detail-body">${p.description.split("\n").filter((s) => s.trim()).map((s) => `<p>${esc(s)}</p>`).join("")}</div></div>
+      <div><div class="info-card info-card--sticky"><div class="info-card__head"><span class="info-card__label">Status</span><span class="info-card__value">${statusLabels[p.status] || p.status}</span></div>
+      <div class="info-card__dates"><div><span>Início</span><span>${inicio}</span></div><div><span>Término</span><span>${termino}</span></div></div>
+      <p class="info-card__note">${statusLabels[p.status] || p.status}</p></div></div></div></div></section>`;
     }
     catch {
         page.innerHTML = `<p>Projeto não encontrado.</p>`;

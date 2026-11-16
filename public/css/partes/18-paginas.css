@@ -1,0 +1,228 @@
+/* ============================================
+   AUTENTICAÇÃO (login, cadastro, verificar email, esqueci/redefinir senha)
+   ============================================ */
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 28rem;
+}
+
+.auth-card--wide {
+  max-width: 30rem;
+}
+
+.auth-head {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.auth-back {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  font-size: .875rem;
+  color: var(--text);
+  margin-bottom: 2rem;
+}
+
+.auth-title {
+  font-family: var(--font-heading);
+  font-size: 2.5rem;
+  color: var(--primary-dark);
+}
+
+.auth-title--sm {
+  font-size: 2.3rem;
+}
+
+.auth-title span {
+  color: var(--secondary);
+}
+
+.auth-subtitle {
+  color: var(--text);
+  font-size: .875rem;
+  margin-top: .5rem;
+}
+
+.auth-box {
+  border: 1px solid var(--border);
+  padding: 2rem;
+}
+
+/* Mensagem de andamento (verificação, envio de link, nova senha) */
+.auth-status {
+  text-align: center;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+.auth-message {
+  margin-top: 1rem;
+  font-size: .9rem;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+.auth-forgot {
+  text-align: right;
+  margin-top: .75rem;
+  font-size: .875rem;
+}
+
+.auth-form-foot {
+  text-align: center;
+  margin-top: 1rem;
+  font-size: .875rem;
+  color: var(--text);
+}
+
+.auth-link {
+  color: var(--primary);
+  font-weight: 500;
+}
+
+.auth-help {
+  display: block;
+  text-align: center;
+  margin-top: 1rem;
+  color: var(--primary);
+  font-weight: 500;
+  font-size: .875rem;
+}
+
+.auth-actions {
+  margin-top: 1.5rem;
+}
+
+.auth-hint {
+  color: var(--text-muted);
+}
+
+/* ============================================
+   LISTAS PÚBLICAS (eventos, projetos, notícias)
+   ============================================ */
+.list-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--text-muted);
+}
+
+/* ============================================
+   PÁGINAS DE DETALHE (evento e projeto)
+   ============================================ */
+.detail-back {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  color: rgba(255,255,255,.6);
+  font-size: .875rem;
+  margin-bottom: 1.5rem;
+}
+
+.detail-meta {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+  color: rgba(255,255,255,.7);
+  font-size: .875rem;
+}
+
+.detail-cover {
+  width: 100%;
+  height: 20rem;
+  object-fit: cover;
+  margin-bottom: 2rem;
+}
+
+/* Sem foto: o fundo em degradê vem do JS (cor do status). */
+.detail-cover--empty {
+  height: 20rem;
+  margin-bottom: 2rem;
+}
+
+.detail-body {
+  line-height: 1.8;
+  color: var(--text);
+}
+
+.detail-body > p {
+  margin-bottom: 1rem;
+}
+
+.info-card--sticky {
+  position: sticky;
+  top: 6rem;
+}
+
+.info-card__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.info-card__label {
+  font-size: .875rem;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.info-card__value {
+  font-size: 1.5rem;
+  font-family: var(--font-heading);
+  color: var(--primary-dark);
+}
+
+.info-card__dates {
+  line-height: 2;
+  font-size: .875rem;
+  color: var(--text);
+}
+
+.info-card__dates > div {
+  display: flex;
+  justify-content: space-between;
+}
+
+.info-card__note {
+  font-size: .75rem;
+  color: var(--text);
+  text-align: center;
+  margin-top: .75rem;
+}
+
+/* Estados do botão de inscrição em eventos */
+.btn-state {
+  cursor: default;
+}
+
+.btn-state--past {
+  background: #e2e8f0;
+  color: #4a5568;
+}
+
+.btn-state--full {
+  background: #fed7d7;
+  color: #742a2a;
+}
+
+.btn-cancel {
+  background: #fed7d7;
+  color: #c53030;
+}
+
+/* ============================================
+   ADMIN — BOTÃO DE ENVIO DOS FORMULÁRIOS
+   ============================================ */
+.modal-submit {
+  margin-top: 1.5rem;
+}

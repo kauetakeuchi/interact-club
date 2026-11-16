@@ -23,7 +23,7 @@ async function renderList(page) {
             const grid = document.getElementById("encontre-grid-ev");
             if (!grid) return;
             if (list.length === 0) {
-                grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:3rem 1rem;color:var(--text-muted);">Nenhum evento com esse filtro.</div>`;
+                grid.innerHTML = `<div class="list-empty">Nenhum evento com esse filtro.</div>`;
                 return;
             }
             grid.innerHTML = list.map((e) => {
@@ -108,14 +108,14 @@ async function renderDetail(page) {
             if (!actionEl)
                 return;
             if (new Date(evento.date) < new Date()) {
-                actionEl.innerHTML = `<div class="btn btn-full" style="background:#e2e8f0;color:#4a5568;cursor:default;">Evento já realizado</div>`;
+                actionEl.innerHTML = `<div class="btn btn-full btn-state btn-state--past">Evento já realizado</div>`;
                 return;
             }
             if (evento.maxParticipants && count >= evento.maxParticipants && !signupId) {
-                actionEl.innerHTML = `<div class="btn btn-full" style="background:#fed7d7;color:#742a2a;cursor:default;">Evento lotado</div>`;
+                actionEl.innerHTML = `<div class="btn btn-full btn-state btn-state--full">Evento lotado</div>`;
             }
             else if (signupId) {
-                actionEl.innerHTML = `<button class="btn btn-full" id="cancel-btn" style="background:#fed7d7;color:#c53030;">Cancelar Inscrição</button>`;
+                actionEl.innerHTML = `<button class="btn btn-full btn-cancel" id="cancel-btn">Cancelar Inscrição</button>`;
                 document.getElementById("cancel-btn")?.addEventListener("click", async () => {
                     try {
                         await api.post("/eventos/cancelar", { signupId });
@@ -154,11 +154,11 @@ async function renderDetail(page) {
             }
         }
         page.innerHTML = `
-      <section class="hero"><div class="container"><a href="/eventos" style="display:inline-flex;align-items:center;gap:.5rem;color:rgba(255,255,255,.6);font-size:.875rem;margin-bottom:1.5rem;">← Voltar para Eventos</a><h1>${esc(evento.title)}</h1><div style="display:flex;gap:1.5rem;margin-top:1.5rem;color:rgba(255,255,255,.7);font-size:.875rem;"><span>${dateStr}</span>${evento.location ? `<span>${esc(evento.location)}</span>` : ""}</div></div></section>
-      <section class="section"><div class="container"><div class="event-sidebar"><div>${evento.imageUrl ? `<img src="${esc(evento.imageUrl)}" alt="${esc(evento.title)}" style="width:100%;height:20rem;object-fit:cover;margin-bottom:2rem;">` : `<div style="height:20rem;background:linear-gradient(135deg,#17458F22,#17458F44);margin-bottom:2rem;"></div>`}<div style="line-height:1.8;color:var(--text);">${evento.description.split("\n").filter((p) => p.trim()).map((p) => `<p style="margin-bottom:1rem;">${esc(p)}</p>`).join("")}</div></div>
-      <div><div class="info-card" style="position:sticky;top:6rem;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;"><span style="font-size:.875rem;font-weight:500;color:var(--text);">Vagas</span><span style="font-size:1.5rem;font-family:var(--font-heading);color:var(--primary-dark);" class="vagas-count">${evento.maxParticipants ? `${evento.signupCount}/${evento.maxParticipants}` : evento.signupCount}</span></div>
+      <section class="hero"><div class="container"><a href="/eventos" class="detail-back">← Voltar para Eventos</a><h1>${esc(evento.title)}</h1><div class="detail-meta"><span>${dateStr}</span>${evento.location ? `<span>${esc(evento.location)}</span>` : ""}</div></div></section>
+      <section class="section"><div class="container"><div class="event-sidebar"><div>${evento.imageUrl ? `<img src="${esc(evento.imageUrl)}" alt="${esc(evento.title)}" class="detail-cover">` : `<div class="detail-cover--empty" style="background:linear-gradient(135deg,#17458F22,#17458F44);"></div>`}<div class="detail-body">${evento.description.split("\n").filter((p) => p.trim()).map((p) => `<p>${esc(p)}</p>`).join("")}</div></div>
+      <div><div class="info-card info-card--sticky"><div class="info-card__head"><span class="info-card__label">Vagas</span><span class="info-card__value vagas-count">${evento.maxParticipants ? `${evento.signupCount}/${evento.maxParticipants}` : evento.signupCount}</span></div>
       <div class="action-area"></div>
-      <p style="font-size:.75rem;color:var(--text);text-align:center;margin-top:.75rem;" class="signup-footer">${evento.signupCount} ${evento.signupCount === 1 ? "pessoa inscrita" : "pessoas inscritas"}</p></div></div></div></div></section>`;
+      <p class="info-card__note signup-footer">${evento.signupCount} ${evento.signupCount === 1 ? "pessoa inscrita" : "pessoas inscritas"}</p></div></div></div></div></section>`;
         renderAction();
     }
     catch {

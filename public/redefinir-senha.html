@@ -5,20 +5,20 @@
   <script src="/js/theme-init.js"></script>
   <link rel="stylesheet" href="/css/style.css"></head>
 <body>
-<div id="page-content" style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem;">
-  <div style="width:100%;max-width:28rem;">
-    <div style="text-align:center;margin-bottom:2rem;">
-      <a href="/login" style="display:inline-flex;align-items:center;gap:.5rem;font-size:.875rem;color:var(--text);margin-bottom:2rem;">← Voltar ao login</a>
-      <h1 style="font-family:var(--font-heading);font-size:2.5rem;color:var(--primary-dark);">Nova <span style="color:var(--secondary);">senha</span></h1>
-      <p style="color:var(--text);font-size:.875rem;margin-top:.5rem;">Crie uma senha nova para sua conta.</p>
+<div id="page-content" class="auth-page">
+  <div class="auth-card">
+    <div class="auth-head">
+      <a href="/login" class="auth-back">← Voltar ao login</a>
+      <h1 class="auth-title">Nova <span>senha</span></h1>
+      <p class="auth-subtitle">Crie uma senha nova para sua conta.</p>
     </div>
-    <div style="border:1px solid var(--border);padding:2rem;">
+    <div class="auth-box">
       <form id="reset-form">
-        <div class="form-group"><label>Nova senha</label><div class="password-wrap"><input type="password" id="reset-password" class="form-control" required minlength="8" autocomplete="new-password" aria-describedby="reset-password-hint" placeholder="Mínimo 8 caracteres"><button type="button" class="password-toggle" tabindex="-1" aria-label="Mostrar senha"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></div><small id="reset-password-hint" style="color:var(--text-muted);">Use maiúscula, minúscula, número e caractere especial.</small></div>
+        <div class="form-group"><label>Nova senha</label><div class="password-wrap"><input type="password" id="reset-password" class="form-control" required minlength="8" autocomplete="new-password" aria-describedby="reset-password-hint" placeholder="Mínimo 8 caracteres"><button type="button" class="password-toggle" tabindex="-1" aria-label="Mostrar senha"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></div><small id="reset-password-hint" class="auth-hint">Use maiúscula, minúscula, número e caractere especial.</small></div>
         <div class="form-group"><label>Confirmar nova senha</label><div class="password-wrap"><input type="password" id="reset-confirm" class="form-control" required minlength="8" autocomplete="new-password" placeholder="Repita a nova senha"><button type="button" class="password-toggle" tabindex="-1" aria-label="Mostrar senha"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></div></div>
         <button type="submit" class="btn btn-primary btn-full" id="reset-btn">Redefinir senha</button>
-        <p id="reset-status" role="status" aria-live="polite" hidden style="margin-top:1rem;font-size:.9rem;line-height:1.6;color:var(--text);"></p>
-        <a id="reset-login-link" href="/login" hidden style="display:block;text-align:center;margin-top:1rem;color:var(--primary);font-weight:500;font-size:.875rem;">Ir para o login</a>
+        <p id="reset-status" role="status" aria-live="polite" class="auth-message" hidden></p>
+        <a id="reset-login-link" href="/login" hidden class="auth-help">Ir para o login</a>
       </form>
     </div>
   </div>
