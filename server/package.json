@@ -3,9 +3,11 @@
   "private": true,
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "tsc",
+    "build": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && tsc",
     "test": "npm run build && node --test tests/*.test.cjs",
     "start": "node dist/index.js",
+    "migrate": "tsx src/migrate.ts",
+    "migrate:prod": "node dist/migrate.js",
     "seed": "tsx src/seed.ts"
   },
   "dependencies": {

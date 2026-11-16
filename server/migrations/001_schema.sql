@@ -112,7 +112,6 @@ CREATE TABLE IF NOT EXISTS contact (
 -- Se você já tinha o banco criado sem essas colunas/charset,
 -- descomente e execute os comandos abaixo:
 --
--- ALTER TABLE `project` ADD COLUMN updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP AFTER createdAt;
 -- ALTER TABLE `user` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 -- ALTER TABLE `event` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 -- ALTER TABLE `eventsignup` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;

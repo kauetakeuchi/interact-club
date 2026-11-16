@@ -19,11 +19,20 @@ Site oficial do Interact Club de Taquaritinga — programa juvenil do Rotary Int
 
 ### 1. Configure o banco
 
-O arquivo `server/migrations/001_schema.sql` cria o banco e todas as tabelas. Execute-o no MySQL:
+Com o MySQL rodando, o `server/.env` configurado (passo 2) e as dependências instaladas (passo 3), rode a partir da raiz:
 
-> No XAMPP: abra o phpMyAdmin → aba **SQL** → cole o conteúdo do arquivo e execute.
+```bash
+npm run migrate
+```
 
-Se o banco já existia antes das atualizações mais recentes, execute uma vez, nesta ordem, apenas as migrations que ainda não rodaram:
+O comando cria o banco do `DATABASE_URL` se ele não existir e aplica só as migrations que faltam. Ele guarda o que já rodou na tabela `schema_migrations`, então pode ser executado sempre que você atualizar o projeto. Em bancos criados antes desse comando existir, ele reconhece as migrations que já foram aplicadas à mão. Em produção, depois do `npm run build`, use `npm --prefix server run migrate:prod`.
+
+Para criar uma migration nova, adicione `server/migrations/NNN_descricao.sql` com o próximo número **e** atualize o `001_schema.sql`, que sempre descreve o esquema completo usado em bancos novos.
+
+<details>
+<summary>Sem o comando: aplicar pelo phpMyAdmin</summary>
+
+Banco novo: execute só o `001_schema.sql` (aba **SQL** → cole o conteúdo → executar). Banco existente: execute, nesta ordem, apenas as migrations que ainda não rodaram:
 
 | Migration | Quando executar |
 |---|---|
@@ -31,6 +40,9 @@ Se o banco já existia antes das atualizações mais recentes, execute uma vez, 
 | `002_email_verification.sql` | Bancos criados antes da confirmação de email |
 | `003_email_updates_consent.sql` | Bancos criados antes da preferência de novidades |
 | `004_polish.sql` | Bancos criados antes da recuperação de senha e dos índices de desempenho |
+| `005_project_updated_at.sql` | Bancos criados antes de `project.updatedAt` existir |
+
+</details>
 
 ### 2. Configure as variáveis de ambiente
 
@@ -172,8 +184,15 @@ Os testes não precisam de um MySQL em execução.
 ## Estrutura
 
 ```
-public/            Frontend estático (HTML, CSS, JS e fontes)
-server/src/        API Express em TypeScript
-server/migrations/ SQL de criação e atualização do banco
-server/tests/      Testes automatizados (node:test)
+public/                    Frontend estático (HTML, JS e fontes)
+public/css/style.css       Só importa as partes, na ordem da cascata
+public/css/partes/         CSS dividido por área (base, componentes, páginas, tema escuro…)
+server/src/routes/         Rotas públicas da API
+server/src/routes/admin/   Rotas do painel, um arquivo por recurso
+server/src/lib/types.ts    Formato das linhas de cada tabela
+server/src/migrate.ts      Comando `npm run migrate`
+server/migrations/         SQL de criação e atualização do banco
+server/tests/              Testes automatizados (node:test)
 ```
+
+No CSS, a ordem dos `@import` em `style.css` é a ordem da cascata: uma regra nova entra na parte da área dela, e uma parte nova entra na lista no ponto em que precisa vencer as anteriores.
