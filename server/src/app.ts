@@ -53,6 +53,8 @@ export function createApp() {
           "font-src": ["'self'"],
           "connect-src": ["'self'"],
           "media-src": ["'self'"],
+          // Mapa da página "Sobre" é um iframe do Google Maps.
+          "frame-src": ["https://www.google.com"],
           "object-src": ["'none'"],
           "base-uri": ["'self'"],
           "form-action": ["'self'"],
