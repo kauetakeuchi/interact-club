@@ -107,6 +107,11 @@ async function renderDetail(page) {
             const actionEl = infoCard.querySelector(".action-area");
             if (!actionEl)
                 return;
+            const userRole = auth.getUser()?.role;
+            if (userRole === "ADMIN" || userRole === "DIRECTOR") {
+                actionEl.innerHTML = ``;
+                return;
+            }
             if (new Date(evento.date) < new Date()) {
                 actionEl.innerHTML = `<div class="btn btn-full btn-state btn-state--past">Evento já realizado</div>`;
                 return;
@@ -130,7 +135,7 @@ async function renderDetail(page) {
                     }
                 });
             }
-            else if (auth.isAuthenticated()) {
+            else if (auth.isAuthenticated() && auth.getUser()?.role === "MEMBER") {
                 actionEl.innerHTML = `<button class="btn btn-primary btn-full" id="signup-btn">Quero Participar</button>`;
                 document.getElementById("signup-btn")?.addEventListener("click", async () => {
                     try {
@@ -150,7 +155,7 @@ async function renderDetail(page) {
                 });
             }
             else {
-                actionEl.innerHTML = `<a href="/login" class="btn btn-primary btn-full">Faça login para participar</a>`;
+                actionEl.innerHTML = ``;
             }
         }
         page.innerHTML = `

@@ -40,6 +40,9 @@ router.get("/:id", optionalStaff, ah(async (req: AuthRequest, res: Response) => 
 }));
 
 router.post("/inscrever", requireAuth, validate(inscricaoSchema), ah(async (req: AuthRequest, res: Response) => {
+  if (req.user!.role !== "MEMBER") {
+    return res.status(403).json({ message: "Administradores e diretores não podem se inscrever em eventos" });
+  }
   const { eventId } = req.body;
   try {
     await withTransaction(async (conn) => {
