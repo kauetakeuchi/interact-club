@@ -5,3 +5,7 @@ dist/
 .DS_Store
 Thumbs.db
 public/uploads/
+
+# Documentos de design e produto: mantidos só localmente
+DESIGN.md
+PRODUCT.md
