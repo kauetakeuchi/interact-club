@@ -1,9 +1,35 @@
+import { bindPhoneInput } from "./phone.js";
+
 export class DashboardSidebar {
     constructor(auth, api, toast) {
         this.currentSection = "visao-geral";
         this.auth = auth;
         this.api = api;
         this.toast = toast;
+    }
+    avatarHtml(user) {
+        return user.avatarUrl
+            ? `<img src="${this.esc(user.avatarUrl)}" alt="">`
+            : this.esc(user.name.charAt(0).toUpperCase());
+    }
+    refreshAvatars() {
+        const user = this.auth.getUser();
+        if (!user)
+            return;
+        const html = this.avatarHtml(user);
+        document.querySelectorAll(".sidebar-dash-header .avatar, #sd-avatar-preview").forEach((el) => { el.innerHTML = html; });
+        const navAvatar = document.getElementById("avatar-letter");
+        if (navAvatar)
+            navAvatar.innerHTML = html;
+    }
+    async sendAvatar(file) {
+        const body = new FormData();
+        body.append("file", file);
+        const res = await fetch("/api/upload/avatar", { method: "POST", body, credentials: "same-origin" });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok)
+            throw new Error(data.message || "Não foi possível enviar a foto.");
+        return data.avatarUrl;
     }
     esc(value) {
         return String(value ?? "").replace(/[&<>"']/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
@@ -37,7 +63,7 @@ export class DashboardSidebar {
         ];
         sidebar.innerHTML = `
       <div class="sidebar-dash-header">
-        <div class="avatar">${this.esc(user.name.charAt(0).toUpperCase())}</div>
+        <div class="avatar">${this.avatarHtml(user)}</div>
         <div class="info">
           <div class="name">${this.esc(user.name)}</div>
           <div class="role">${roleLabel}</div>
@@ -148,6 +174,41 @@ export class DashboardSidebar {
                 this.toast.show(err.message, "error");
             }
         });
+        document.getElementById("sd-avatar-input")?.addEventListener("change", async (e) => {
+            const file = e.target.files?.[0];
+            e.target.value = "";
+            if (!file)
+                return;
+            if (file.size > 2 * 1024 * 1024) {
+                this.toast.show("A foto deve ter no máximo 2 MB.", "error");
+                return;
+            }
+            try {
+                const avatarUrl = await this.sendAvatar(file);
+                this.auth.updateUser({ avatarUrl });
+                this.toast.show("Foto atualizada!");
+                this.refreshAvatars();
+                this.renderSection("perfil");
+            }
+            catch (err) {
+                this.toast.show(err.message, "error");
+            }
+        });
+        document.getElementById("sd-avatar-remove")?.addEventListener("click", async () => {
+            if (!confirm("Remover sua foto de perfil?"))
+                return;
+            try {
+                await this.api.del("/upload/avatar");
+                this.auth.updateUser({ avatarUrl: null });
+                this.toast.show("Foto removida.");
+                this.refreshAvatars();
+                this.renderSection("perfil");
+            }
+            catch (err) {
+                this.toast.show(err.message, "error");
+            }
+        });
+        bindPhoneInput(document.getElementById("sd-pf-phone"));
         const perfilForm = document.getElementById("sd-perfil-form");
         if (perfilForm) {
             perfilForm.addEventListener("submit", async (e) => {
@@ -207,12 +268,23 @@ export class DashboardSidebar {
         const me = await this.api.get("/auth/me").catch(() => null);
         const user = me || this.auth.getUser();
         return `
+      <div class="sd-avatar-edit">
+        <div class="sd-avatar-preview" id="sd-avatar-preview">${this.avatarHtml(user)}</div>
+        <div class="sd-avatar-actions">
+          <label class="btn btn-sm btn-primary" for="sd-avatar-input">${user.avatarUrl ? "Trocar foto" : "Adicionar foto"}</label>
+          <input type="file" id="sd-avatar-input" accept="image/jpeg,image/png,image/webp" hidden>
+          ${user.avatarUrl ? `<button type="button" class="btn btn-sm btn-danger" id="sd-avatar-remove">Remover</button>` : ""}
+          <small>JPG, PNG ou WebP, até 2 MB.</small>
+        </div>
+      </div>
       <form id="sd-perfil-form">
         <div class="sd-field"><label>Nome</label><input type="text" id="sd-pf-name" value="${this.esc(user.name)}"></div>
         <div class="sd-field"><label>Email</label><input type="email" value="${this.esc(user.email)}" disabled></div>
-        <div class="sd-field"><label>Cargo</label><input type="text" id="sd-pf-position" value="${this.esc(user.position || "")}" placeholder="Seu cargo"></div>
+        ${user.role === "MEMBER"
+            ? `<div class="sd-field"><label>Cargo</label><input type="text" id="sd-pf-position" value="${this.esc(user.position || "Membro")}" disabled></div>`
+            : `<div class="sd-field"><label>Cargo</label><input type="text" id="sd-pf-position" value="${this.esc(user.position || "")}" placeholder="Seu cargo"></div>`}
         <div class="sd-field"><label>Bio</label><textarea id="sd-pf-bio" placeholder="Fale sobre você..." rows="3">${this.esc(user.bio || "")}</textarea></div>
-        <div class="sd-field"><label>Telefone</label><input type="text" id="sd-pf-phone" value="${this.esc(user.phone || "")}" placeholder="(11) 99999-9999"></div>
+        <div class="sd-field"><label>Telefone</label><input type="tel" id="sd-pf-phone" autocomplete="tel" value="${this.esc(user.phone || "")}" placeholder="(11) 99999-9999"></div>
         <div class="sd-field email-choice"><label class="email-choice__label" for="sd-pf-email-updates"><input type="checkbox" id="sd-pf-email-updates" ${user.emailUpdatesOptIn ? "checked" : ""}><span><strong>Receber novidades por email</strong><small>Projetos, eventos e notícias. Desmarque e salve para parar de receber.</small></span></label></div>
         <button type="submit" class="btn btn-primary btn-full">Salvar</button>
       </form>
@@ -228,7 +300,7 @@ export class DashboardSidebar {
           <div>
             <div class="sd-item-title">${this.esc(i.event.title)}</div>
             <div class="sd-item-sub">${new Date(i.event.date).toLocaleDateString("pt-BR")}${i.event.location ? ` - ${this.esc(i.event.location)}` : ""}</div>
-            <button class="btn btn-sm btn-danger" style="margin-top:.5rem;" data-cancel-id="${i.id}" data-cancel-title="${this.esc(i.event.title)}">Cancelar</button>
+            <button class="btn btn-sm btn-danger sd-item-action" data-cancel-id="${i.id}" data-cancel-title="${this.esc(i.event.title)}">Cancelar</button>
           </div>
         </div>`).join("");
         }

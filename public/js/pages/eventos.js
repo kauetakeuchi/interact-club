@@ -1,6 +1,7 @@
 import { api, auth, toast } from "../lib/index.js";
 import { initPublicPage } from "../lib/page.js";
 import { esc } from "../lib/security.js";
+import { pageHero, encontreSection, bindFilters, encontreCard, letterPlaceholder, paragraphs } from "../lib/listing.js";
 
 const params = new URLSearchParams(location.search);
 const detailId = params.get("id");
@@ -13,69 +14,76 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
     await renderList(page);
 });
+const EVENT_PLACEHOLDER_VARS = "--cat-soft:#17458F22;--cat:#17458F88";
+
+function eventCard(e) {
+    const d = new Date(e.date);
+    const dia = d.toLocaleDateString("pt-BR", { day: "numeric", month: "short" }).replace(".", "");
+    const isPast = e._tipo === "passado";
+    const lotado = e.maxParticipants && (e.signupCount || 0) >= e.maxParticipants;
+    const badgeColor = isPast ? "#6B7280" : lotado ? "#DC2626" : "#17458F";
+    const badgeLabel = isPast ? "Realizado" : lotado ? "Lotado" : "Aberto";
+    const dataCompleta = d.toLocaleDateString("pt-BR", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+    return encontreCard({
+        href: `/eventos?id=${encodeURIComponent(e.id)}`,
+        extraClass: isPast ? "encontre-card--past" : "",
+        vars: `${EVENT_PLACEHOLDER_VARS};--badge:${badgeColor}`,
+        mediaHtml: e.imageUrl
+            ? `<img src="${esc(e.imageUrl)}" alt="${esc(e.title)}" loading="lazy">`
+            : letterPlaceholder(e.title.charAt(0)),
+        badgeHtml: badgeLabel,
+        titleHtml: esc(e.title),
+        metaHtml: `${e.location ? esc(e.location) + " · " : ""}${esc(dia)}`,
+        dateHtml: `Data: ${esc(dataCompleta)}`,
+    });
+}
+
+function renderGrid(list) {
+    const countEl = document.getElementById("encontre-count-ev");
+    if (countEl) countEl.textContent = `${list.length} eventos encontrados`;
+    const grid = document.getElementById("encontre-grid-ev");
+    if (!grid) return;
+    grid.innerHTML = list.length
+        ? list.map(eventCard).join("")
+        : `<div class="list-empty">Nenhum evento com esse filtro.</div>`;
+}
+
 async function renderList(page) {
     try {
         const { futuros, passados } = await api.get("/eventos");
-        const todos = [...futuros.map(e=>({...e, _tipo:"futuro"})), ...passados.map(e=>({...e, _tipo:"passado"}))];
-        const renderGrid = (list) => {
-            const countEl = document.getElementById("encontre-count-ev");
-            if (countEl) countEl.textContent = `${list.length} eventos encontrados`;
-            const grid = document.getElementById("encontre-grid-ev");
-            if (!grid) return;
-            if (list.length === 0) {
-                grid.innerHTML = `<div class="list-empty">Nenhum evento com esse filtro.</div>`;
-                return;
-            }
-            grid.innerHTML = list.map((e) => {
-                const d = new Date(e.date);
-                const dia = d.toLocaleDateString("pt-BR", { day: "numeric", month: "short" }).replace(".", "");
-                const isPast = e._tipo === "passado";
-                const vagasTxt = e.maxParticipants ? `${e.signupCount||0}/${e.maxParticipants} vagas` : "Vagas livres";
-                const badgeColor = isPast ? "#6B7280" : e.maxParticipants && (e.signupCount||0) >= e.maxParticipants ? "#DC2626" : "#17458F";
-                const badgeLabel = isPast ? "Realizado" : e.maxParticipants && (e.signupCount||0) >= e.maxParticipants ? "Lotado" : "Aberto";
-                return `<a href="/eventos?id=${e.id}" class="encontre-card" style="${isPast ? "opacity:.85" : ""}">
-                  <div class="encontre-card__media">${e.imageUrl ? `<img src="${esc(e.imageUrl)}" alt="${esc(e.title)}" loading="lazy">` : `<div style="width:100%;height:100%;background:linear-gradient(135deg,#17458F22,#17458F88);display:flex;align-items:center;justify-content:center;color:#fff;font-family:var(--font-heading);font-weight:700;font-size:1.5rem;">${esc(e.title.charAt(0))}</div>`}<span class="encontre-card__badge" style="background:${badgeColor}">${badgeLabel}</span></div>
-                  <div class="encontre-card__body">
-                    <h3 class="encontre-card__title">${esc(e.title)}</h3>
-                    <div class="encontre-card__meta">${e.location ? esc(e.location) + " · " : ""}${esc(dia)}</div>
-                    <div class="encontre-card__date">Data: ${esc(d.toLocaleDateString("pt-BR", { weekday: "short", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }))}</div>
-                  </div>
-                </a>`;
-            }).join("");
-        };
-        page.innerHTML = `<section class="hero"><div class="container"><span class="tag">Agenda</span><h1>Próximos <span>Eventos</span></h1><p>Fique por dentro das atividades do clube e garanta sua vaga.</p></div></section><section class="section" style="padding: 5rem 0;"><div class="container">
-          <div class="encontre-head">
-            <h1>Encontre eventos</h1>
-            <div class="encontre-filters" id="encontre-filters-ev">
-              <button data-filter="all" class="encontre-filter encontre-filter--active">Todos</button>
-              <button data-filter="futuro" class="encontre-filter">Próximos</button>
-              <button data-filter="passado" class="encontre-filter">Realizados</button>
-              <button data-filter="vagas" class="encontre-filter">Com vagas</button>
-            </div>
-          </div>
-          <p class="encontre-count" id="encontre-count-ev">${todos.length} eventos encontrados</p>
-          <div class="encontre-grid" id="encontre-grid-ev"></div>
-        </div></section>`;
+        const todos = [...futuros.map((e) => ({ ...e, _tipo: "futuro" })), ...passados.map((e) => ({ ...e, _tipo: "passado" }))];
+        page.innerHTML = pageHero({
+            tag: "Agenda",
+            titleHtml: "Próximos <span>Eventos</span>",
+            text: "Fique por dentro das atividades do clube e garanta sua vaga.",
+        }) + encontreSection({
+            heading: "Encontre eventos",
+            filtersId: "encontre-filters-ev",
+            filters: [
+                { value: "all", label: "Todos" },
+                { value: "futuro", label: "Próximos" },
+                { value: "passado", label: "Realizados" },
+                { value: "vagas", label: "Com vagas" },
+            ],
+            countId: "encontre-count-ev",
+            countText: `${todos.length} eventos encontrados`,
+            gridId: "encontre-grid-ev",
+        });
         renderGrid(todos);
-        document.getElementById("encontre-filters-ev")?.addEventListener("click", (e) => {
-            const btn = e.target.closest("button[data-filter]");
-            if (!btn) return;
-            document.querySelectorAll("#encontre-filters-ev .encontre-filter").forEach(b=>b.classList.remove("encontre-filter--active"));
-            btn.classList.add("encontre-filter--active");
-            const f = btn.dataset.filter;
+        bindFilters("encontre-filters-ev", (f) => {
             let filtered = todos;
-            if (f === "futuro") filtered = todos.filter(x=>x._tipo==="futuro");
-            else if (f === "passado") filtered = todos.filter(x=>x._tipo==="passado");
-            else if (f === "vagas") filtered = todos.filter(x=>x._tipo==="futuro" && (!x.maxParticipants || (x.signupCount||0) < x.maxParticipants));
+            if (f === "futuro") filtered = todos.filter((x) => x._tipo === "futuro");
+            else if (f === "passado") filtered = todos.filter((x) => x._tipo === "passado");
+            else if (f === "vagas") filtered = todos.filter((x) => x._tipo === "futuro" && (!x.maxParticipants || (x.signupCount || 0) < x.maxParticipants));
             renderGrid(filtered);
         });
-    } catch (e) {
+    } catch {
         page.innerHTML = `<p>Erro ao carregar eventos.</p>`;
     }
 }
 async function renderDetail(page) {
     try {
-        const evento = await api.get(`/eventos/${detailId}`);
+        const evento = await api.get(`/eventos/${encodeURIComponent(detailId)}`);
         const d = new Date(evento.date);
         const dateStr = d.toLocaleDateString("pt-BR", { day: "numeric", month: "long", year: "numeric" });
         let signupId = null;
@@ -160,7 +168,7 @@ async function renderDetail(page) {
         }
         page.innerHTML = `
       <section class="hero"><div class="container"><a href="/eventos" class="detail-back">← Voltar para Eventos</a><h1>${esc(evento.title)}</h1><div class="detail-meta"><span>${dateStr}</span>${evento.location ? `<span>${esc(evento.location)}</span>` : ""}</div></div></section>
-      <section class="section"><div class="container"><div class="event-sidebar"><div>${evento.imageUrl ? `<img src="${esc(evento.imageUrl)}" alt="${esc(evento.title)}" class="detail-cover">` : `<div class="detail-cover--empty" style="background:linear-gradient(135deg,#17458F22,#17458F44);"></div>`}<div class="detail-body">${evento.description.split("\n").filter((p) => p.trim()).map((p) => `<p>${esc(p)}</p>`).join("")}</div></div>
+      <section class="section"><div class="container"><div class="event-sidebar"><div>${evento.imageUrl ? `<img src="${esc(evento.imageUrl)}" alt="${esc(evento.title)}" class="detail-cover">` : `<div class="detail-cover--empty" style="--cat-soft:#17458F22;--cat:#17458F44"></div>`}<div class="detail-body">${paragraphs(evento.description)}</div></div>
       <div><div class="info-card info-card--sticky"><div class="info-card__head"><span class="info-card__label">Vagas</span><span class="info-card__value vagas-count">${evento.maxParticipants ? `${evento.signupCount}/${evento.maxParticipants}` : evento.signupCount}</span></div>
       <div class="action-area"></div>
       <p class="info-card__note signup-footer">${evento.signupCount} ${evento.signupCount === 1 ? "pessoa inscrita" : "pessoas inscritas"}</p></div></div></div></div></section>`;

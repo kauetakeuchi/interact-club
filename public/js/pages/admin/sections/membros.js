@@ -26,7 +26,7 @@ export async function render() {
     </div>
     <div class="table-wrap"><table class="admin-table" id="tabela-membros"><thead><tr><th>Nome</th><th>Email</th><th>Verificação</th><th>Cargo</th><th>Função</th><th>Status</th><th class="th-actions">Ações</th></tr></thead><tbody>
       ${membros.map((membro) => `<tr>
-        <td><div class="cell-name"><div class="cell-avatar">${esc(membro.name.charAt(0).toUpperCase())}</div>${esc(membro.name)}</div></td>
+        <td><div class="cell-name"><div class="cell-avatar">${membro.avatarUrl ? `<img src="${esc(membro.avatarUrl)}" alt="">` : esc(membro.name.charAt(0).toUpperCase())}</div>${esc(membro.name)}</div></td>
         <td><span class="cell-email">${esc(membro.email)}</span></td>
         <td><span class="status-dot status-${membro.emailVerifiedAt ? "green" : "amber"}"></span><span class="status-label">${membro.emailVerifiedAt ? "Confirmado" : "Pendente"}</span></td>
         <td>${membro.position ? esc(membro.position) : '<span class="cell-empty">—</span>'}</td>
@@ -50,9 +50,10 @@ export function bind(root, { refresh }) {
 function memberForm(membro) {
     return `
     <div class="form-row">
-      <div class="form-group"><label>Nome</label><input type="text" id="f-mem-name" class="form-control" value="${esc(membro.name)}" maxlength="255" required></div>
-      <div class="form-group"><label>Email</label><input type="email" id="f-mem-email" class="form-control" value="${esc(membro.email)}" maxlength="255" required></div>
+      <div class="form-group"><label>Nome</label><input type="text" class="form-control" value="${esc(membro.name)}" disabled></div>
+      <div class="form-group"><label>Email</label><input type="email" class="form-control" value="${esc(membro.email)}" disabled></div>
     </div>
+    <small class="form-note form-note--block">Nome, email e telefone só podem ser alterados pelo próprio membro.</small>
     <div class="form-group"><label>Cargo</label><input type="text" id="f-mem-pos" class="form-control" value="${esc(membro.position || "")}" maxlength="255" placeholder="Ex: Presidente, Tesoureiro..."></div>
     <div class="form-row">
       <div class="form-group"><label>Função</label><select id="f-mem-role" class="form-control">
@@ -66,7 +67,6 @@ function memberForm(membro) {
         <option value="INACTIVE" ${membro.status === "INACTIVE" ? "selected" : ""}>Inativo</option>
       </select></div>
     </div>
-    <div class="form-group"><label>Nova senha <small>opcional</small></label><input type="password" id="f-mem-password" class="form-control" minlength="8" autocomplete="new-password" placeholder="Deixe em branco para manter a atual"><small style="color:var(--text-muted);">Ao trocar, as sessões abertas desse membro são encerradas.</small></div>
     <button type="submit" class="btn btn-primary btn-full">Salvar</button>`;
 }
 
@@ -76,24 +76,15 @@ async function openEditForm(id, refresh) {
     if (!membro) throw new Error("Membro não encontrado.");
 
     modalForm("Editar Membro", memberForm(membro), async () => {
-        const password = document.getElementById("f-mem-password").value;
         const payload = {
-            name: document.getElementById("f-mem-name").value,
-            email: document.getElementById("f-mem-email").value,
             position: document.getElementById("f-mem-pos").value || null,
             role: document.getElementById("f-mem-role").value,
             status: document.getElementById("f-mem-status").value,
         };
-        if (password) payload.password = password;
 
-        const updated = await api.put(`/membros/${encodeURIComponent(id)}`, payload);
+        await api.put(`/membros/${encodeURIComponent(id)}`, payload);
         closeModal();
-
-        if (updated.emailVerificationSent) {
-            toast.show("Membro atualizado. Enviamos um novo link de verificação para o email.");
-        } else {
-            toast.show("Membro atualizado!");
-        }
+        toast.show("Membro atualizado!");
 
         // Mudanças no próprio perfil também alteram o cabeçalho do painel.
         if (auth.getUser()?.id === id) {

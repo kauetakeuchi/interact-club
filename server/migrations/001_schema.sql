@@ -107,6 +107,12 @@ CREATE TABLE IF NOT EXISTS contact (
   INDEX idx_contact_read_created (isRead, createdAt)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS revoked_session (
+  jti VARCHAR(36) PRIMARY KEY,
+  expiresAt DATETIME NOT NULL,
+  INDEX idx_revoked_session_expires (expiresAt)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- ============================================================
 -- ATUALIZAÇÃO DE BANCO EXISTENTE (versões anteriores do schema)
 -- Se você já tinha o banco criado sem essas colunas/charset,

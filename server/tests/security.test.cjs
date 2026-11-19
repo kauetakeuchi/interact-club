@@ -15,7 +15,7 @@ const { signToken } = require("../dist/lib/jwt");
 const db = require("../dist/lib/db");
 const { requireAuth, requireAdmin } = require("../dist/middleware/auth");
 const storage = require("../dist/lib/storage");
-const { loginSchema, registerSchema, membroUpdateSchema, projetoSchema } = require("../dist/lib/schemas");
+const { loginSchema, registerSchema, membroUpdateSchema, projetoSchema, perfilSchema, contatoSchema } = require("../dist/lib/schemas");
 
 test("servidor rejeita JWT_SECRET ausente", () => {
   const result = spawnSync(process.execPath, ["-e", "require('./dist/lib/jwt')"], {
@@ -48,10 +48,44 @@ test("novas senhas exigem 8 caracteres, maiúscula, minúscula, número e especi
   assert.equal(registerSchema.safeParse({ ...registration, password: "Ábcdef1!" }).success, true);
   for (const password of ["Abcde1!", "abcdef1!", "ABCDEF1!", "Abcdefg!", "Abcdef12", "Abcde 12"]) {
     assert.equal(registerSchema.safeParse({ ...registration, password }).success, false, password);
-    assert.equal(membroUpdateSchema.safeParse({ password }).success, false, password);
   }
-  assert.equal(membroUpdateSchema.safeParse({ password: registration.password }).success, true);
   assert.equal(loginSchema.safeParse({ email: registration.email, password: "senhaantiga" }).success, true);
+});
+
+test("admin não troca a senha de membro: o campo é descartado", () => {
+  assert.equal(membroUpdateSchema.safeParse({ password: "Abcdef1!" }).success, false);
+  const parsed = membroUpdateSchema.parse({ status: "ACTIVE", password: "Abcdef1!" });
+  assert.equal("password" in parsed, false);
+});
+
+test("telefone: DDD existente, quantidade exata de dígitos e sem sequências", () => {
+  const parse = (phone) => perfilSchema.safeParse({ name: "Pessoa", phone });
+  for (const [input, saved] of [
+    ["(11) 98123-4567", "11981234567"],
+    ["11981234567", "11981234567"],
+    ["+55 11 98123-4567", "11981234567"],
+    ["5511981234567", "11981234567"],
+    ["(21) 3456-7123", "2134567123"],
+    ["(55) 99123-4567", "55991234567"],
+  ]) {
+    const r = parse(input);
+    assert.equal(r.success, true, input);
+    assert.equal(r.data.phone, saved, input);
+  }
+  for (const input of [
+    "(20) 98123-4567", "(00) 98123-4567", "(10) 3456-7123", // DDD inexistente
+    "1198123456", "119812345", "119812345670",              // quantidade errada / celular sem 9
+    "(11) 6345-6712",                                       // fixo começando com 6
+    "(11) 99999-9999", "(11) 91111-1111", "(21) 3333-3333", // dígitos repetidos
+    "(11) 91234-5678", "(11) 98765-4321", "(21) 2345-6789", // sequências
+    "abc", "11 98123-4567 ramal 2", "+1 415 555 0100",
+  ]) {
+    assert.equal(parse(input).success, false, input);
+  }
+  assert.equal(parse("").data.phone, null);
+  const contato = { name: "Pessoa", email: "a@b.com", subject: "Oi", message: "Olá" };
+  assert.equal(contatoSchema.safeParse({ ...contato, phone: "(11) 99999-9999" }).success, false);
+  assert.equal(registerSchema.safeParse({ name: "Pessoa", email: "a@b.com", password: "Abcdef1!", phone: "(99) 1234-5678" }).success, false);
 });
 
 test("datas de projeto permanecem no dia informado", () => {

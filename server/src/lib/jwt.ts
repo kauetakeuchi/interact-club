@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
 
 function getSecret(): string {
   const secret = process.env.JWT_SECRET?.trim();
@@ -13,10 +14,13 @@ const SECRET = getSecret();
 export interface VerifiedToken {
   userId: string;
   issuedAt: number;
+  /** Identificador da sessão; tokens antigos (sem jti) vêm como null. */
+  sessionId: string | null;
+  expiresAt: number;
 }
 
 export function signToken(id: string): string {
-  return jwt.sign({}, SECRET, { subject: id, expiresIn: "7d", algorithm: "HS256" });
+  return jwt.sign({}, SECRET, { subject: id, expiresIn: "7d", algorithm: "HS256", jwtid: crypto.randomUUID() });
 }
 
 export function verifyToken(token: string): VerifiedToken {
@@ -24,5 +28,10 @@ export function verifyToken(token: string): VerifiedToken {
   if (typeof payload === "string" || !payload.sub || typeof payload.sub !== "string") {
     throw new Error("Token inválido");
   }
-  return { userId: payload.sub, issuedAt: Number(payload.iat ?? 0) * 1000 };
+  return {
+    userId: payload.sub,
+    issuedAt: Number(payload.iat ?? 0) * 1000,
+    sessionId: typeof payload.jti === "string" ? payload.jti : null,
+    expiresAt: Number(payload.exp ?? 0) * 1000,
+  };
 }

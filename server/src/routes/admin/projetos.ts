@@ -4,7 +4,7 @@ import { query, getOne, exec } from "../../lib/db";
 import { AuthRequest } from "../../middleware/auth";
 import { validate } from "../../lib/validation";
 import { projetoSchema } from "../../lib/schemas";
-import { deleteImage } from "../../lib/storage";
+import { discardImage } from "../../lib/storage";
 import { ah } from "../../lib/asyncHandler";
 import { notifyContentPublishedAsync, buildContentUrl } from "../../lib/notify";
 import type { ProjectRow } from "../../lib/types";
@@ -52,7 +52,7 @@ router.put("/:id", validate(projetoSchema), ah(async (req: AuthRequest, res: Res
     "UPDATE `project` SET title=?, description=?, `status`=?, startDate=?, endDate=?, imageUrl=?, isPublic=? WHERE id=?",
     [title, description, status, startDate ?? null, endDate ?? null, imageUrl ?? null, isPublic ?? true, req.params.id]
   );
-  if (antigo.imageUrl && antigo.imageUrl !== imageUrl) await deleteImage(antigo.imageUrl);
+  if (antigo.imageUrl && antigo.imageUrl !== imageUrl) await discardImage(antigo.imageUrl, "admin/projetos");
   if (!antigo.isPublic && (isPublic ?? true)) {
     notifyContentPublishedAsync("projeto", {
       title,
@@ -68,7 +68,7 @@ router.delete("/:id", ah(async (req: AuthRequest, res: Response) => {
   const projeto = await getOne<{ imageUrl: string | null }>("SELECT imageUrl FROM `project` WHERE id = ?", [req.params.id]);
   if (!projeto) return res.status(404).json({ message: "Projeto não encontrado" });
   await exec("DELETE FROM `project` WHERE id = ?", [req.params.id]);
-  if (projeto.imageUrl) await deleteImage(projeto.imageUrl);
+  await discardImage(projeto.imageUrl, "admin/projetos");
   return res.json({ success: true });
 }));
 

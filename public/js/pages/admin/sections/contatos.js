@@ -1,6 +1,7 @@
 import { api, toast } from "../../../lib/index.js";
 import { esc, bindActions } from "../ui.js";
 import { icons } from "../icons.js";
+import { formatPhone, phoneProblem } from "../../../lib/phone.js";
 
 export async function render() {
     const contatos = await api.get("/admin/contatos");
@@ -19,7 +20,7 @@ export async function render() {
     <div class="table-wrap"><table class="admin-table" id="tabela-contatos"><thead><tr><th>Nome</th><th>Email</th><th>Assunto</th><th>Mensagem</th><th>Data</th><th>Status</th><th class="th-actions">Ações</th></tr></thead><tbody>
       ${contatos.map((contato) => `<tr>
         <td><div class="cell-name"><div class="cell-avatar">${esc(contato.name.charAt(0).toUpperCase())}</div>${esc(contato.name)}</div></td>
-        <td><span class="cell-email">${esc(contato.email)}</span>${contato.phone ? `<div class="cell-time">${esc(contato.phone)}</div>` : ""}</td>
+        <td><span class="cell-email">${esc(contato.email)}</span>${contato.phone ? `<div class="cell-time">${esc(phoneProblem(contato.phone) ? contato.phone : formatPhone(contato.phone))}</div>` : ""}</td>
         <td>${esc(contato.subject)}</td>
         <td><div class="cell-preview">${esc(contato.message)}</div></td>
         <td><div class="cell-date">${new Date(contato.createdAt).toLocaleDateString("pt-BR")}</div></td>

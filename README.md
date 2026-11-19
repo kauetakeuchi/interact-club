@@ -27,12 +27,12 @@ npm run migrate
 
 O comando cria o banco do `DATABASE_URL` se ele não existir e aplica só as migrations que faltam. Ele guarda o que já rodou na tabela `schema_migrations`, então pode ser executado sempre que você atualizar o projeto. Em bancos criados antes desse comando existir, ele reconhece as migrations que já foram aplicadas à mão. Em produção, depois do `npm run build`, use `npm --prefix server run migrate:prod`.
 
-Para criar uma migration nova, adicione `server/migrations/NNN_descricao.sql` com o próximo número **e** atualize o `001_schema.sql`, que sempre descreve o esquema completo usado em bancos novos.
+Para criar uma migration nova, adicione `server/migrations/NNN_descricao.sql` com o próximo número **e** atualize o `001_schema.sql`, que sempre descreve o esquema completo usado em bancos novos. Exceção: migrations com `_conteudo` no nome só inserem dados (sem mudar o esquema) e rodam também em bancos novos; elas não podem duplicar o que já existe.
 
 <details>
 <summary>Sem o comando: aplicar pelo phpMyAdmin</summary>
 
-Banco novo: execute só o `001_schema.sql` (aba **SQL** → cole o conteúdo → executar). Banco existente: execute, nesta ordem, apenas as migrations que ainda não rodaram:
+Banco novo: execute o `001_schema.sql` e depois o `007_conteudo_inicial.sql` (aba **SQL** → cole o conteúdo → executar). Banco existente: execute, nesta ordem, apenas as migrations que ainda não rodaram:
 
 | Migration | Quando executar |
 |---|---|
@@ -41,6 +41,8 @@ Banco novo: execute só o `001_schema.sql` (aba **SQL** → cole o conteúdo →
 | `003_email_updates_consent.sql` | Bancos criados antes da preferência de novidades |
 | `004_polish.sql` | Bancos criados antes da recuperação de senha e dos índices de desempenho |
 | `005_project_updated_at.sql` | Bancos criados antes de `project.updatedAt` existir |
+| `006_revoked_session.sql` | Bancos criados antes do "Sair" encerrar a sessão no servidor |
+| `007_conteudo_inicial.sql` | Qualquer banco, inclusive novo: 2 notícias, 2 eventos e 2 projetos de exemplo (não duplica) |
 
 </details>
 

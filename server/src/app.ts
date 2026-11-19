@@ -172,8 +172,9 @@ export function createApp() {
 
     if (err instanceof multer.MulterError) {
       const status = err.code === "LIMIT_FILE_SIZE" ? 413 : 400;
+      const maxMb = req.originalUrl.startsWith("/api/upload/avatar") ? 2 : 5;
       const message = err.code === "LIMIT_FILE_SIZE"
-        ? "Imagem muito grande (máximo de 5 MB)"
+        ? `Imagem muito grande (máximo de ${maxMb} MB)`
         : "Não foi possível enviar o arquivo";
       return res.status(status).json({ message });
     }

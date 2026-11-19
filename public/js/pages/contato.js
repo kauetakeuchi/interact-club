@@ -1,5 +1,6 @@
 import { api, toast } from "../lib/index.js";
 import { initPublicPage } from "../lib/page.js";
+import { bindPhoneInput } from "../lib/phone.js";
 
 function renderSuccess() {
     return `<div class="success-state contact-success">
@@ -85,7 +86,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           <button type="submit" class="contact-submit" id="ct-btn">Mandar mensagem <span aria-hidden="true">↗</span></button>
         </div>
       </form>
-      <div id="ct-success" style="display:none;"></div>
+      <div id="ct-success" hidden></div>
         </section>
       </div>
     </main>`;
@@ -95,6 +96,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     requestAnimationFrame(() => revealItems.forEach((item) => item.classList.add("is-visible")));
 
     const form = document.getElementById("contato-form");
+    bindPhoneInput(document.getElementById("ct-phone"));
     const successEl = document.getElementById("ct-success");
 
     form?.addEventListener("submit", async (e) => {
@@ -115,10 +117,10 @@ document.addEventListener("DOMContentLoaded", async () => {
             toast.show("Mensagem recebida! Entraremos em contato em breve.");
             form.style.display = "none";
             successEl.innerHTML = renderSuccess();
-            successEl.style.display = "block";
+            successEl.hidden = false;
             successEl.querySelector("#ct-reset")?.addEventListener("click", () => {
                 form.style.display = "block";
-                successEl.style.display = "none";
+                successEl.hidden = true;
                 successEl.innerHTML = "";
                 form.reset();
             });

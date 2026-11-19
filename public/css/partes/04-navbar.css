@@ -80,6 +80,29 @@
   gap: .75rem;
 }
 
+/* Menu do usuário logado. O Navbar.js mostra (display:flex) ou esconde. */
+.navbar .nav-user {
+  display: none;
+  align-items: center;
+  gap: .75rem;
+}
+
+.navbar .nav-user__link {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  color: var(--text);
+  font-size: .875rem;
+}
+
+.navbar .nav-user__logout {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: .875rem;
+  cursor: pointer;
+}
+
 .navbar .avatar-circle {
   width: 2rem;
   height: 2rem;

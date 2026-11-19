@@ -4,7 +4,7 @@ import { query, getOne, exec } from "../../lib/db";
 import { AuthRequest } from "../../middleware/auth";
 import { validate } from "../../lib/validation";
 import { eventoSchema } from "../../lib/schemas";
-import { deleteImage } from "../../lib/storage";
+import { discardImage } from "../../lib/storage";
 import { ah } from "../../lib/asyncHandler";
 import { notifyContentPublishedAsync, buildContentUrl } from "../../lib/notify";
 import type { EventRow, EventWithSignups } from "../../lib/types";
@@ -56,7 +56,7 @@ router.put("/:id", validate(eventoSchema), ah(async (req: AuthRequest, res: Resp
     "UPDATE `event` SET title=?, description=?, `date`=?, location=?, imageUrl=?, isPublic=?, maxParticipants=? WHERE id=?",
     [title, description, date, location ?? null, imageUrl ?? null, isPublic ?? true, maxParticipants ?? null, req.params.id]
   );
-  if (antigo.imageUrl && antigo.imageUrl !== imageUrl) await deleteImage(antigo.imageUrl);
+  if (antigo.imageUrl && antigo.imageUrl !== imageUrl) await discardImage(antigo.imageUrl, "admin/eventos");
   if (!antigo.isPublic && (isPublic ?? true)) {
     notifyContentPublishedAsync("evento", {
       title,
@@ -73,7 +73,7 @@ router.delete("/:id", ah(async (req: AuthRequest, res: Response) => {
   const evento = await getOne<{ imageUrl: string | null }>("SELECT imageUrl FROM `event` WHERE id = ?", [req.params.id]);
   if (!evento) return res.status(404).json({ message: "Evento não encontrado" });
   await exec("DELETE FROM `event` WHERE id = ?", [req.params.id]);
-  if (evento.imageUrl) await deleteImage(evento.imageUrl);
+  await discardImage(evento.imageUrl, "admin/eventos");
   return res.json({ success: true });
 }));
 

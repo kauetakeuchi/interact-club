@@ -311,3 +311,170 @@
   white-space: nowrap;
   border: 0;
 }
+
+/* ============================================
+   CORES POR CATEGORIA/STATUS
+   O JavaScript define só as variáveis (--cat e --cat-soft, que é a mesma
+   cor com transparência); o visual fica todo aqui.
+   ============================================ */
+
+/* ---------- Home: carregamento (skeletons) ---------- */
+.skeleton--lead-media { aspect-ratio: 16 / 10.2; border-radius: 16px 16px 0 0; }
+.skeleton-pad { padding: 1.25rem; }
+.skeleton--line-tag { height: .75rem; width: 6rem; margin-bottom: .9rem; }
+.skeleton--line-title { height: 1.4rem; width: 90%; margin-bottom: .6rem; }
+.skeleton--line-text { height: .85rem; width: 100%; }
+.skeleton--stack-item { height: 112px; border-radius: 12px; }
+.skeleton--event { height: 96px; border-radius: 14px; }
+.skeleton--calendar { height: 320px; border-radius: 16px; }
+.skeleton--project { height: 17rem; border-radius: 12px; }
+
+/* ---------- Home: erros de carregamento ---------- */
+.news-empty p { margin-bottom: 1rem; font-size: .875rem; }
+.home-load-error {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 2rem 1rem;
+  color: var(--text-muted);
+  font-size: .875rem;
+}
+.home-load-error p { margin-bottom: 1rem; }
+
+/* ---------- Home: placeholders sem imagem ---------- */
+.news-lead__placeholder {
+  background: linear-gradient(135deg, var(--cat), #2E63C4);
+  aspect-ratio: 16 / 10.2;
+  font-size: 3rem;
+}
+.news-stack__placeholder {
+  background: linear-gradient(135deg, var(--cat), #94a3b8);
+  font-size: 1.5rem;
+}
+.news-stack__meta .mini-badge { background: var(--cat); }
+.ficha__placeholder { background: linear-gradient(135deg, var(--cat-soft), var(--cat)); }
+
+/* ---------- Página de notícias: lista ---------- */
+.news-list-section {
+  background: #F9FAFB;
+  padding: 2.5rem 0 4rem;
+}
+.news-list-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+.news-list-count {
+  font-size: .8125rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+.news-list-filters {
+  display: flex;
+  gap: .5rem;
+  flex-wrap: wrap;
+}
+.encontre-card--news .encontre-card__body { padding: .9rem 1rem; }
+.encontre-card--news .encontre-card__title {
+  font-size: .9375rem;
+  min-height: 2.6rem;
+}
+.encontre-card--news .encontre-card__meta {
+  margin-top: .35rem;
+  display: flex;
+  gap: .35rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.encontre-card__excerpt {
+  font-size: .8125rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+  margin: .5rem 0 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.encontre-card--news .encontre-card__placeholder { font-size: 1.75rem; }
+
+/* ---------- Página de notícias: matéria ---------- */
+.news-article__badge-wrap { margin-top: 1.25rem; }
+.badge.news-article__badge {
+  background: var(--cat);
+  color: #fff;
+  padding: .35rem .75rem;
+  border-radius: 100px;
+  font-size: .6875rem;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+/* .hero h1 já define a largura; este seletor precisa ser mais específico. */
+.hero h1.news-article__title {
+  margin-top: 1rem;
+  max-width: 32rem;
+}
+.news-article__meta {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+  color: rgba(255,255,255,.7);
+  font-size: .8125rem;
+}
+.news-article-section { padding: 3rem 0 5rem; }
+.news-article { max-width: 42rem; }
+.news-article__cover {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: 16px;
+  margin-bottom: 2rem;
+  box-shadow: 0 8px 32px rgba(15,52,110,.08);
+}
+.news-article__cover--empty {
+  aspect-ratio: 16 / 9;
+  background: linear-gradient(135deg, var(--cat-soft), var(--cat));
+  border-radius: 16px;
+  margin-bottom: 2rem;
+}
+.news-article__excerpt {
+  font-size: 1.0625rem;
+  line-height: 1.7;
+  color: var(--text);
+  font-style: italic;
+  border-left: 3px solid var(--cat);
+  margin-bottom: 2rem;
+  background: var(--muted);
+  padding: .9rem 1.15rem;
+  border-radius: 0 8px 8px 0;
+}
+.news-article__content {
+  font-size: 1rem;
+  line-height: 1.8;
+  color: var(--text);
+}
+.news-article__footer {
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+.news-article__back {
+  font-size: .875rem;
+  font-weight: 600;
+  color: var(--primary);
+  display: inline-flex;
+  gap: .35rem;
+  align-items: center;
+  text-decoration: none;
+}
+.news-article__date {
+  font-size: .75rem;
+  color: var(--text-light);
+}

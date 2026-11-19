@@ -8,6 +8,10 @@
  * migrations seguintes existem para atualizar bancos criados antes delas.
  * Por isso, num banco vazio, roda-se só o 001 e as demais são marcadas
  * como aplicadas. Ao criar uma migration nova, atualize também o 001.
+ *
+ * Exceção: migrations com "_conteudo" no nome inserem dados (não mudam o
+ * esquema), então rodam também em bancos novos, logo depois do 001. Elas
+ * precisam ser seguras para rodar em qualquer banco (não duplicar dados).
  */
 import "dotenv/config";
 import fs from "fs";
@@ -15,6 +19,7 @@ import path from "path";
 import mysql from "mysql2/promise";
 
 const MIGRATIONS_DIR = path.join(__dirname, "../migrations");
+const isContentMigration = (file: string) => file.includes("_conteudo");
 
 // Bancos atualizados à mão antes deste script existir: cada migration
 // antiga é reconhecida por uma coluna que ela criou.
@@ -72,7 +77,14 @@ async function main() {
         // Banco vazio: o 001 cria tudo na versão mais recente.
         console.log(`Criando o banco a partir de ${files[0]}...`);
         await conn.query(stripDatabaseSelection(fs.readFileSync(path.join(MIGRATIONS_DIR, files[0]), "utf8")));
-        for (const f of files) { await record(f); done.add(f); }
+        for (const f of files) {
+          if (f !== files[0] && isContentMigration(f)) {
+            console.log(`Aplicando ${f}...`);
+            await conn.query(stripDatabaseSelection(fs.readFileSync(path.join(MIGRATIONS_DIR, f), "utf8")));
+          }
+          await record(f);
+          done.add(f);
+        }
         console.log("Banco criado na versão mais recente.");
         return;
       } else {

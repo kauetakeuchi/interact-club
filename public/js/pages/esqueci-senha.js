@@ -18,9 +18,9 @@ form?.addEventListener("submit", async (event) => {
         form.hidden = true;
         status.hidden = false;
         status.innerHTML = `
-          <span style="font-size:2rem;">✉️</span><br>
+          <span class="auth-message__icon">✉️</span><br>
           <strong>Verifique sua caixa de email</strong><br>
-          <span style="font-size:0.95rem;color:var(--text-muted,#6b7280)">Enviamos um link de redefinição para o seu email. Pode levar alguns instantes.</span>
+          <span class="auth-message__hint">Enviamos um link de redefinição para o seu email. Pode levar alguns instantes.</span>
         `;
     } catch (err) {
         toast.show(err.message || "Não foi possível enviar o link agora.", "error");

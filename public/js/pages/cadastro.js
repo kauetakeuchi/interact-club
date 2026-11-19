@@ -1,13 +1,17 @@
 import { auth, toast } from "../lib/index.js";
 import { initPasswordToggles } from "../lib/password.js";
 import { askTermsConsent } from "../lib/TermsModal.js";
+import { bindPhoneInput } from "../lib/phone.js";
 
 if (auth.isAuthenticated()) {
     auth.refresh().then((user) => {
-        if (user) window.location.replace("/");
+        if (!user) return;
+        toast.show("Você já tem cadastro no clube! Voltando para o início...");
+        setTimeout(() => window.location.replace("/"), 1800);
     });
 }
 initPasswordToggles();
+bindPhoneInput(document.getElementById("reg-phone"));
 
 document.getElementById("register-form")?.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -38,10 +42,14 @@ document.getElementById("register-form")?.addEventListener("submit", async (e) =
         toast.show(err.message || "Erro ao criar conta", "error");
         btn.disabled = false;
         btn.textContent = "Criar Conta";
-        if (err.code === "EMAIL_NOT_VERIFIED") {
-            setTimeout(() => {
-                window.location.href = `/verificar-email?email=${encodeURIComponent(document.getElementById("reg-email").value)}`;
-            }, 900);
-        }
     }
 });
+
+// Data de nascimento não pode ser no futuro.
+const birthInput = document.getElementById("reg-birth");
+if (birthInput) {
+    const now = new Date();
+    const pad = (n) => String(n).padStart(2, "0");
+    birthInput.max = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+    birthInput.min = "1900-01-01";
+}

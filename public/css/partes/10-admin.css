@@ -767,3 +767,10 @@
   grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
   gap: 1rem;
 }
+
+/* Nota em cinza abaixo de campos de formulário */
+.form-note { color: var(--text-muted); }
+.form-note--block {
+  display: block;
+  margin: -.5rem 0 1rem;
+}

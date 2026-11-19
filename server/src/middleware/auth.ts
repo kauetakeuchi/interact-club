@@ -15,19 +15,21 @@ type ActiveUser = {
   status: string;
   emailVerifiedAt: Date | null;
   passwordChangedAt: Date | null;
+  sessionRevoked?: number | boolean | null;
 };
 
-function requestToken(req: Request): string | null {
+export function requestToken(req: Request): string | null {
   const header = req.headers.authorization;
   if (header?.startsWith("Bearer ")) return header.slice(7);
   const cookie = (req as Request & { cookies?: Record<string, string> }).cookies?.[SESSION_COOKIE];
   return typeof cookie === "string" && cookie.length > 0 ? cookie : null;
 }
 
-function loadActiveUser(userId: string): Promise<ActiveUser | null> {
+function loadActiveUser(userId: string, sessionId: string | null): Promise<ActiveUser | null> {
+  // Uma única consulta traz o usuário e diz se esta sessão foi encerrada (logout).
   return getOne<ActiveUser>(
-    "SELECT id, role, name, email, `status`, emailVerifiedAt, passwordChangedAt FROM `user` WHERE id = ?",
-    [userId]
+    "SELECT u.*, (r.jti IS NOT NULL) AS sessionRevoked FROM (SELECT id, role, name, email, `status`, emailVerifiedAt, passwordChangedAt FROM `user` WHERE id = ?) u LEFT JOIN revoked_session r ON r.jti = ?",
+    [userId, sessionId ?? ""]
   );
 }
 
@@ -42,8 +44,9 @@ async function resolveUser(req: Request): Promise<AuthRequest["user"] | null> {
     return null;
   }
 
-  const user = await loadActiveUser(verified.userId);
+  const user = await loadActiveUser(verified.userId, verified.sessionId);
   if (!user || user.status !== "ACTIVE" || !user.emailVerifiedAt) return null;
+  if (user.sessionRevoked && Number(user.sessionRevoked) === 1) return null;
 
   // Trocar a senha invalida sessões abertas antes da mudança.
   if (user.passwordChangedAt) {

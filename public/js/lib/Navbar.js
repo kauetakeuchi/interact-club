@@ -36,7 +36,15 @@ export class Navbar {
         if (user) {
             if (loginLink) loginLink.style.display = "none";
             if (userMenu) userMenu.style.display = "flex";
-            if (avatarLetter) avatarLetter.textContent = user.name.charAt(0).toUpperCase();
+            if (avatarLetter) {
+                avatarLetter.textContent = user.name.charAt(0).toUpperCase();
+                if (user.avatarUrl) {
+                    const img = document.createElement("img");
+                    img.src = user.avatarUrl;
+                    img.alt = "";
+                    avatarLetter.replaceChildren(img);
+                }
+            }
             if (userName) userName.textContent = user.name;
         } else {
             if (loginLink) loginLink.style.display = "inline-flex";

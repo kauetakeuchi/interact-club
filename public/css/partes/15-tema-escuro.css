@@ -351,6 +351,29 @@ html.dark .faq-item p {
   color: var(--text-muted) !important;
 }
 
+/* Notícia em destaque: no escuro --primary-dark fica claro, então a etiqueta
+   branca sobre a foto ficava ilegível. Fundo escuro e texto claro. */
+html.dark .news-lead__badge {
+  background: rgba(21,27,43,.88) !important;
+  border-color: rgba(255,255,255,.14) !important;
+  color: var(--text) !important;
+  box-shadow: 0 2px 10px rgba(0,0,0,.35) !important;
+}
+
+html.dark .news-lead__meta {
+  color: var(--text-muted) !important;
+}
+
+/* Azul claro: o --primary (#17458F) some sobre o fundo escuro. */
+html.dark .news-lead__cta,
+html.dark .news-lead__body h3 a:hover {
+  color: #8FB4F5 !important;
+}
+
+html.dark .news-lead__cta:hover {
+  border-color: #8FB4F5 !important;
+}
+
 html.dark .ficha__meta,
 html.dark .cal-event__foot,
 html.dark .encontre-grid,

@@ -13,7 +13,7 @@ const { signToken } = require("../dist/lib/jwt");
 
 // Banco falso: cada teste define como responder; tudo que roda fica registrado.
 const fake = { rows: () => null, list: () => [], calls: [], deleted: [], notified: [] };
-const original = { query: db.query, getOne: db.getOne, exec: db.exec, deleteImage: storage.deleteImage, notify: notify.notifyContentPublishedAsync };
+const original = { query: db.query, getOne: db.getOne, exec: db.exec, discardImage: storage.discardImage, notify: notify.notifyContentPublishedAsync };
 
 const staffId = crypto.randomUUID();
 let role = "ADMIN";
@@ -27,7 +27,7 @@ db.getOne = async (sql, params = []) => {
 };
 db.query = async (sql, params = []) => { fake.calls.push({ fn: "query", sql, params }); return fake.list(sql, params); };
 db.exec = async (sql, params = []) => { fake.calls.push({ fn: "exec", sql, params }); return { affectedRows: 1 }; };
-storage.deleteImage = async (url) => { fake.deleted.push(url); };
+storage.discardImage = async (url) => { if (url) fake.deleted.push(url); };
 notify.notifyContentPublishedAsync = (kind, content) => { fake.notified.push({ kind, ...content }); };
 
 const app = express();
@@ -52,7 +52,7 @@ test.before(async () => {
 test.after(async () => {
   await new Promise((r) => server.close(r));
   Object.assign(db, { query: original.query, getOne: original.getOne, exec: original.exec });
-  storage.deleteImage = original.deleteImage;
+  storage.discardImage = original.discardImage;
   notify.notifyContentPublishedAsync = original.notify;
 });
 

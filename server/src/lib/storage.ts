@@ -1,6 +1,7 @@
 import { v2 as cloudinary, type UploadApiErrorResponse, type UploadApiResponse } from "cloudinary";
 import path from "path";
 import fs from "fs";
+import { logError } from "./logger";
 
 export const publicDir = path.resolve(__dirname, "../../../public");
 export const UPLOAD_DIR = path.join(publicDir, "uploads");
@@ -58,6 +59,19 @@ export async function deleteImage(imageUrl: string | null | undefined): Promise<
     if (publicId) await deleteFromCloudinary(publicId);
   } else {
     deleteLocalFile(imageUrl);
+  }
+}
+
+/**
+ * Apaga uma imagem que deixou de ser usada, sem nunca derrubar a requisição.
+ * Usado depois que o banco já foi atualizado: se a limpeza falhar (ex.: Cloudinary
+ * fora do ar), a alteração continua valendo e o erro fica só no log.
+ */
+export async function discardImage(imageUrl: string | null | undefined, context: string): Promise<void> {
+  try {
+    await deleteImage(imageUrl);
+  } catch (err) {
+    logError(`storage/${context}`, err);
   }
 }
 

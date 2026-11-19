@@ -3,7 +3,7 @@ import { query, getOne, exec } from "../../lib/db";
 import { AuthRequest } from "../../middleware/auth";
 import { validate } from "../../lib/validation";
 import { noticiaSchema } from "../../lib/schemas";
-import { deleteImage } from "../../lib/storage";
+import { discardImage } from "../../lib/storage";
 import { ah } from "../../lib/asyncHandler";
 import { notifyContentPublishedAsync, buildContentUrl } from "../../lib/notify";
 import { type NewsRow, type WithAuthorName, withAuthor } from "../../lib/types";
@@ -62,7 +62,7 @@ router.put("/:id", validate(noticiaSchema), ah(async (req: AuthRequest, res: Res
     "UPDATE newsarticle SET title=?, slug=?, content=?, excerpt=?, imageUrl=?, category=?, published=? WHERE id=?",
     [title, slug, content, excerpt ?? null, imageUrl ?? null, category ?? null, published ?? false, req.params.id]
   );
-  if (antigo.imageUrl && antigo.imageUrl !== imageUrl) await deleteImage(antigo.imageUrl);
+  if (antigo.imageUrl && antigo.imageUrl !== imageUrl) await discardImage(antigo.imageUrl, "admin/noticias");
   if (!antigo.published && (published ?? false)) {
     notifyContentPublishedAsync("noticia", {
       title,
@@ -78,7 +78,7 @@ router.delete("/:id", ah(async (req: AuthRequest, res: Response) => {
   const noticia = await getOne<{ imageUrl: string | null }>("SELECT imageUrl FROM newsarticle WHERE id = ?", [req.params.id]);
   if (!noticia) return res.status(404).json({ message: "Notícia não encontrada" });
   await exec("DELETE FROM newsarticle WHERE id = ?", [req.params.id]);
-  if (noticia.imageUrl) await deleteImage(noticia.imageUrl);
+  await discardImage(noticia.imageUrl, "admin/noticias");
   return res.json({ success: true });
 }));
 

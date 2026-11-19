@@ -2,8 +2,8 @@ import { Router, Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { getOne, exec, isDuplicateKeyError } from "../lib/db";
-import { signToken } from "../lib/jwt";
-import { requireAuth, AuthRequest } from "../middleware/auth";
+import { signToken, verifyToken } from "../lib/jwt";
+import { requireAuth, requestToken, AuthRequest } from "../middleware/auth";
 import { validate } from "../lib/validation";
 import {
   loginSchema,
@@ -71,29 +71,67 @@ router.post("/login", validate(loginSchema), ah(async (req: Request, res: Respon
   });
 }));
 
-router.post("/logout", (_req: Request, res: Response) => {
+router.post("/logout", ah(async (req: Request, res: Response) => {
+  // Encerra esta sessão no servidor: o token deixa de valer mesmo que alguém tenha copiado o cookie.
+  const token = requestToken(req);
+  let session: ReturnType<typeof verifyToken> | null = null;
+  try {
+    session = token ? verifyToken(token) : null;
+  } catch {
+    session = null; // Token inválido ou expirado já não abre sessão.
+  }
+  if (session?.sessionId && session.expiresAt > Date.now()) {
+    try {
+      await exec("INSERT IGNORE INTO revoked_session (jti, expiresAt) VALUES (?, ?)", [session.sessionId, new Date(session.expiresAt)]);
+      await exec("DELETE FROM revoked_session WHERE expiresAt < NOW()");
+    } catch (err) {
+      logError("auth/logout", err);
+    }
+  }
   clearSessionCookie(res);
   return res.json({ success: true });
-});
+}));
 
 router.post("/register", validate(registerSchema), ah(async (req: Request, res: Response) => {
   const { name, email, password, phone, birthDate, emailUpdatesOptIn } = req.body;
 
   const exists = await getOne<Pick<UserRow, "id" | "emailVerifiedAt">>("SELECT id, emailVerifiedAt FROM `user` WHERE email = ?", [email]);
-  if (exists) {
-    return res.status(409).json({
-      code: exists.emailVerifiedAt ? "EMAIL_ALREADY_REGISTERED" : "EMAIL_NOT_VERIFIED",
-      message: exists.emailVerifiedAt
-        ? "Email já cadastrado"
-        : "Este email já iniciou um cadastro. Solicite um novo link de verificação.",
-    });
+  if (exists?.emailVerifiedAt) {
+    return res.status(409).json({ code: "EMAIL_ALREADY_REGISTERED", message: "Email já cadastrado" });
   }
 
   const passwordHash = await bcrypt.hash(password, 12);
-  const id = crypto.randomUUID();
   const verificationToken = crypto.randomBytes(32).toString("hex");
   const verificationTokenHash = hashToken(verificationToken);
   const verificationExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+  // Cadastro nunca confirmado: o novo substitui o antigo (nome, senha e link).
+  // Assim ninguém "reserva" o email de outra pessoa com uma senha que só ele sabe;
+  // o link antigo deixa de valer e o novo vai só para o dono do email.
+  if (exists) {
+    const result = await exec(
+      "UPDATE `user` SET name = ?, passwordHash = ?, passwordChangedAt = CURRENT_TIMESTAMP, phone = ?, birthDate = ?, emailVerificationTokenHash = ?, emailVerificationExpiresAt = ?, emailUpdatesOptIn = ?, emailUpdatesOptInAt = ? WHERE id = ? AND emailVerifiedAt IS NULL",
+      [name, passwordHash, phone ?? null, birthDate ?? null, verificationTokenHash, verificationExpiresAt, emailUpdatesOptIn, emailUpdatesOptIn ? new Date() : null, exists.id]
+    );
+    if (result.affectedRows === 0) {
+      return res.status(409).json({ code: "EMAIL_ALREADY_REGISTERED", message: "Email já cadastrado" });
+    }
+    try {
+      await sendVerificationEmail(email, name, verificationToken);
+    } catch (err) {
+      logError("auth/register-email", err);
+      return res.status(503).json({
+        message: "Não foi possível enviar o email de verificação. Tente novamente em alguns minutos.",
+      });
+    }
+    return res.status(201).json({
+      message: "Cadastro iniciado. Confira seu email para ativar a conta.",
+      email,
+      requiresEmailVerification: true,
+    });
+  }
+
+  const id = crypto.randomUUID();
   try {
     await exec(
       "INSERT INTO `user` (id, name, email, passwordHash, role, `status`, phone, birthDate, emailVerificationTokenHash, emailVerificationExpiresAt, emailUpdatesOptIn, emailUpdatesOptInAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
@@ -214,11 +252,14 @@ router.get("/me", requireAuth, ah(async (req: AuthRequest, res: Response) => {
 }));
 
 router.put("/perfil", requireAuth, validate(perfilSchema), ah(async (req: AuthRequest, res: Response) => {
-  const { name, bio = null, phone = null, position = null, avatarUrl = null, emailUpdatesOptIn } = req.body;
+  const { name, bio = null, phone = null, emailUpdatesOptIn } = req.body;
+  // Membros não definem o próprio cargo: mantém o que o admin definiu.
+  const keepPosition = req.user!.role === "MEMBER" ? 1 : 0;
+  const position = req.body.position ?? null;
   const preference = emailUpdatesOptIn ?? null;
   await exec(
-    "UPDATE `user` SET name = ?, bio = ?, phone = ?, `position` = ?, avatarUrl = ?, emailUpdatesOptIn = COALESCE(?, emailUpdatesOptIn), emailUpdatesOptInAt = CASE WHEN ? IS NULL THEN emailUpdatesOptInAt WHEN ? = 1 THEN COALESCE(emailUpdatesOptInAt, CURRENT_TIMESTAMP) ELSE NULL END WHERE id = ?",
-    [name, bio, phone, position, avatarUrl, preference, preference, preference, req.user!.id]
+    "UPDATE `user` SET name = ?, bio = ?, phone = ?, `position` = IF(? = 1, `position`, ?), emailUpdatesOptIn = COALESCE(?, emailUpdatesOptIn), emailUpdatesOptInAt = CASE WHEN ? IS NULL THEN emailUpdatesOptInAt WHEN ? = 1 THEN COALESCE(emailUpdatesOptInAt, CURRENT_TIMESTAMP) ELSE NULL END WHERE id = ?",
+    [name, bio, phone, keepPosition, position, preference, preference, preference, req.user!.id]
   );
   const user = await getOne<UserRow>("SELECT * FROM `user` WHERE id = ?", [req.user!.id]);
   return res.json({

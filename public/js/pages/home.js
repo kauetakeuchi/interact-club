@@ -1,17 +1,71 @@
-import { api, auth, toast } from "../lib/index.js";
+import { api } from "../lib/index.js";
 import { initPublicPage } from "../lib/page.js";
 import { esc } from "../lib/security.js";
 import { CATEGORY_COLORS } from "../lib/constants.js";
 
 document.addEventListener("DOMContentLoaded", async () => {
     initPublicPage();
-    document.querySelector('a[href="/cadastro"]')?.addEventListener("click", (e) => {
-        if (!auth.isAuthenticated()) return;
-        e.preventDefault();
-        toast.show("Você já está cadastrado!");
-    });
     await Promise.all([initNewsCarousel(), initEventosHome(), renderProjects()]);
 });
+
+const ARROW_CIRCLE = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9" opacity="0.3"/><path d="M9 12h7M12 8.5l4 3.5-4 3.5"/></svg>`;
+
+const NEWS_SKELETON = `<div class="news-edition">
+  <article class="news-lead">
+    <div class="skeleton skeleton-light skeleton--lead-media"></div>
+    <div class="skeleton-pad">
+      <div class="skeleton skeleton-light skeleton--line-tag"></div>
+      <div class="skeleton skeleton-light skeleton--line-title"></div>
+      <div class="skeleton skeleton-light skeleton--line-text"></div>
+    </div>
+  </article>
+  <div class="news-stack">
+    <div class="skeleton skeleton-light skeleton--stack-item"></div>
+    <div class="skeleton skeleton-light skeleton--stack-item"></div>
+    <div class="skeleton skeleton-light skeleton--stack-item"></div>
+  </div>
+</div>`;
+
+function formatNewsDate(value) {
+    return new Date(value).toLocaleDateString("pt-BR", { day: "numeric", month: "short", year: "numeric" });
+}
+
+/** Resumo da notícia: o excerpt, ou o começo do texto cortado em `max` caracteres. */
+function newsSummary(n, max) {
+    if (n.excerpt) return n.excerpt;
+    const content = n.content || "";
+    return content.slice(0, max) + (content.length > max ? "..." : "");
+}
+
+function newsLead(lead) {
+    const href = `/noticias?slug=${encodeURIComponent(lead.slug)}`;
+    const cor = CATEGORY_COLORS[lead.category] || "#17458F";
+    const media = lead.imageUrl
+        ? `<img src="${esc(lead.imageUrl)}" alt="${esc(lead.title)}" loading="lazy" decoding="async">`
+        : `<div class="news-stack__thumb--placeholder news-lead__placeholder" style="--cat:${cor}">${esc((lead.category || "N").charAt(0))}</div>`;
+    const badge = lead.category ? `<span class="news-lead__badge">${esc(lead.category)}</span>` : "";
+    const author = lead.author?.name ? `<span> - Por ${esc(lead.author.name)}</span>` : "";
+    return `<article class="news-lead"><a href="${href}" class="news-lead__media">${media}${badge}</a><div class="news-lead__body">`
+        + `<div class="news-lead__meta"><span>${formatNewsDate(lead.createdAt)}</span>${author}</div>`
+        + `<h3><a href="${href}">${esc(lead.title)}</a></h3>`
+        + `<p>${esc(newsSummary(lead, 220))}</p>`
+        + `<a href="${href}" class="news-lead__cta">Ler matéria <span aria-hidden="true">${ARROW_CIRCLE}</span></a>`
+        + `</div></article>`;
+}
+
+function newsStackItem(n) {
+    const href = `/noticias?slug=${encodeURIComponent(n.slug)}`;
+    const cor = CATEGORY_COLORS[n.category] || "#6b7280";
+    const media = n.imageUrl
+        ? `<img src="${esc(n.imageUrl)}" alt="${esc(n.title)}">`
+        : `<div class="news-stack__thumb--placeholder news-stack__placeholder" style="--cat:${cor}">${esc((n.category || "N").charAt(0))}</div>`;
+    const badge = n.category ? `<span class="mini-badge" style="--cat:${cor}">${esc(n.category)}</span>` : "";
+    return `<article class="news-stack__item"><a href="${href}" class="news-stack__media">${media}</a><div class="news-stack__body">`
+        + `<div class="news-stack__meta">${badge}<span>${formatNewsDate(n.createdAt)}</span></div>`
+        + `<h4><a href="${href}">${esc(n.title)}</a></h4>`
+        + `<p>${esc(newsSummary(n, 98))}</p>`
+        + `</div></article>`;
+}
 
 async function initNewsCarousel() {
     const section = document.getElementById("news-carousel-section");
@@ -21,7 +75,7 @@ async function initNewsCarousel() {
     section.hidden = false;
     root.setAttribute("role", "region");
     root.setAttribute("aria-label", "Notícias em destaque");
-    root.innerHTML = `<div class="news-edition"><article class="news-lead"><div class="skeleton skeleton-light" style="aspect-ratio:16/10.2;border-radius:16px 16px 0 0;"></div><div style="padding:1.25rem;"><div class="skeleton skeleton-light" style="height:.75rem;width:6rem;margin-bottom:.9rem;"></div><div class="skeleton skeleton-light" style="height:1.4rem;width:90%;margin-bottom:.6rem;"></div><div class="skeleton skeleton-light" style="height:.85rem;width:100%;"></div></div></article><div class="news-stack"><div class="skeleton skeleton-light" style="height:112px;border-radius:12px;"></div><div class="skeleton skeleton-light" style="height:112px;border-radius:12px;"></div><div class="skeleton skeleton-light" style="height:112px;border-radius:12px;"></div></div></div>`;
+    root.innerHTML = NEWS_SKELETON;
     let status = document.getElementById("news-status");
     if (!status) {
         status = document.createElement("span");
@@ -36,7 +90,7 @@ async function initNewsCarousel() {
         noticias = await api.get("/noticias");
     } catch (err) {
         status.textContent = err.message || "Erro ao carregar notícias.";
-        root.innerHTML = `<div class="news-empty"><p style="margin-bottom:1rem;font-size:.875rem;">` + esc(err.message || "Não foi possível carregar as notícias agora.") + `</p><button class="btn btn-primary" id="retry-news">Tentar novamente</button></div>`;
+        root.innerHTML = `<div class="news-empty"><p>${esc(err.message || "Não foi possível carregar as notícias agora.")}</p><button class="btn btn-primary" id="retry-news">Tentar novamente</button></div>`;
         document.getElementById("retry-news")?.addEventListener("click", (e) => {
             const b = e.currentTarget;
             if (b.disabled) return;
@@ -51,29 +105,9 @@ async function initNewsCarousel() {
     }
     status.textContent = "Notícias carregadas.";
     const items = noticias.slice(0, 5);
-    const lead = items[0];
-    const rest = items.slice(1, 5);
-    const fmtDate = (d) => new Date(d).toLocaleDateString("pt-BR", { day: "numeric", month: "short", year: "numeric" });
-    const leadCor = CATEGORY_COLORS[lead.category] || "#17458F";
-    const leadDate = fmtDate(lead.createdAt);
-    const leadTexto = lead.excerpt || ((lead.content || "").slice(0, 220) + ((lead.content || "").length > 220 ? "..." : ""));
-    const leadMedia = lead.imageUrl
-        ? `<img src="` + esc(lead.imageUrl) + `" alt="` + esc(lead.title) + `" loading="lazy" decoding="async">`
-        : `<div class="news-stack__thumb--placeholder" style="background:linear-gradient(135deg,` + leadCor + `, #2E63C4);width:100%;height:100%;aspect-ratio:16/10.2;display:flex;align-items:center;justify-content:center;font-size:3rem;color:#fff;">` + esc((lead.category || "N").charAt(0)) + `</div>`;
-    const leadHtml = `<article class="news-lead"><a href="/noticias?slug=` + encodeURIComponent(lead.slug) + `" class="news-lead__media">` + leadMedia + (lead.category ? `<span class="news-lead__badge">` + esc(lead.category) + `</span>` : "") + `</a><div class="news-lead__body"><div class="news-lead__meta"><span>` + leadDate + `</span>` + (lead.author?.name ? `<span> - Por ` + esc(lead.author.name) + `</span>` : "") + `</div><h3><a href="/noticias?slug=` + encodeURIComponent(lead.slug) + `">` + esc(lead.title) + `</a></h3><p>` + esc(leadTexto) + `</p><a href="/noticias?slug=` + encodeURIComponent(lead.slug) + `" class="news-lead__cta">Ler matéria <span aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9" opacity="0.3"/><path d="M9 12h7M12 8.5l4 3.5-4 3.5"/></svg></span></a></div></article>`;
-    let stackHtml = "";
-    if (rest.length) {
-        stackHtml = `<div class="news-stack">` + rest.map((n) => {
-            const c = CATEGORY_COLORS[n.category] || "#6b7280";
-            const d = fmtDate(n.createdAt);
-            const ex = n.excerpt || ((n.content || "").slice(0, 98) + ((n.content || "").length > 98 ? "..." : ""));
-            const media = n.imageUrl
-                ? `<img src="` + esc(n.imageUrl) + `" alt="` + esc(n.title) + `">`
-                : `<div class="news-stack__thumb--placeholder" style="background:linear-gradient(135deg,` + c + `, #94a3b8);width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-family:var(--font-heading);font-size:1.5rem;">` + esc((n.category || "N").charAt(0)) + `</div>`;
-            return `<article class="news-stack__item"><a href="/noticias?slug=` + encodeURIComponent(n.slug) + `" class="news-stack__media">` + media + `</a><div class="news-stack__body"><div class="news-stack__meta">` + (n.category ? `<span class="mini-badge" style="background:` + c + `;color:#fff;">` + esc(n.category) + `</span>` : "") + `<span>` + d + `</span></div><h4><a href="/noticias?slug=` + encodeURIComponent(n.slug) + `">` + esc(n.title) + `</a></h4><p>` + esc(ex) + `</p></div></article>`;
-        }).join("") + `</div>`;
-    }
-    root.innerHTML = `<div class="news-edition">` + leadHtml + stackHtml + `</div>`;
+    const stack = items.slice(1, 5);
+    const stackHtml = stack.length ? `<div class="news-stack">${stack.map(newsStackItem).join("")}</div>` : "";
+    root.innerHTML = `<div class="news-edition">${newsLead(items[0])}${stackHtml}</div>`;
 }
 
 async function initEventosHome() {
@@ -82,8 +116,8 @@ async function initEventosHome() {
     const calCard = document.getElementById("cal-card");
     if (!section || !grid || !calCard) return;
     section.hidden = false;
-    grid.innerHTML = Array(3).fill('<div class="skeleton skeleton-light" style="height:96px;border-radius:14px;"></div>').join("");
-    calCard.innerHTML = '<div class="skeleton skeleton-light" style="height:320px;border-radius:16px;"></div>';
+    grid.innerHTML = Array(3).fill('<div class="skeleton skeleton-light skeleton--event"></div>').join("");
+    calCard.innerHTML = '<div class="skeleton skeleton-light skeleton--calendar"></div>';
     let futuros = [];
     let agenda = [];
     try {
@@ -92,7 +126,7 @@ async function initEventosHome() {
         futuros = agenda.slice(0, 3);
         if (!agenda.length) { section.hidden = true; return; }
     } catch {
-        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:2rem 1rem;color:var(--text-muted);font-size:.875rem;">Não foi possível carregar a agenda agora.</div>';
+        grid.innerHTML = '<div class="home-load-error">Não foi possível carregar a agenda agora.</div>';
         calCard.hidden = true;
         return;
     }
@@ -166,7 +200,7 @@ async function initEventosHome() {
             <h4><a href="/eventos?id=` + encodeURIComponent(ev.id) + `">` + esc(ev.title) + `</a></h4>
             <div class="cal-event__meta">` + (loc ? `<span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s7-5.5 7-11a7 7 0 1 0-14 0c0 5.5 7 11 7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg> ` + loc + `</span>` : "") + `<span>` + esc(d.toLocaleDateString("pt-BR", { weekday: "short" })) + ` ` + esc(d.toLocaleTimeString("pt-BR", {hour:"2-digit", minute:"2-digit"})) + `</span></div>
             <p class="cal-event__desc">` + esc((ev.description || "").slice(0, 90)) + ((ev.description||"").length>90?"...":"") + `</p>
-            <div class="cal-event__foot"><span class="cal-event__vagas">` + vagasTxt + `</span><a href="/eventos?id=` + encodeURIComponent(ev.id) + `" class="cal-event__cta">Ver <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9" opacity="0.3"/><path d="M9 12h7M12 8.5l4 3.5-4 3.5"/></svg><span style="display:none" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9" opacity="0.3"/><path d="M9 12h7M12 8.5l4 3.5-4 3.5"/></svg></span></a></div>
+            <div class="cal-event__foot"><span class="cal-event__vagas">` + vagasTxt + `</span><a href="/eventos?id=` + encodeURIComponent(ev.id) + `" class="cal-event__cta">Ver <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9" opacity="0.3"/><path d="M9 12h7M12 8.5l4 3.5-4 3.5"/></svg></a></div>
           </div>
         </article>`;
     }).join("");
@@ -177,7 +211,7 @@ async function renderProjects() {
     const container = document.getElementById("projetos-home");
     if (!section || !container) return;
     section.hidden = false;
-    container.innerHTML = Array(3).fill('<div class="skeleton skeleton-light" style="height:17rem;border-radius:12px;"></div>').join("");
+    container.innerHTML = Array(3).fill('<div class="skeleton skeleton-light skeleton--project"></div>').join("");
     let status = document.getElementById("projetos-status");
     if (!status) {
         status = document.createElement("span");
@@ -201,7 +235,7 @@ async function renderProjects() {
             const badgeCls = "ficha__badge--" + p.status.toLowerCase();
             const media = p.imageUrl
                 ? `<img src="` + esc(p.imageUrl) + `" alt="` + esc(p.title) + `" loading="lazy" decoding="async">`
-                : `<div class="ficha__placeholder" style="background:linear-gradient(135deg,` + grad + `14,` + grad + `);">` + esc(p.title.charAt(0).toUpperCase()) + `</div>`;
+                : `<div class="ficha__placeholder" style="--cat:${grad};--cat-soft:${grad}14">${esc(p.title.charAt(0).toUpperCase())}</div>`;
             return `<article class="ficha">
               <a href="/projetos?id=` + p.id + `" class="ficha__media">` + media + `<span class="ficha__badge ` + badgeCls + `">` + esc(label) + `</span></a>
               <div class="ficha__body">
@@ -221,8 +255,8 @@ async function renderProjects() {
         status.textContent = "Projetos carregados.";
     } catch (err) {
         status.textContent = err.message || "Erro ao carregar projetos.";
-        container.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:2rem 1rem;">
-          <p style="color:var(--text-muted);font-size:.875rem;margin-bottom:1rem;">` + esc(err.message || "Não foi possível carregar os projetos agora.") + `</p>
+        container.innerHTML = `<div class="home-load-error">
+          <p>${esc(err.message || "Não foi possível carregar os projetos agora.")}</p>
           <button class="btn btn-primary" id="retry-projetos">Tentar novamente</button>
         </div>`;
         document.getElementById("retry-projetos")?.addEventListener("click", (e) => {

@@ -71,6 +71,18 @@
   color: var(--text);
 }
 
+.auth-message--center {
+  text-align: center;
+  line-height: 1.8;
+}
+
+.auth-message__icon { font-size: 2rem; }
+
+.auth-message__hint {
+  font-size: .95rem;
+  color: var(--text-muted, #6b7280);
+}
+
 .auth-forgot {
   text-align: right;
   margin-top: .75rem;
@@ -143,10 +155,11 @@
   margin-bottom: 2rem;
 }
 
-/* Sem foto: o fundo em degradê vem do JS (cor do status). */
+/* Sem foto: degradê com a cor do status (o JS define --cat e --cat-soft). */
 .detail-cover--empty {
   height: 20rem;
   margin-bottom: 2rem;
+  background: linear-gradient(135deg, var(--cat-soft), var(--cat));
 }
 
 .detail-body {
